@@ -547,13 +547,13 @@ class IGroupController(Interface):
         '''
         pass
 
-    def before_view(self, pkg_dict):
+    def before_view(self, data_dict):
         u'''
         Extensions will receive this before the group gets
         displayed. The dictionary passed will be the one that gets
         sent to the template.
         '''
-        return pkg_dict
+        return data_dict
 
 
 class IOrganizationController(Interface):
@@ -587,13 +587,13 @@ class IOrganizationController(Interface):
         '''
         pass
 
-    def before_view(self, pkg_dict):
+    def before_view(self, data_dict):
         u'''
         Extensions will receive this before the organization gets
         displayed. The dictionary passed will be the one that gets
         sent to the template.
         '''
-        return pkg_dict
+        return data_dict
 
 
 class IPackageController(Interface):
