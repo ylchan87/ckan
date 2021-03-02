@@ -33,3 +33,4 @@ showcontent = true
 
 [tool.black]
 line-length = 79
+include = '\.pyi?$'
