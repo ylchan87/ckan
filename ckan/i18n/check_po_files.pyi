@@ -1,7 +1,4 @@
-
-
 from typing import Any, List, Tuple
-
 
 def check_po_file(path: str) -> List[Tuple[str, str]]: ...
 def check_po_files(paths: List[str]) -> None: ...

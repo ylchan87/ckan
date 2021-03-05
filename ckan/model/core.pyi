@@ -1,7 +1,3 @@
-
-
-
-
 class State:
     ACTIVE: str
     DELETED: str
