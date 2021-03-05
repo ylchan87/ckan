@@ -7,19 +7,41 @@ import logging
 
 log = logging.getLogger(__name__)
 _open_licenses = None
-VALID_SOLR_PARAMETERS = set(['q', 'fl', 'fq', 'rows', 'sort', 'start', 'wt', 'qf', 'bf', 'boost', 'facet', 'facet.mincount', 'facet.limit', 'facet.field', 'extras', 'fq_list', 'tie', 'defType', 'mm', 'df'])
+VALID_SOLR_PARAMETERS = set(
+    [
+        "q",
+        "fl",
+        "fq",
+        "rows",
+        "sort",
+        "start",
+        "wt",
+        "qf",
+        "bf",
+        "boost",
+        "facet",
+        "facet.mincount",
+        "facet.limit",
+        "facet.field",
+        "extras",
+        "fq_list",
+        "tie",
+        "defType",
+        "mm",
+        "df",
+    ]
+)
 QUERY_FIELDS = "name^4 title^4 tags^2 groups^2 text"
 solr_regex = re.compile(r'([\\+\-&|!(){}\[\]^"~*?:])')
-def escape_legacy_argument(val):
-    ...
 
+def escape_legacy_argument(val): ...
 def convert_legacy_parameters_to_solr(legacy_params):
-    '''API v1 and v2 allowed search params that the SOLR syntax does not
+    """API v1 and v2 allowed search params that the SOLR syntax does not
     support, so use this function to convert those to SOLR syntax.
     See tests for examples.
 
     raises SearchQueryError on invalid params.
-    '''
+    """
     ...
 
 class QueryOptions(dict):
@@ -29,60 +51,49 @@ class QueryOptions(dict):
     NB This is used only by legacy package search and current resource & tag search.
        Modern SOLR package search leaves this to SOLR syntax.
     """
+
     BOOLEAN_OPTIONS = ...
     INTEGER_OPTIONS = ...
     UNSUPPORTED_OPTIONS = ...
-    def __init__(self, **kwargs) -> None:
-        ...
-    
-    def validate(self):
-        ...
-    
-    def __getattr__(self, name):
-        ...
-    
-    def __setattr__(self, name, value):
-        ...
-    
-
+    def __init__(self, **kwargs) -> None: ...
+    def validate(self): ...
+    def __getattr__(self, name): ...
+    def __setattr__(self, name, value): ...
 
 class SearchQuery(object):
     """
     A query is ... when you ask the search engine things. SearchQuery is intended
     to be used for only one query, i.e. it sets state. Definitely not thread-safe.
     """
-    def __init__(self) -> None:
-        ...
-    
+
+    def __init__(self) -> None: ...
     @property
-    def open_licenses(self):
-        ...
-    
+    def open_licenses(self): ...
     def get_all_entity_ids(self, max_results=...):
         """
         Return a list of the IDs of all indexed packages.
         """
         ...
-    
-    def run(self, query=..., terms=..., fields=..., facet_by=..., options=..., **kwargs):
-        ...
-    
+    def run(
+        self,
+        query=...,
+        terms=...,
+        fields=...,
+        facet_by=...,
+        options=...,
+        **kwargs
+    ): ...
     __call__ = ...
-
 
 class TagSearchQuery(SearchQuery):
     """Search for tags."""
-    def run(self, query=..., fields=..., options=..., **kwargs):
-        ...
-    
 
+    def run(self, query=..., fields=..., options=..., **kwargs): ...
 
 class ResourceSearchQuery(SearchQuery):
     """Search for resources."""
-    def run(self, fields=..., options=..., **kwargs):
-        ...
-    
 
+    def run(self, fields=..., options=..., **kwargs): ...
 
 class PackageSearchQuery(SearchQuery):
     def get_all_entity_ids(self, max_results=...):
@@ -90,12 +101,9 @@ class PackageSearchQuery(SearchQuery):
         Return a list of the IDs of all indexed packages.
         """
         ...
-    
-    def get_index(self, reference):
-        ...
-    
+    def get_index(self, reference): ...
     def run(self, query, permission_labels=..., **kwargs):
-        '''
+        """
         Performs a dataset search using the given query.
 
         :param query: dictionary with keys like: q, fq, sort, rows, facet
@@ -107,17 +115,14 @@ class PackageSearchQuery(SearchQuery):
         :returns: dictionary with keys results and count
 
         May raise SearchQueryError or SearchError.
-        '''
+        """
         ...
-    
-
 
 def solr_literal(t):
-    '''
+    """
     return a safe literal string for a solr query. Instead of escaping
     each of + - && || ! ( ) { } [ ] ^ " ~ * ? : \ / we're just dropping
     double quotes -- this method currently only used by tokens like site_id
     and permission labels.
-    '''
+    """
     ...
-

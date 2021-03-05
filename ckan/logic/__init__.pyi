@@ -17,71 +17,60 @@ from ckan.common import _, c
 
 log = logging.getLogger(__name__)
 _validate = df.validate
-class NameConflict(Exception):
-    ...
 
-
-class UsernamePasswordError(Exception):
-    ...
-
+class NameConflict(Exception): ...
+class UsernamePasswordError(Exception): ...
 
 class ActionError(Exception):
-    def __init__(self, message=...) -> None:
-        ...
-    
-    def __str__(self) -> str:
-        ...
-    
-
+    def __init__(self, message=...) -> None: ...
+    def __str__(self) -> str: ...
 
 class NotFound(ActionError):
-    '''Exception raised by logic functions when a given object is not found.
+    """Exception raised by logic functions when a given object is not found.
 
     For example :py:func:`~ckan.logic.action.get.package_show` raises
     :py:exc:`~ckan.plugins.toolkit.ObjectNotFound` if no package with the
     given ``id`` exists.
 
-    '''
+    """
+
     ...
 
-
 class NotAuthorized(ActionError):
-    '''Exception raised when the user is not authorized to call the action.
+    """Exception raised when the user is not authorized to call the action.
 
     For example :py:func:`~ckan.logic.action.create.package_create` raises
     :py:exc:`~ckan.plugins.toolkit.NotAuthorized` if the user is not authorized
     to create packages.
-    '''
+    """
+
     ...
 
-
 class ValidationError(ActionError):
-    '''Exception raised by action functions when validating their given
+    """Exception raised by action functions when validating their given
     ``data_dict`` fails.
 
-    '''
-    def __init__(self, error_dict, error_summary=..., extra_msg=...) -> None:
-        ...
-    
+    """
+
+    def __init__(
+        self, error_dict, error_summary=..., extra_msg=...
+    ) -> None: ...
     @property
     def error_summary(self):
-        ''' autogenerate the summary if not supplied '''
+        """ autogenerate the summary if not supplied """
         ...
-    
-    def __str__(self) -> str:
-        ...
-    
-
+    def __str__(self) -> str: ...
 
 log = logging.getLogger(__name__)
+
 def parse_params(params, ignore_keys=...):
-    '''Takes a dict and returns it with some values standardised.
+    """Takes a dict and returns it with some values standardised.
     This is done on a dict before calling tuplize_dict on it.
-    '''
+    """
     ...
 
 def clean_dict(data_dict):
-    '''Takes a dict and if any of the values are lists of dicts,
+    """Takes a dict and if any of the values are lists of dicts,
     the empty dicts are stripped from the lists (recursive).
 
     e.g.
@@ -101,28 +90,24 @@ def clean_dict(data_dict):
      'extras': [{'key': u'packages', 'value': u'["testpkg"]'}],
      'state': u'active'}
 
-    '''
+    """
     ...
 
 def tuplize_dict(data_dict):
-    '''Takes a dict with keys of the form 'table__0__key' and converts them
+    """Takes a dict with keys of the form 'table__0__key' and converts them
     to a tuple like ('table', 0, 'key').
 
     Dict should be put through parse_dict before this function, to have
     values standardized.
 
     May raise a DataError if the format of the key is incorrect.
-    '''
+    """
     ...
 
-def untuplize_dict(tuplized_dict):
-    ...
-
-def flatten_to_string_key(dict):
-    ...
-
+def untuplize_dict(tuplized_dict): ...
+def flatten_to_string_key(dict): ...
 def check_access(action, context, data_dict=...):
-    '''Calls the authorization function for the provided action
+    """Calls the authorization function for the provided action
 
     This is the only function that should be called to determine whether a
     user (or an anonymous request) is allowed to perform a particular action.
@@ -156,18 +141,15 @@ def check_access(action, context, data_dict=...):
     :raises: :py:exc:`~ckan.plugins.toolkit.NotAuthorized` if the user is not
         authorized to call the named action
 
-    '''
+    """
     ...
 
-_actions = {  }
-def clear_actions_cache():
-    ...
+_actions = {}
 
-def chained_action(func):
-    ...
-
+def clear_actions_cache(): ...
+def chained_action(func): ...
 def get_action(action):
-    '''Return the named :py:mod:`ckan.logic.action` function.
+    """Return the named :py:mod:`ckan.logic.action` function.
 
     For example ``get_action('package_create')`` will normally return the
     :py:func:`ckan.logic.action.create.package_create()` function.
@@ -214,11 +196,11 @@ def get_action(action):
     :returns: the named action function
     :rtype: callable
 
-    '''
+    """
     ...
 
 def get_or_bust(data_dict, keys):
-    '''Return the value(s) from the given data_dict for the given key(s).
+    """Return the value(s) from the given data_dict for the given key(s).
 
     Usage::
 
@@ -237,16 +219,15 @@ def get_or_bust(data_dict, keys):
     :raises: :py:exc:`ckan.logic.ValidationError` if one of the given keys is
         not in the given dictionary
 
-    '''
+    """
     ...
 
 def validate(schema_func, can_skip_validator=...):
-    ''' A decorator that validates an action function against a given schema
-    '''
+    """A decorator that validates an action function against a given schema"""
     ...
 
 def side_effect_free(action):
-    '''A decorator that marks the given action function as side-effect-free.
+    """A decorator that marks the given action function as side-effect-free.
 
     Action functions decorated with this decorator can be called with an HTTP
     GET request to the :doc:`Action API </api/index>`. Action functions that
@@ -268,11 +249,11 @@ def side_effect_free(action):
     (Then implement :py:class:`~ckan.plugins.interfaces.IActions` to register
     your action function with CKAN.)
 
-    '''
+    """
     ...
 
 def auth_sysadmins_check(action):
-    '''A decorator that prevents sysadmins from being automatically authorized
+    """A decorator that prevents sysadmins from being automatically authorized
     to call an action function.
 
     Normally sysadmins are allowed to call any action function (for example
@@ -284,51 +265,48 @@ def auth_sysadmins_check(action):
     authorization function will always be called, even if the user is a
     sysadmin.
 
-    '''
+    """
     ...
 
 def auth_audit_exempt(action):
-    ''' Dirty hack to stop auth audit being done '''
+    """ Dirty hack to stop auth audit being done """
     ...
 
 def auth_allow_anonymous_access(action):
-    ''' Flag an auth function as not requiring a logged in user
+    """Flag an auth function as not requiring a logged in user
 
     This means that check_access won't automatically raise a NotAuthorized
     exception if an authenticated user is not provided in the context. (The
     auth function can still return False if for some reason access is not
     granted).
-    '''
+    """
     ...
 
 def auth_disallow_anonymous_access(action):
-    ''' Flag an auth function as requiring a logged in user
+    """Flag an auth function as requiring a logged in user
 
     This means that check_access will automatically raise a NotAuthorized
     exception if an authenticated user is not provided in the context, without
     calling the actual auth function.
-    '''
+    """
     ...
 
 def chained_auth_function(func):
-    '''
+    """
     Decorator function allowing authentication functions to be chained.
-    '''
+    """
     ...
 
 class UnknownValidator(Exception):
-    '''Exception raised when a requested validator function cannot be found.
+    """Exception raised when a requested validator function cannot be found."""
 
-    '''
     ...
 
+_validators_cache = {}
 
-_validators_cache = {  }
-def clear_validators_cache():
-    ...
-
+def clear_validators_cache(): ...
 def get_validator(validator):
-    '''Return a validator function by name.
+    """Return a validator function by name.
 
     :param validator: the name of the validator function to return,
         eg. ``'package_name_exists'``
@@ -340,14 +318,13 @@ def get_validator(validator):
     :returns: the named validator function
     :rtype: ``types.FunctionType``
 
-    '''
+    """
     ...
 
 def model_name_to_class(model_module, model_name):
-    '''Return the class in model_module that has the same name as the
+    """Return the class in model_module that has the same name as the
     received string.
 
     Raises AttributeError if there's no model in model_module named model_name.
-    '''
+    """
     ...
-

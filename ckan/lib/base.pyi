@@ -10,24 +10,24 @@ from pylons.controllers import WSGIController
 
 Provides the BaseController class for subclassing.
 """
-if six.PY2:
-    ...
+if six.PY2: ...
 log = logging.getLogger(__name__)
-APIKEY_HEADER_NAME_KEY = 'apikey_header_name'
-APIKEY_HEADER_NAME_DEFAULT = 'X-CKAN-API-Key'
+APIKEY_HEADER_NAME_KEY = "apikey_header_name"
+APIKEY_HEADER_NAME_DEFAULT = "X-CKAN-API-Key"
+
 def abort(status_code=..., detail=..., headers=..., comment=...):
-    '''Abort the current request immediately by returning an HTTP exception.
+    """Abort the current request immediately by returning an HTTP exception.
 
     This is a wrapper for :py:func:`pylons.controllers.util.abort` that adds
     some CKAN custom behavior, including allowing
     :py:class:`~ckan.plugins.interfaces.IAuthenticator` plugins to alter the
     abort response, and showing flash messages in the web interface.
 
-    '''
+    """
     ...
 
 def render_snippet(*template_names, **kw):
-    ''' Helper function for rendering snippets. Rendered html has
+    """Helper function for rendering snippets. Rendered html has
     comment tags added to show the template used. NOTE: unlike other
     render functions this takes a list of keywords instead of a dict for
     the extra template variables.
@@ -38,14 +38,12 @@ def render_snippet(*template_names, **kw):
     :type template_names: str
     :param kw: extra template variables to supply to the template
     :type kw: named arguments of any type that are supported by the template
-    '''
+    """
     ...
 
-def render_jinja2(template_name, extra_vars):
-    ...
-
+def render_jinja2(template_name, extra_vars): ...
 def render(template_name, extra_vars=..., *pargs, **kwargs):
-    '''Render a template and return the output.
+    """Render a template and return the output.
 
     This is CKAN's main template rendering function.
 
@@ -58,29 +56,19 @@ def render(template_name, extra_vars=..., *pargs, **kwargs):
     :params kwargs: DEPRECATED
     :type kwargs: dict
 
-    '''
+    """
     ...
 
-class ValidationException(Exception):
-    ...
-
+class ValidationException(Exception): ...
 
 if six.PY2:
     class BaseController(WSGIController):
-        '''Base class for CKAN controller classes to inherit from.
+        """Base class for CKAN controller classes to inherit from."""
 
-        '''
         repo = ...
         log = ...
-        def __before__(self, action, **params):
-            ...
-        
+        def __before__(self, action, **params): ...
         def __call__(self, environ, start_response):
             """Invoke the Controller"""
             ...
-        
-        def __after__(self, action, **params):
-            ...
-        
-    
-    
+        def __after__(self, action, **params): ...

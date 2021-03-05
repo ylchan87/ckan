@@ -9,108 +9,105 @@ Invalid = df.Invalid
 StopOnError = df.StopOnError
 Missing = df.Missing
 missing = df.missing
-def owner_org_validator(key, data, errors, context):
-    ...
 
-def package_id_not_changed(value, context):
-    ...
-
+def owner_org_validator(key, data, errors, context): ...
+def package_id_not_changed(value, context): ...
 def int_validator(value, context):
-    '''
+    """
     Return an integer for value, which may be a string in base 10 or
     a numeric type (e.g. int, long, float, Decimal, Fraction). Return
     None for None or empty/all-whitespace string values.
 
     :raises: ckan.lib.navl.dictization_functions.Invalid for other
         inputs or non-whole values
-    '''
+    """
     ...
 
-def natural_number_validator(value, context):
-    ...
-
-def is_positive_integer(value, context):
-    ...
-
+def natural_number_validator(value, context): ...
+def is_positive_integer(value, context): ...
 def boolean_validator(value, context):
-    '''
+    """
     Return a boolean for value.
     Return value when value is a python bool type.
     Return True for strings 'true', 'yes', 't', 'y', and '1'.
     Return False in all other cases, including when value is an empty string or
     None
-    '''
+    """
     ...
 
-def isodate(value, context):
-    ...
-
-def no_http(value, context):
-    ...
-
-def package_id_exists(value, context):
-    ...
-
-def package_id_does_not_exist(value, context):
-    ...
-
-def package_name_exists(value, context):
-    ...
-
+def isodate(value, context): ...
+def no_http(value, context): ...
+def package_id_exists(value, context): ...
+def package_id_does_not_exist(value, context): ...
+def package_name_exists(value, context): ...
 def package_id_or_name_exists(package_id_or_name, context):
-    '''Return the given package_id_or_name if such a package exists.
+    """Return the given package_id_or_name if such a package exists.
 
     :raises: ckan.lib.navl.dictization_functions.Invalid if there is no
         package with the given id or name
 
-    '''
+    """
     ...
 
-def resource_id_exists(value, context):
-    ...
-
+def resource_id_exists(value, context): ...
 def user_id_exists(user_id, context):
-    '''Raises Invalid if the given user_id does not exist in the model given
+    """Raises Invalid if the given user_id does not exist in the model given
     in the context, otherwise returns the given user_id.
 
-    '''
+    """
     ...
 
 def user_id_or_name_exists(user_id_or_name, context):
-    '''Return the given user_id_or_name if such a user exists.
+    """Return the given user_id_or_name if such a user exists.
 
     :raises: ckan.lib.navl.dictization_functions.Invalid if no user can be
         found with the given id or user name
 
-    '''
+    """
     ...
 
 def group_id_exists(group_id, context):
-    '''Raises Invalid if the given group_id does not exist in the model given
+    """Raises Invalid if the given group_id does not exist in the model given
     in the context, otherwise returns the given group_id.
 
-    '''
+    """
     ...
 
 def group_id_or_name_exists(reference, context):
-    '''
+    """
     Raises Invalid if a group identified by the name or id cannot be found.
-    '''
+    """
     ...
 
 def activity_type_exists(activity_type):
-    '''Raises Invalid if there is no registered activity renderer for the
+    """Raises Invalid if there is no registered activity renderer for the
     given activity_type. Otherwise returns the given activity_type.
 
     This just uses object_id_validators as a lookup.
     very safe.
 
-    '''
+    """
     ...
 
-object_id_validators = { 'new package': package_id_exists,'changed package': package_id_exists,'deleted package': package_id_exists,'follow dataset': package_id_exists,'new user': user_id_exists,'changed user': user_id_exists,'follow user': user_id_exists,'new group': group_id_exists,'changed group': group_id_exists,'deleted group': group_id_exists,'new organization': group_id_exists,'changed organization': group_id_exists,'deleted organization': group_id_exists,'follow group': group_id_exists }
+object_id_validators = {
+    "new package": package_id_exists,
+    "changed package": package_id_exists,
+    "deleted package": package_id_exists,
+    "follow dataset": package_id_exists,
+    "new user": user_id_exists,
+    "changed user": user_id_exists,
+    "follow user": user_id_exists,
+    "new group": group_id_exists,
+    "changed group": group_id_exists,
+    "deleted group": group_id_exists,
+    "new organization": group_id_exists,
+    "changed organization": group_id_exists,
+    "deleted organization": group_id_exists,
+    "follow group": group_id_exists,
+}
+
 def object_id_validator(key, activity_dict, errors, context):
-    '''Validate the 'object_id' value of an activity_dict.
+    """Validate the 'object_id' value of an activity_dict.
 
     Uses the object_id_validators dict (above) to find and call an 'object_id'
     validator function for the given activity_dict's 'activity_type' value.
@@ -122,12 +119,13 @@ def object_id_validator(key, activity_dict, errors, context):
     Raises Invalid if there is no object_id_validator for the activity_dict's
     'activity_type' value.
 
-    '''
+    """
     ...
 
-name_match = re.compile('[a-z0-9_\-]*$')
+name_match = re.compile("[a-z0-9_\-]*$")
+
 def name_validator(value, context):
-    '''Return the given value if it's a valid name, otherwise raise Invalid.
+    """Return the given value if it's a valid name, otherwise raise Invalid.
 
     If it's a valid name, the given value will be returned unmodified.
 
@@ -142,53 +140,37 @@ def name_validator(value, context):
     :raises ckan.lib.navl.dictization_functions.Invalid: if ``value`` is not
         a valid name
 
-    '''
+    """
     ...
 
-def package_name_validator(key, data, errors, context):
-    ...
-
-def package_version_validator(value, context):
-    ...
-
-def duplicate_extras_key(key, data, errors, context):
-    ...
-
-def group_name_validator(key, data, errors, context):
-    ...
-
-def tag_length_validator(value, context):
-    ...
-
-def tag_name_validator(value, context):
-    ...
-
-def tag_not_uppercase(value, context):
-    ...
-
+def package_name_validator(key, data, errors, context): ...
+def package_version_validator(value, context): ...
+def duplicate_extras_key(key, data, errors, context): ...
+def group_name_validator(key, data, errors, context): ...
+def tag_length_validator(value, context): ...
+def tag_name_validator(value, context): ...
+def tag_not_uppercase(value, context): ...
 def tag_string_convert(key, data, errors, context):
-    '''Takes a list of tags that is a comma-separated string (in data[key])
+    """Takes a list of tags that is a comma-separated string (in data[key])
     and parses tag names. These are added to the data dict, enumerated. They
-    are also validated.'''
+    are also validated."""
     ...
 
-def ignore_not_admin(key, data, errors, context):
-    ...
-
+def ignore_not_admin(key, data, errors, context): ...
 def ignore_not_package_admin(key, data, errors, context):
-    '''Ignore if the user is not allowed to administer the package specified.'''
+    """Ignore if the user is not allowed to administer the package specified."""
     ...
 
 def ignore_not_sysadmin(key, data, errors, context):
-    '''Ignore the field if user not sysadmin or ignore_auth in context.'''
+    """Ignore the field if user not sysadmin or ignore_auth in context."""
     ...
 
 def ignore_not_group_admin(key, data, errors, context):
-    '''Ignore if the user is not allowed to administer for the group specified.'''
+    """Ignore if the user is not allowed to administer for the group specified."""
     ...
 
 def user_name_validator(key, data, errors, context):
-    '''Validate a new user name.
+    """Validate a new user name.
 
     Append an error message to ``errors[key]`` if a user named ``data[key]``
     already exists. Otherwise, do nothing.
@@ -197,86 +179,62 @@ def user_name_validator(key, data, errors, context):
         not a string
     :rtype: None
 
-    '''
+    """
     ...
 
-def user_both_passwords_entered(key, data, errors, context):
-    ...
-
-def user_password_validator(key, data, errors, context):
-    ...
-
-def user_passwords_match(key, data, errors, context):
-    ...
-
+def user_both_passwords_entered(key, data, errors, context): ...
+def user_password_validator(key, data, errors, context): ...
+def user_passwords_match(key, data, errors, context): ...
 def user_password_not_empty(key, data, errors, context):
-    '''Only check if password is present if the user is created via action API.
-       If not, user_both_passwords_entered will handle the validation'''
+    """Only check if password is present if the user is created via action API.
+    If not, user_both_passwords_entered will handle the validation"""
     ...
 
-def user_about_validator(value, context):
-    ...
-
-def vocabulary_name_validator(name, context):
-    ...
-
-def vocabulary_id_not_changed(value, context):
-    ...
-
-def vocabulary_id_exists(value, context):
-    ...
-
-def tag_in_vocabulary_validator(value, context):
-    ...
-
-def tag_not_in_vocabulary(key, tag_dict, errors, context):
-    ...
-
+def user_about_validator(value, context): ...
+def vocabulary_name_validator(name, context): ...
+def vocabulary_id_not_changed(value, context): ...
+def vocabulary_id_exists(value, context): ...
+def tag_in_vocabulary_validator(value, context): ...
+def tag_not_in_vocabulary(key, tag_dict, errors, context): ...
 def url_validator(key, data, errors, context):
-    ''' Checks that the provided value (if it is present) is a valid URL '''
+    """ Checks that the provided value (if it is present) is a valid URL """
     ...
 
-def user_name_exists(user_name, context):
-    ...
-
-def role_exists(role, context):
-    ...
-
-def datasets_with_no_organization_cannot_be_private(key, data, errors, context):
-    ...
-
-def list_of_strings(key, data, errors, context):
-    ...
-
-def if_empty_guess_format(key, data, errors, context):
-    ...
-
-def clean_format(format):
-    ...
-
+def user_name_exists(user_name, context): ...
+def role_exists(role, context): ...
+def datasets_with_no_organization_cannot_be_private(
+    key, data, errors, context
+): ...
+def list_of_strings(key, data, errors, context): ...
+def if_empty_guess_format(key, data, errors, context): ...
+def clean_format(format): ...
 def no_loops_in_hierarchy(key, data, errors, context):
-    '''Checks that the parent groups specified in the data would not cause
+    """Checks that the parent groups specified in the data would not cause
     a loop in the group hierarchy, and therefore cause the recursion up/down
     the hierarchy to get into an infinite loop.
-    '''
+    """
     ...
 
-def filter_fields_and_values_should_have_same_length(key, data, errors, context):
-    ...
-
-def filter_fields_and_values_exist_and_are_valid(key, data, errors, context):
-    ...
-
-def extra_key_not_in_root_schema(key, data, errors, context):
-    ...
-
+def filter_fields_and_values_should_have_same_length(
+    key, data, errors, context
+): ...
+def filter_fields_and_values_exist_and_are_valid(
+    key, data, errors, context
+): ...
+def extra_key_not_in_root_schema(key, data, errors, context): ...
 def empty_if_not_sysadmin(key, data, errors, context):
-    '''Only sysadmins may pass this value'''
+    """Only sysadmins may pass this value"""
     ...
 
-email_pattern = re.compile(r"^(?!\.)(?!.*\.$)(?!.*?\.\.)" "[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9]" "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9]" "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+email_pattern = re.compile(
+    r"^(?!\.)(?!.*\.$)(?!.*?\.\.)"
+    "[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9]"
+    "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9]"
+    "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+)
+
 def email_validator(value, context):
-    '''Validate email input '''
+    """Validate email input """
     ...
 
 def collect_prefix_validate(prefix, *validator_names):
@@ -287,21 +245,17 @@ def collect_prefix_validate(prefix, *validator_names):
     """
     ...
 
-def dict_only(value):
-    ...
-
+def dict_only(value): ...
 def email_is_unique(key, data, errors, context):
-    '''Validate email is unique'''
+    """Validate email is unique"""
     ...
 
 def one_of(list_of_value):
-    ''' Checks if the provided value is present in a list '''
+    """ Checks if the provided value is present in a list """
     ...
 
 def json_object(value):
-    ''' Make sure value can be serialized as a JSON object'''
+    """ Make sure value can be serialized as a JSON object"""
     ...
 
-def extras_valid_json(extras, context):
-    ...
-
+def extras_valid_json(extras, context): ...

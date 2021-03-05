@@ -8,41 +8,45 @@ from sqlalchemy.orm.session import SessionExtension
 from ckan.model import extension
 
 class CkanCacheExtension(SessionExtension):
-    ''' This extension checks what tables have been affected by
+    """This extension checks what tables have been affected by
     database access and allows us to act on them. Currently this is
     used by the page cache to flush the cache when data in the database
-    is altered. '''
-    def __init__(self, *args, **kw) -> None:
-        ...
-    
-    def after_commit(self, session):
-        ...
-    
+    is altered."""
 
+    def __init__(self, *args, **kw) -> None: ...
+    def after_commit(self, session): ...
 
 class CkanSessionExtension(SessionExtension):
-    def before_flush(self, session, flush_context, instances):
-        ...
-    
-    def before_commit(self, session):
-        ...
-    
-    def after_commit(self, session):
-        ...
-    
-    def after_rollback(self, session):
-        ...
-    
-
+    def before_flush(self, session, flush_context, instances): ...
+    def before_commit(self, session): ...
+    def after_commit(self, session): ...
+    def after_rollback(self, session): ...
 
 engine = None
-Session = orm.scoped_session(orm.sessionmaker(autoflush=False, autocommit=False, expire_on_commit=False, extension=[CkanCacheExtension(), CkanSessionExtension(), extension.PluginSessionExtension()]))
-create_local_session = orm.sessionmaker(autoflush=False, autocommit=False, expire_on_commit=False, extension=[CkanCacheExtension(), CkanSessionExtension(), extension.PluginSessionExtension()])
+Session = orm.scoped_session(
+    orm.sessionmaker(
+        autoflush=False,
+        autocommit=False,
+        expire_on_commit=False,
+        extension=[
+            CkanCacheExtension(),
+            CkanSessionExtension(),
+            extension.PluginSessionExtension(),
+        ],
+    )
+)
+create_local_session = orm.sessionmaker(
+    autoflush=False,
+    autocommit=False,
+    expire_on_commit=False,
+    extension=[
+        CkanCacheExtension(),
+        CkanSessionExtension(),
+        extension.PluginSessionExtension(),
+    ],
+)
 mapper = orm.mapper
 metadata = MetaData()
-def engine_is_sqlite(sa_engine=...):
-    ...
 
-def engine_is_pg(sa_engine=...):
-    ...
-
+def engine_is_sqlite(sa_engine=...): ...
+def engine_is_pg(sa_engine=...): ...

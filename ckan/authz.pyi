@@ -7,92 +7,97 @@ from collections import OrderedDict
 from logging import getLogger
 
 log = getLogger(__name__)
+
 class AuthFunctions:
-    ''' This is a private cache used by get_auth_function() and should never be
-    accessed directly we will create an instance of it and then remove it.'''
+    """This is a private cache used by get_auth_function() and should never be
+    accessed directly we will create an instance of it and then remove it."""
+
     _functions = ...
     def clear(self):
-        ''' clear any stored auth functions. '''
+        """ clear any stored auth functions. """
         ...
-    
     def keys(self):
-        ''' Return a list of known auth functions.'''
+        """ Return a list of known auth functions."""
         ...
-    
     def get(self, function):
-        ''' Return the requested auth function. '''
+        """ Return the requested auth function. """
         ...
-    
-
 
 _AuthFunctions = AuthFunctions()
-def clear_auth_functions_cache():
-    ...
 
+def clear_auth_functions_cache(): ...
 def auth_functions_list():
-    '''Returns a list of the names of the auth functions available.  Currently
+    """Returns a list of the names of the auth functions available.  Currently
     this is to allow the Auth Audit to know if an auth function is available
-    for a given action.'''
+    for a given action."""
     ...
 
 def is_sysadmin(username):
-    ''' Returns True is username is a sysadmin '''
+    """ Returns True is username is a sysadmin """
     ...
 
-def get_group_or_org_admin_ids(group_id):
-    ...
-
+def get_group_or_org_admin_ids(group_id): ...
 def is_authorized_boolean(action, context, data_dict=...):
-    ''' runs the auth function but just returns True if allowed else False
-    '''
+    """runs the auth function but just returns True if allowed else False"""
     ...
 
-def is_authorized(action, context, data_dict=...):
-    ...
+def is_authorized(action, context, data_dict=...): ...
 
-ROLE_PERMISSIONS = OrderedDict([('admin', ['admin', 'membership']), ('editor', ['read', 'delete_dataset', 'create_dataset', 'update_dataset', 'manage_group']), ('member', ['read', 'manage_group'])])
-def get_collaborator_capacities():
-    ...
+ROLE_PERMISSIONS = OrderedDict(
+    [
+        ("admin", ["admin", "membership"]),
+        (
+            "editor",
+            [
+                "read",
+                "delete_dataset",
+                "create_dataset",
+                "update_dataset",
+                "manage_group",
+            ],
+        ),
+        ("member", ["read", "manage_group"]),
+    ]
+)
 
-def trans_role(role):
-    ...
-
+def get_collaborator_capacities(): ...
+def trans_role(role): ...
 def roles_list():
-    ''' returns list of roles for forms '''
+    """ returns list of roles for forms """
     ...
 
 def roles_trans():
-    ''' return dict of roles with translation '''
+    """ return dict of roles with translation """
     ...
 
 def get_roles_with_permission(permission):
-    ''' returns the roles with the permission requested '''
+    """ returns the roles with the permission requested """
     ...
 
 def has_user_permission_for_group_or_org(group_id, user_name, permission):
-    ''' Check if the user has the given permissions for the group, allowing for
+    """Check if the user has the given permissions for the group, allowing for
     sysadmin rights and permission cascading down a group hierarchy.
 
-    '''
+    """
     ...
 
 def users_role_for_group_or_org(group_id, user_name):
-    ''' Returns the user's role for the group. (Ignores privileges that cascade
+    """Returns the user's role for the group. (Ignores privileges that cascade
     in a group hierarchy.)
 
-    '''
+    """
     ...
 
 def has_user_permission_for_some_org(user_name, permission):
-    ''' Check if the user has the given permission for any organization. '''
+    """ Check if the user has the given permission for any organization. """
     ...
 
 def get_user_id_for_username(user_name, allow_none=...):
-    ''' Helper function to get user id '''
+    """ Helper function to get user id """
     ...
 
 def can_manage_collaborators(package_id, user_id):
-    '''
+    """
     Returns True if a user is allowed to manage the collaborators of a given
     dataset.
 
@@ -105,11 +110,11 @@ def can_manage_collaborators(package_id, user_id):
         organization (
         requires :ref:`ckan.auth.create_dataset_if_not_in_organization`
         and :ref:`ckan.auth.create_unowned_dataset`)
-    '''
+    """
     ...
 
 def user_is_collaborator_on_dataset(user_id, dataset_id, capacity=...):
-    '''
+    """
     Returns True if the provided user is a collaborator on the provided
     dataset.
 
@@ -117,12 +122,29 @@ def user_is_collaborator_on_dataset(user_id, dataset_id, capacity=...):
     provided (eg `admin` or `editor`). Multiple capacities can be
     provided passing a list
 
-    '''
+    """
     ...
 
-CONFIG_PERMISSIONS_DEFAULTS = { 'anon_create_dataset': False,'create_dataset_if_not_in_organization': True,'create_unowned_dataset': True,'user_create_groups': True,'user_create_organizations': True,'user_delete_groups': True,'user_delete_organizations': True,'create_user_via_api': False,'create_user_via_web': True,'roles_that_cascade_to_sub_groups': 'admin','public_activity_stream_detail': False,'allow_dataset_collaborators': False,'allow_admin_collaborators': False,'allow_collaborators_to_change_owner_org': False,'create_default_api_keys': False }
+CONFIG_PERMISSIONS_DEFAULTS = {
+    "anon_create_dataset": False,
+    "create_dataset_if_not_in_organization": True,
+    "create_unowned_dataset": True,
+    "user_create_groups": True,
+    "user_create_organizations": True,
+    "user_delete_groups": True,
+    "user_delete_organizations": True,
+    "create_user_via_api": False,
+    "create_user_via_web": True,
+    "roles_that_cascade_to_sub_groups": "admin",
+    "public_activity_stream_detail": False,
+    "allow_dataset_collaborators": False,
+    "allow_admin_collaborators": False,
+    "allow_collaborators_to_change_owner_org": False,
+    "create_default_api_keys": False,
+}
+
 def check_config_permission(permission):
-    '''Returns the configuration value for the provided permission
+    """Returns the configuration value for the provided permission
 
     Permission is a string indentifying the auth permission (eg
     `anon_create_dataset`), optionally prefixed with `ckan.auth.`.
@@ -134,26 +156,25 @@ def check_config_permission(permission):
     Returns the permission value, generally True or False, except on
     `roles_that_cascade_to_sub_groups` which is a list of strings.
 
-    '''
+    """
     ...
 
-@maintain.deprecated('Use auth_is_loggedin_user instead')
+@maintain.deprecated("Use auth_is_loggedin_user instead")
 def auth_is_registered_user():
-    '''
+    """
     This function is deprecated, please use the auth_is_loggedin_user instead
-    '''
+    """
     ...
 
 def auth_is_loggedin_user():
-    ''' Do we have a logged in user '''
+    """ Do we have a logged in user """
     ...
 
 def auth_is_anon_user(context):
-    ''' Is this an anonymous user?
-        eg Not logged in if a web request and not user defined in context
-        if logic functions called directly
+    """Is this an anonymous user?
+    eg Not logged in if a web request and not user defined in context
+    if logic functions called directly
 
-        See ckan/lib/base.py:232 for pylons context object logic
-    '''
+    See ckan/lib/base.py:232 for pylons context object logic
+    """
     ...
-

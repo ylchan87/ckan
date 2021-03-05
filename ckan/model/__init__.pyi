@@ -11,29 +11,74 @@ from time import sleep
 from os.path import splitext
 from sqlalchemy import MetaData, Table, __version__ as sqav
 from sqlalchemy.exc import ProgrammingError
-from alembic.command import current as alembic_current, downgrade as alembic_downgrade, upgrade as alembic_upgrade
+from alembic.command import (
+    current as alembic_current,
+    downgrade as alembic_downgrade,
+    upgrade as alembic_upgrade,
+)
 from alembic.config import Config as AlembicConfig
 from ckan.model import meta
 from ckan.model.meta import Session, engine_is_pg, engine_is_sqlite
 from ckan.model.core import State
 from ckan.model.system import System
-from ckan.model.package import PACKAGE_NAME_MAX_LENGTH, PACKAGE_NAME_MIN_LENGTH, PACKAGE_VERSION_MAX_LENGTH, Package, PackageMember, package_member_table, package_table
-from ckan.model.tag import MAX_TAG_LENGTH, MIN_TAG_LENGTH, PackageTag, Tag, package_tag_table, tag_table
+from ckan.model.package import (
+    PACKAGE_NAME_MAX_LENGTH,
+    PACKAGE_NAME_MIN_LENGTH,
+    PACKAGE_VERSION_MAX_LENGTH,
+    Package,
+    PackageMember,
+    package_member_table,
+    package_table,
+)
+from ckan.model.tag import (
+    MAX_TAG_LENGTH,
+    MIN_TAG_LENGTH,
+    PackageTag,
+    Tag,
+    package_tag_table,
+    tag_table,
+)
 from ckan.model.user import User, user_table
 from ckan.model.group import Group, Member, group_table, member_table
 from ckan.model.group_extra import GroupExtra, group_extra_table
 from ckan.model.package_extra import PackageExtra, package_extra_table
 from ckan.model.resource import DictProxy, Resource, resource_table
 from ckan.model.resource_view import ResourceView, resource_view_table
-from ckan.model.tracking import TrackingSummary, tracking_raw_table, tracking_summary_table
+from ckan.model.tracking import (
+    TrackingSummary,
+    tracking_raw_table,
+    tracking_summary_table,
+)
 from ckan.model.rating import MAX_RATING, MIN_RATING, Rating
-from ckan.model.package_relationship import PackageRelationship, package_relationship_table
+from ckan.model.package_relationship import (
+    PackageRelationship,
+    package_relationship_table,
+)
 from ckan.model.task_status import TaskStatus, task_status_table
-from ckan.model.vocabulary import VOCABULARY_NAME_MAX_LENGTH, VOCABULARY_NAME_MIN_LENGTH, Vocabulary
-from ckan.model.activity import Activity, ActivityDetail, activity_detail_table, activity_table
+from ckan.model.vocabulary import (
+    VOCABULARY_NAME_MAX_LENGTH,
+    VOCABULARY_NAME_MIN_LENGTH,
+    Vocabulary,
+)
+from ckan.model.activity import (
+    Activity,
+    ActivityDetail,
+    activity_detail_table,
+    activity_table,
+)
 from ckan.model.term_translation import term_translation_table
-from ckan.model.follower import UserFollowingDataset, UserFollowingGroup, UserFollowingUser
-from ckan.model.system_info import SystemInfo, delete_system_info, get_system_info, set_system_info, system_info_table
+from ckan.model.follower import (
+    UserFollowingDataset,
+    UserFollowingGroup,
+    UserFollowingUser,
+)
+from ckan.model.system_info import (
+    SystemInfo,
+    delete_system_info,
+    get_system_info,
+    set_system_info,
+    system_info_table,
+)
 from ckan.model.domain_object import DomainObject, DomainObjectOperation
 from ckan.model.dashboard import Dashboard
 from ckan.model.api_token import ApiToken
@@ -41,88 +86,63 @@ from ckan.common import config
 
 log = logging.getLogger(__name__)
 DB_CONNECT_RETRIES = 10
+
 def init_model(engine):
-    '''Call me before using any of the tables or classes in the model'''
+    """Call me before using any of the tables or classes in the model"""
     ...
 
 class Repository:
     _alembic_ini = ...
     tables_created_and_initialised = ...
-    def __init__(self, metadata, session) -> None:
-        ...
-    
-    def commit_and_remove(self):
-        ...
-    
+    def __init__(self, metadata, session) -> None: ...
+    def commit_and_remove(self): ...
     def init_db(self):
-        '''Ensures tables, const data and some default config is created.
+        """Ensures tables, const data and some default config is created.
         This method MUST be run before using CKAN for the first time.
         Before this method is run, you can either have a clean db or tables
         that may have been setup with either upgrade_db or a previous run of
         init_db.
-        '''
+        """
         ...
-    
-    def clean_db(self):
-        ...
-    
+    def clean_db(self): ...
     def create_db(self):
-        '''Ensures tables, const data and some default config is created.
+        """Ensures tables, const data and some default config is created.
         i.e. the same as init_db APART from when running tests, when init_db
         has shortcuts.
-        '''
+        """
         ...
-    
     def rebuild_db(self):
-        '''Clean and init the db'''
+        """Clean and init the db"""
         ...
-    
     def delete_all(self):
-        '''Delete all data from all tables.'''
+        """Delete all data from all tables."""
         ...
-    
-    def reset_alembic_output(self):
-        ...
-    
-    def add_alembic_output(self, *args):
-        ...
-    
-    def take_alembic_output(self, with_reset=...):
-        ...
-    
-    def setup_migration_version_control(self):
-        ...
-    
-    def current_version(self):
-        ...
-    
-    def downgrade_db(self, version=...):
-        ...
-    
+    def reset_alembic_output(self): ...
+    def add_alembic_output(self, *args): ...
+    def take_alembic_output(self, with_reset=...): ...
+    def setup_migration_version_control(self): ...
+    def current_version(self): ...
+    def downgrade_db(self, version=...): ...
     def upgrade_db(self, version=...):
-        '''Upgrade db using sqlalchemy migrations.
+        """Upgrade db using sqlalchemy migrations.
 
         @param version: version to upgrade to (if None upgrade to latest)
-        '''
+        """
         ...
-    
-    def are_tables_created(self):
-        ...
-    
-
+    def are_tables_created(self): ...
 
 repo = Repository(meta.metadata, meta.Session)
+
 def is_id(id_string):
-    '''Tells the client if the string looks like a revision id or not'''
+    """Tells the client if the string looks like a revision id or not"""
     ...
 
 def parse_db_config(config_key=...):
-    u''' Takes a config key for a database connection url and parses it into
+    u"""Takes a config key for a database connection url and parses it into
     a dictionary. Expects a url like:
 
     'postgres://tester:pass@localhost/ckantest3'
 
     Returns None if the url could not be parsed.
-    '''
+    """
     ...
-

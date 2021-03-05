@@ -16,19 +16,29 @@ if six.PY2:
 else:
     KEY_CHARS = string.digits + string.ascii_letters + "_-"
 SOLR_FIELDS = [TYPE_FIELD, "res_url", "text", "urls", "indexed_ts", "site_id"]
-RESERVED_FIELDS = SOLR_FIELDS + ["tags", "groups", "res_name", "res_description", "res_format", "res_url", "res_type"]
+RESERVED_FIELDS = SOLR_FIELDS + [
+    "tags",
+    "groups",
+    "res_name",
+    "res_description",
+    "res_format",
+    "res_url",
+    "res_type",
+]
 RELATIONSHIP_TYPES = PackageRelationship.types
-_illegal_xml_chars_re = re.compile(u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]')
+_illegal_xml_chars_re = re.compile(
+    u"[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]"
+)
+
 def escape_xml_illegal_chars(val, replacement=...):
-    '''
-        Replaces any character not supported by XML with
-        a replacement string (default is an empty string)
-        Thanks to http://goo.gl/ZziIz
-    '''
+    """
+    Replaces any character not supported by XML with
+    a replacement string (default is an empty string)
+    Thanks to http://goo.gl/ZziIz
+    """
     ...
 
-def clear_index():
-    ...
+def clear_index(): ...
 
 class SearchIndex(object):
     """
@@ -37,50 +47,29 @@ class SearchIndex(object):
     The default implementation maps many of the methods, so most subclasses will
     only have to implement ``update_dict`` and ``remove_dict``.
     """
-    def __init__(self) -> None:
-        ...
-    
+
+    def __init__(self) -> None: ...
     def insert_dict(self, data):
         """ Insert new data from a dictionary. """
         ...
-    
     def update_dict(self, data):
         """ Update data from a dictionary. """
         ...
-    
     def remove_dict(self, data):
         """ Delete an index entry uniquely identified by ``data``. """
         ...
-    
     def clear(self):
         """ Delete the complete index. """
         ...
-    
     def get_all_entity_ids(self):
         """ Return a list of entity IDs in the index. """
         ...
-    
 
-
-class NoopSearchIndex(SearchIndex):
-    ...
-
+class NoopSearchIndex(SearchIndex): ...
 
 class PackageSearchIndex(SearchIndex):
-    def remove_dict(self, pkg_dict):
-        ...
-    
-    def update_dict(self, pkg_dict, defer_commit=...):
-        ...
-    
-    def index_package(self, pkg_dict, defer_commit=...):
-        ...
-    
-    def commit(self):
-        ...
-    
-    def delete_package(self, pkg_dict):
-        ...
-    
-
-
+    def remove_dict(self, pkg_dict): ...
+    def update_dict(self, pkg_dict, defer_commit=...): ...
+    def index_package(self, pkg_dict, defer_commit=...): ...
+    def commit(self): ...
+    def delete_package(self, pkg_dict): ...

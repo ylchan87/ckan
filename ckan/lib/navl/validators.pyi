@@ -7,43 +7,28 @@ import ckan.lib.navl.dictization_functions as df
 missing = df.missing
 StopOnError = df.StopOnError
 Invalid = df.Invalid
-def identity_converter(key, data, errors, context):
-    ...
 
-def keep_extras(key, data, errors, context):
-    ...
-
-def not_missing(key, data, errors, context):
-    ...
-
-def not_empty(key, data, errors, context):
-    ...
-
-def if_empty_same_as(other_key):
-    ...
-
-def both_not_empty(other_key):
-    ...
-
-def empty(key, data, errors, context):
-    ...
-
-def ignore(key, data, errors, context):
-    ...
-
+def identity_converter(key, data, errors, context): ...
+def keep_extras(key, data, errors, context): ...
+def not_missing(key, data, errors, context): ...
+def not_empty(key, data, errors, context): ...
+def if_empty_same_as(other_key): ...
+def both_not_empty(other_key): ...
+def empty(key, data, errors, context): ...
+def ignore(key, data, errors, context): ...
 def default(default_value):
-    '''When key is missing or value is an empty string or None, replace it with
-    a default value'''
+    """When key is missing or value is an empty string or None, replace it with
+    a default value"""
     ...
 
 def configured_default(config_name, default_value_if_not_configured):
-    '''When key is missing or value is an empty string or None, replace it with
+    """When key is missing or value is an empty string or None, replace it with
     a default value from config, or if that isn't set from the
-    default_value_if_not_configured.'''
+    default_value_if_not_configured."""
     ...
 
 def ignore_missing(key, data, errors, context):
-    '''If the key is missing from the data, ignore the rest of the key's
+    """If the key is missing from the data, ignore the rest of the key's
     schema.
 
     By putting ignore_missing at the start of the schema list for a key,
@@ -56,21 +41,17 @@ def ignore_missing(key, data, errors, context):
 
     :returns: ``None``
 
-    '''
+    """
     ...
 
-def ignore_empty(key, data, errors, context):
-    ...
-
-def convert_int(value, context):
-    ...
-
+def ignore_empty(key, data, errors, context): ...
+def convert_int(value, context): ...
 def unicode_only(value):
-    '''Accept only unicode values'''
+    """Accept only unicode values"""
     ...
 
 def unicode_safe(value):
-    '''
+    """
     Make sure value passed is treated as unicode, but don't raise
     an error if it's not, just make a reasonable attempt to
     convert other types passed.
@@ -81,14 +62,13 @@ def unicode_safe(value):
     a list of strings (uses json format instead). It also
     converts binary strings assuming either UTF-8 or CP1252
     encodings (not ASCII, with occasional decoding errors)
-    '''
+    """
     ...
 
 def limit_to_configured_maximum(config_option, default_limit):
-    '''
+    """
     If the value is over a limit, it changes it to the limit. The limit is
     defined by a configuration option, or if that is not set, a given int
     default_limit.
-    '''
+    """
     ...
-

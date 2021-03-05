@@ -1,7 +1,5 @@
-from typing import ClassVar, Dict, Optional, Tuple, Type, Union
-from markupsafe import Markup
+from typing import Dict, Optional, Tuple, Union
 
-import six
 import ckan as _ckan
 import ckan.logic as logic
 

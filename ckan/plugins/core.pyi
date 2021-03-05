@@ -8,7 +8,10 @@ from pyutilib.component.core import (
     ExtensionPoint,
     Plugin as _pca_Plugin,
     SingletonPlugin as _pca_SingletonPlugin,
+    implements as _implements,
 )
+
+implements = _implements
 
 PLUGINS_ENTRY_POINT_GROUP = "ckan.plugins"
 SYSTEM_PLUGINS_ENTRY_POINT_GROUP = "ckan.system_plugins"
@@ -21,7 +24,7 @@ GROUPS = [
 @contextmanager
 def use_plugin(
     *plugins: str,
-) -> Generator[Union[SingletonPlugin, List[SingletonPlugin]]]: ...
+) -> Generator[Union[SingletonPlugin, List[SingletonPlugin]], None, None]: ...
 
 class PluginImplementations(ExtensionPoint):
     def __iter__(self) -> Iterable[SingletonPlugin]: ...

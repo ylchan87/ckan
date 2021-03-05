@@ -7,6 +7,7 @@ from pylons.wsgiapp import PylonsApp
 from paste.fileapp import _FileIter
 
 log = logging.getLogger(__name__)
+
 def make_pylons_stack(conf, full_stack=..., static_files=..., **app_conf):
     """Create a Pylons WSGI application and return it
 
@@ -35,7 +36,7 @@ def make_pylons_stack(conf, full_stack=..., static_files=..., **app_conf):
 class CKANPylonsApp(PylonsApp):
     app_name = ...
     def can_handle_request(self, environ):
-        '''
+        """
         Decides whether it can handle a request with the Pylons app by
         matching the request environ against the route mapper
 
@@ -53,23 +54,17 @@ class CKANPylonsApp(PylonsApp):
         does not cause issues as the Pylons core routes are the last to
         take precedence so the current behaviour is kept, but it's worth
         keeping in mind.
-        '''
+        """
         ...
-    
-
 
 class CloseCallbackWrapper(object):
-    def __init__(self, iterable, callback, environ) -> None:
-        ...
-    
+    def __init__(self, iterable, callback, environ) -> None: ...
     def __iter__(self):
         """
         return a generator that passes through items from iterable
         then calls callback(environ).
         """
         ...
-    
-
 
 class FileIterWrapper(CloseCallbackWrapper, _FileIter):
     """Same CloseCallbackWrapper, just with _FileIter mixin.
@@ -77,8 +72,8 @@ class FileIterWrapper(CloseCallbackWrapper, _FileIter):
     That will prevent pylons from converting file responses into
     in-memori lists.
     """
-    ...
 
+    ...
 
 def execute_on_completion(application, config, callback):
     """
@@ -86,6 +81,4 @@ def execute_on_completion(application, config, callback):
     """
     ...
 
-def cleanup_pylons_response_string(environ):
-    ...
-
+def cleanup_pylons_response_string(environ): ...

@@ -18,11 +18,20 @@ clean_dict = logic.clean_dict
 parse_params = logic.parse_params
 flatten_to_string_key = logic.flatten_to_string_key
 log = logging.getLogger(__name__)
-resource = Blueprint(u'dataset_resource', __name__, url_prefix=u'/dataset/<id>/resource', url_defaults={ u'package_type': u'dataset' })
-prefixed_resource = Blueprint(u'resource', __name__, url_prefix=u'/dataset/<id>/resource', url_defaults={ u'package_type': u'dataset' })
-def read(package_type, id, resource_id):
-    ...
+resource = Blueprint(
+    u"dataset_resource",
+    __name__,
+    url_prefix=u"/dataset/<id>/resource",
+    url_defaults={u"package_type": u"dataset"},
+)
+prefixed_resource = Blueprint(
+    u"resource",
+    __name__,
+    url_prefix=u"/dataset/<id>/resource",
+    url_defaults={u"package_type": u"dataset"},
+)
 
+def read(package_type, id, resource_id): ...
 def download(package_type, id, resource_id, filename=...):
     """
     Provides a direct download by either redirecting the user to the url
@@ -31,35 +40,28 @@ def download(package_type, id, resource_id, filename=...):
     ...
 
 class CreateView(MethodView):
-    def post(self, package_type, id):
-        ...
-    
-    def get(self, package_type, id, data=..., errors=..., error_summary=...):
-        ...
-    
-
+    def post(self, package_type, id): ...
+    def get(
+        self, package_type, id, data=..., errors=..., error_summary=...
+    ): ...
 
 class EditView(MethodView):
-    def post(self, package_type, id, resource_id):
-        ...
-    
-    def get(self, package_type, id, resource_id, data=..., errors=..., error_summary=...):
-        ...
-    
-
+    def post(self, package_type, id, resource_id): ...
+    def get(
+        self,
+        package_type,
+        id,
+        resource_id,
+        data=...,
+        errors=...,
+        error_summary=...,
+    ): ...
 
 class DeleteView(MethodView):
-    def post(self, package_type, id, resource_id):
-        ...
-    
-    def get(self, package_type, id, resource_id):
-        ...
-    
+    def post(self, package_type, id, resource_id): ...
+    def get(self, package_type, id, resource_id): ...
 
-
-def views(package_type, id, resource_id):
-    ...
-
+def views(package_type, id, resource_id): ...
 def view(package_type, id, resource_id, view_id=...):
     """
     Embedded page for a resource view.
@@ -71,13 +73,10 @@ def view(package_type, id, resource_id, view_id=...):
     ...
 
 class EditResourceViewView(MethodView):
-    def post(self, package_type, id, resource_id, view_id=...):
-        ...
-    
-    def get(self, package_type, id, resource_id, view_id=..., post_extra=...):
-        ...
-    
-
+    def post(self, package_type, id, resource_id, view_id=...): ...
+    def get(
+        self, package_type, id, resource_id, view_id=..., post_extra=...
+    ): ...
 
 def embedded_dataviewer(package_type, id, resource_id, width=..., height=...):
     """
@@ -97,6 +96,4 @@ def datapreview(package_type, id, resource_id):
     """
     ...
 
-def register_dataset_plugin_rules(blueprint):
-    ...
-
+def register_dataset_plugin_rules(blueprint): ...

@@ -6,10 +6,37 @@ import datetime
 from sqlalchemy import Column, ForeignKey, Table, types
 from ckan.model import core, domain_object, meta, types as _types
 
-member_table = Table('member', meta.metadata, Column('id', types.UnicodeText, primary_key=True, default=_types.make_uuid), Column('table_name', types.UnicodeText, nullable=False), Column('table_id', types.UnicodeText, nullable=False), Column('capacity', types.UnicodeText, nullable=False), Column('group_id', types.UnicodeText, ForeignKey('group.id')), Column('state', types.UnicodeText, default=core.State.ACTIVE))
-group_table = Table('group', meta.metadata, Column('id', types.UnicodeText, primary_key=True, default=_types.make_uuid), Column('name', types.UnicodeText, nullable=False, unique=True), Column('title', types.UnicodeText), Column('type', types.UnicodeText, nullable=False), Column('description', types.UnicodeText), Column('image_url', types.UnicodeText), Column('created', types.DateTime, default=datetime.datetime.now), Column('is_organization', types.Boolean, default=False), Column('approval_status', types.UnicodeText, default=u"approved"), Column('state', types.UnicodeText, default=core.State.ACTIVE))
+member_table = Table(
+    "member",
+    meta.metadata,
+    Column(
+        "id", types.UnicodeText, primary_key=True, default=_types.make_uuid
+    ),
+    Column("table_name", types.UnicodeText, nullable=False),
+    Column("table_id", types.UnicodeText, nullable=False),
+    Column("capacity", types.UnicodeText, nullable=False),
+    Column("group_id", types.UnicodeText, ForeignKey("group.id")),
+    Column("state", types.UnicodeText, default=core.State.ACTIVE),
+)
+group_table = Table(
+    "group",
+    meta.metadata,
+    Column(
+        "id", types.UnicodeText, primary_key=True, default=_types.make_uuid
+    ),
+    Column("name", types.UnicodeText, nullable=False, unique=True),
+    Column("title", types.UnicodeText),
+    Column("type", types.UnicodeText, nullable=False),
+    Column("description", types.UnicodeText),
+    Column("image_url", types.UnicodeText),
+    Column("created", types.DateTime, default=datetime.datetime.now),
+    Column("is_organization", types.Boolean, default=False),
+    Column("approval_status", types.UnicodeText, default=u"approved"),
+    Column("state", types.UnicodeText, default=core.State.ACTIVE),
+)
+
 class Member(core.StatefulObjectMixin, domain_object.DomainObject):
-    '''A Member object represents any other object being a 'member' of a
+    """A Member object represents any other object being a 'member' of a
     particular Group.
 
     Meanings:
@@ -22,59 +49,60 @@ class Member(core.StatefulObjectMixin, domain_object.DomainObject):
     * Group - the Group (Member.group_id) is a parent of the Group (Member.id)
               in a hierarchy.
                  - capacity is 'parent'
-    '''
-    def __init__(self, group=..., table_id=..., group_id=..., table_name=..., capacity=..., state=...) -> None:
-        ...
-    
+    """
+
+    def __init__(
+        self,
+        group=...,
+        table_id=...,
+        group_id=...,
+        table_name=...,
+        capacity=...,
+        state=...,
+    ) -> None: ...
     @classmethod
     def get(cls, reference):
-        '''Returns a group object referenced by its id or name.'''
+        """Returns a group object referenced by its id or name."""
         ...
-    
-    def related_packages(self):
-        ...
-    
-    def __unicode__(self):
-        ...
-    
-
+    def related_packages(self): ...
+    def __unicode__(self): ...
 
 class Group(core.StatefulObjectMixin, domain_object.DomainObject):
-    def __init__(self, name=..., title=..., description=..., image_url=..., type=..., approval_status=..., is_organization=...) -> None:
-        ...
-    
+    def __init__(
+        self,
+        name=...,
+        title=...,
+        description=...,
+        image_url=...,
+        type=...,
+        approval_status=...,
+        is_organization=...,
+    ) -> None: ...
     @property
-    def display_name(self):
-        ...
-    
+    def display_name(self): ...
     @classmethod
     def get(cls, reference):
-        '''Returns a group object referenced by its id or name.'''
+        """Returns a group object referenced by its id or name."""
         ...
-    
     @classmethod
     def all(cls, group_type=..., state=...):
         """
         Returns all groups.
         """
         ...
-    
     def set_approval_status(self, status):
         """
-            Aproval status can be set on a group, where currently it does
-            nothing other than act as an indication of whether it was
-            approved or not. It may be that we want to tie the object
-            status to the approval status
+        Aproval status can be set on a group, where currently it does
+        nothing other than act as an indication of whether it was
+        approved or not. It may be that we want to tie the object
+        status to the approval status
         """
         ...
-    
     def get_children_groups(self, type=...):
-        '''Returns the groups one level underneath this group in the hierarchy.
-        '''
+        """Returns the groups one level underneath this group in the hierarchy."""
         ...
-    
     def get_children_group_hierarchy(self, type=...):
-        '''Returns the groups in all levels underneath this group in the
+        """Returns the groups in all levels underneath this group in the
         hierarchy. The ordering is such that children always come after their
         parent.
 
@@ -85,41 +113,38 @@ class Group(core.StatefulObjectMixin, domain_object.DomainObject):
         >>> dept-health.get_children_group_hierarchy()
         [(u'8ac0...', u'national-health-service', u'National Health Service', u'e041...'),
          (u'b468...', u'nhs-wirral-ccg', u'NHS Wirral CCG', u'8ac0...')]
-        '''
+        """
         ...
-    
     def get_parent_groups(self, type=...):
-        '''Returns this group's parent groups.
+        """Returns this group's parent groups.
         Returns a list. Will have max 1 value for organizations.
 
-        '''
+        """
         ...
-    
     def get_parent_group_hierarchy(self, type=...):
-        '''Returns this group's parent, parent's parent, parent's parent's
-        parent etc.. Sorted with the top level parent first.'''
+        """Returns this group's parent, parent's parent, parent's parent's
+        parent etc.. Sorted with the top level parent first."""
         ...
-    
     @classmethod
     def get_top_level_groups(cls, type=...):
-        '''Returns a list of the groups (of the specified type) which have
+        """Returns a list of the groups (of the specified type) which have
         no parent groups. Groups are sorted by title.
-        '''
+        """
         ...
-    
     def groups_allowed_to_be_its_parent(self, type=...):
-        '''Returns a list of the groups (of the specified type) which are
+        """Returns a list of the groups (of the specified type) which are
         allowed to be this group's parent. It excludes ones which would
         create a loop in the hierarchy, causing the recursive CTE to
         be in an infinite loop.
 
         :returns: A list of group objects ordered by group title
 
-        '''
+        """
         ...
-    
-    def packages(self, with_private=..., limit=..., return_query=..., context=...):
-        '''Return this group's active packages.
+    def packages(
+        self, with_private=..., limit=..., return_query=..., context=...
+    ):
+        """Return this group's active packages.
 
         Returns all packages in this group with VDM state ACTIVE
 
@@ -136,20 +161,14 @@ class Group(core.StatefulObjectMixin, domain_object.DomainObject):
         :returns: a list of this group's packages
         :rtype: list of ckan.model.package.Package objects
 
-        '''
+        """
         ...
-    
     @classmethod
-    def search_by_name_or_title(cls, text_query, group_type=..., is_org=..., limit=...):
-        ...
-    
-    def add_package_by_name(self, package_name):
-        ...
-    
-    def __repr__(self):
-        ...
-    
-
+    def search_by_name_or_title(
+        cls, text_query, group_type=..., is_org=..., limit=...
+    ): ...
+    def add_package_by_name(self, package_name): ...
+    def __repr__(self): ...
 
 MAX_RECURSES = 8
 HIERARCHY_DOWNWARDS_CTE = """WITH RECURSIVE child(depth) AS
@@ -166,7 +185,9 @@ HIERARCHY_DOWNWARDS_CTE = """WITH RECURSIVE child(depth) AS
 SELECT G.id, G.name, G.title, child.depth, child.table_id as parent_id FROM child
     INNER JOIN public.group G ON G.id = child.group_id
     WHERE G.type = :type AND G.state='active'
-    ORDER BY child.depth ASC;""".format(max_recurses=MAX_RECURSES)
+    ORDER BY child.depth ASC;""".format(
+    max_recurses=MAX_RECURSES
+)
 HIERARCHY_UPWARDS_CTE = """WITH RECURSIVE parenttree(depth) AS (
     -- non-recursive term
     SELECT 0, M.* FROM public.member AS M
@@ -181,4 +202,6 @@ HIERARCHY_UPWARDS_CTE = """WITH RECURSIVE parenttree(depth) AS (
 SELECT G.*, PT.depth FROM parenttree AS PT
     INNER JOIN public.group G ON G.id = PT.table_id
     WHERE G.type = :type AND G.state='active'
-    ORDER BY PT.depth DESC;""".format(max_recurses=MAX_RECURSES)
+    ORDER BY PT.depth DESC;""".format(
+    max_recurses=MAX_RECURSES
+)

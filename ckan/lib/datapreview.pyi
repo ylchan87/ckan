@@ -9,21 +9,19 @@ import logging
 Functions and data structures that are needed for the ckan data preview.
 """
 log = logging.getLogger(__name__)
-DEFAULT_RESOURCE_VIEW_TYPES = ['image_view', 'recline_view']
+DEFAULT_RESOURCE_VIEW_TYPES = ["image_view", "recline_view"]
+
 def res_format(resource):
-    ''' The assumed resource format in lower case. '''
+    """ The assumed resource format in lower case. """
     ...
 
 def compare_domains(urls):
-    ''' Return True if the domains of the provided urls are the same.
-    '''
+    """Return True if the domains of the provided urls are the same."""
     ...
 
-def on_same_domain(data_dict):
-    ...
-
+def on_same_domain(data_dict): ...
 def get_preview_plugin(data_dict, return_first=...):
-    '''Determines whether there is an extension that can preview the resource.
+    """Determines whether there is an extension that can preview the resource.
 
     :param data_dict: contains a resource and package dict.
         The resource dict has to have a value for ``on_same_domain``
@@ -32,31 +30,31 @@ def get_preview_plugin(data_dict, return_first=...):
     :param return_first: If True return the first plugin that can preview
     :type return_first: bool
 
-    Returns a dict of plugins that can preview or ones that are fixable'''
+    Returns a dict of plugins that can preview or ones that are fixable"""
     ...
 
 def get_view_plugin(view_type):
-    '''
+    """
     Returns the IResourceView plugin associated with the given view_type.
-    '''
+    """
     ...
 
 def get_view_plugins(view_types):
-    '''
+    """
     Returns a list of the view plugins associated with the given view_types.
-    '''
+    """
     ...
 
 def get_allowed_view_plugins(data_dict):
-    '''
+    """
     Returns a list of view plugins that work against the resource provided
 
     The ``data_dict`` contains: ``resource`` and ``package``.
-    '''
+    """
     ...
 
 def get_default_view_plugins(get_datastore_views=...):
-    '''
+    """
     Returns the list of view plugins to be created by default on new resources
 
     The default view types are defined via the `ckan.views.default_views`
@@ -72,11 +70,17 @@ def get_default_view_plugins(get_datastore_views=...):
     method.
 
     Returns a list of IResourceView plugins
-    '''
+    """
     ...
 
-def add_views_to_resource(context, resource_dict, dataset_dict=..., view_types=..., create_datastore_views=...):
-    '''
+def add_views_to_resource(
+    context,
+    resource_dict,
+    dataset_dict=...,
+    view_types=...,
+    create_datastore_views=...,
+):
+    """
     Creates the provided views (if necessary) on the provided resource
 
     Views to create are provided as a list of ``view_types``. If no types are
@@ -98,11 +102,13 @@ def add_views_to_resource(context, resource_dict, dataset_dict=..., view_types=.
     for details on the ``create_datastore_views`` parameter.
 
     Returns a list of resource views created (empty if none were created)
-    '''
+    """
     ...
 
-def add_views_to_dataset_resources(context, dataset_dict, view_types=..., create_datastore_views=...):
-    '''
+def add_views_to_dataset_resources(
+    context, dataset_dict, view_types=..., create_datastore_views=...
+):
+    """
     Creates the provided views on all resources of the provided dataset
 
     Views to create are provided as a list of ``view_types``. If no types are
@@ -118,6 +124,5 @@ def add_views_to_dataset_resources(context, dataset_dict, view_types=..., create
     for details on the ``create_datastore_views`` parameter.
 
     Returns a list of resource views created (empty if none were created)
-    '''
+    """
     ...
-

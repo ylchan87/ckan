@@ -21,97 +21,80 @@ lookup_group_plugin = lib_plugins.lookup_group_plugin
 lookup_group_controller = lib_plugins.lookup_group_controller
 lookup_group_blueprint = lib_plugins.lookup_group_blueprints
 is_org = False
-def set_org(is_organization):
-    ...
 
-def index(group_type, is_organization):
-    ...
-
-def read(group_type, is_organization, id=..., limit=...):
-    ...
-
+def set_org(is_organization): ...
+def index(group_type, is_organization): ...
+def read(group_type, is_organization, id=..., limit=...): ...
 def activity(id, group_type, is_organization, offset=...):
-    u'''Render this group's public activity stream page.'''
+    u"""Render this group's public activity stream page."""
     ...
 
-def about(id, group_type, is_organization):
-    ...
-
-def members(id, group_type, is_organization):
-    ...
-
-def member_delete(id, group_type, is_organization):
-    ...
-
-def history(id, group_type, is_organization):
-    ...
-
+def about(id, group_type, is_organization): ...
+def members(id, group_type, is_organization): ...
+def member_delete(id, group_type, is_organization): ...
+def history(id, group_type, is_organization): ...
 def follow(id, group_type, is_organization):
-    u'''Start following this group.'''
+    u"""Start following this group."""
     ...
 
 def unfollow(id, group_type, is_organization):
-    u'''Stop following this group.'''
+    u"""Stop following this group."""
     ...
 
-def followers(id, group_type, is_organization):
-    ...
-
-def admins(id, group_type, is_organization):
-    ...
+def followers(id, group_type, is_organization): ...
+def admins(id, group_type, is_organization): ...
 
 class BulkProcessView(MethodView):
-    u''' Bulk process view'''
-    def get(self, id, group_type, is_organization):
-        ...
-    
-    def post(self, id, group_type, is_organization, data=...):
-        ...
-    
-
+    u""" Bulk process view"""
+    def get(self, id, group_type, is_organization): ...
+    def post(self, id, group_type, is_organization, data=...): ...
 
 class CreateGroupView(MethodView):
-    u'''Create group view '''
-    def post(self, group_type, is_organization):
-        ...
-    
-    def get(self, group_type, is_organization, data=..., errors=..., error_summary=...):
-        ...
-    
-
+    u"""Create group view """
+    def post(self, group_type, is_organization): ...
+    def get(
+        self,
+        group_type,
+        is_organization,
+        data=...,
+        errors=...,
+        error_summary=...,
+    ): ...
 
 class EditGroupView(MethodView):
-    u''' Edit group view'''
-    def post(self, group_type, is_organization, id=...):
-        ...
-    
-    def get(self, id, group_type, is_organization, data=..., errors=..., error_summary=...):
-        ...
-    
-
+    u""" Edit group view"""
+    def post(self, group_type, is_organization, id=...): ...
+    def get(
+        self,
+        id,
+        group_type,
+        is_organization,
+        data=...,
+        errors=...,
+        error_summary=...,
+    ): ...
 
 class DeleteGroupView(MethodView):
-    u'''Delete group view '''
-    def post(self, group_type, is_organization, id=...):
-        ...
-    
-    def get(self, group_type, is_organization, id=...):
-        ...
-    
-
+    u"""Delete group view """
+    def post(self, group_type, is_organization, id=...): ...
+    def get(self, group_type, is_organization, id=...): ...
 
 class MembersGroupView(MethodView):
-    u'''New members group view'''
-    def post(self, group_type, is_organization, id=...):
-        ...
-    
-    def get(self, group_type, is_organization, id=...):
-        ...
-    
+    u"""New members group view"""
+    def post(self, group_type, is_organization, id=...): ...
+    def get(self, group_type, is_organization, id=...): ...
 
+group = Blueprint(
+    u"group",
+    __name__,
+    url_prefix=u"/group",
+    url_defaults={u"group_type": u"group", u"is_organization": False},
+)
+organization = Blueprint(
+    u"organization",
+    __name__,
+    url_prefix=u"/organization",
+    url_defaults={u"group_type": u"organization", u"is_organization": True},
+)
 
-group = Blueprint(u'group', __name__, url_prefix=u'/group', url_defaults={ u'group_type': u'group',u'is_organization': False })
-organization = Blueprint(u'organization', __name__, url_prefix=u'/organization', url_defaults={ u'group_type': u'organization',u'is_organization': True })
-def register_group_plugin_rules(blueprint):
-    ...
-
+def register_group_plugin_rules(blueprint): ...

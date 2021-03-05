@@ -16,41 +16,33 @@ from ckan.lib.helpers import redirect_to as redirect
 from ckan.lib.i18n import get_locales_from_config
 
 log = logging.getLogger(__name__)
-APIKEY_HEADER_NAME_KEY = u'apikey_header_name'
-APIKEY_HEADER_NAME_DEFAULT = u'X-CKAN-API-Key'
-class LazyView(object):
-    def __init__(self, import_name, view_name=...) -> None:
-        ...
-    
-    @cached_property
-    def view(self):
-        ...
-    
-    def __call__(self, *args, **kwargs):
-        ...
-    
+APIKEY_HEADER_NAME_KEY = u"apikey_header_name"
+APIKEY_HEADER_NAME_DEFAULT = u"X-CKAN-API-Key"
 
+class LazyView(object):
+    def __init__(self, import_name, view_name=...) -> None: ...
+    @cached_property
+    def view(self): ...
+    def __call__(self, *args, **kwargs): ...
 
 def check_session_cookie(response):
-    u'''
+    u"""
     The cookies for auth (auth_tkt) and session (ckan) are separate. This
     checks whether a user is logged in, and determines the validity of the
     session cookie, removing it if necessary.
-    '''
+    """
     ...
 
 def set_cors_headers_for_response(response):
-    u'''
+    u"""
     Set up Access Control Allow headers if either origin_allow_all is True, or
     the request Origin is in the origin_whitelist.
-    '''
+    """
     ...
 
-def set_cache_control_headers_for_response(response):
-    ...
-
+def set_cache_control_headers_for_response(response): ...
 def identify_user():
-    u'''Try to identify the user
+    u"""Try to identify the user
     If the user is identified then:
       g.user = user name (unicode)
       g.userobj = user object
@@ -61,14 +53,12 @@ def identify_user():
       g.author = user's IP address (unicode)
 
     Note: Remember, when running under Pylons, `g` is the Pylons `c` object
-    '''
+    """
     ...
 
-def set_controller_and_action():
-    ...
-
+def set_controller_and_action(): ...
 def handle_i18n(environ=...):
-    u'''
+    u"""
     Strips the locale code from the requested url
     (eg '/sk/about' -> '/about') and sets environ variables for the
     language selected:
@@ -76,9 +66,7 @@ def handle_i18n(environ=...):
         * CKAN_LANG is the language code eg en, fr
         * CKAN_LANG_IS_DEFAULT is set to True or False
         * CKAN_CURRENT_URL is set to the current application url
-    '''
+    """
     ...
 
-def set_ckan_current_url(environ):
-    ...
-
+def set_ckan_current_url(environ): ...

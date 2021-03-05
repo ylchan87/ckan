@@ -8,8 +8,17 @@ from ckan.model import domain_object, meta, types as _types
 
 MIN_RATING = 1
 MAX_RATING = 5
-rating_table = Table('rating', meta.metadata, Column('id', types.UnicodeText, primary_key=True, default=_types.make_uuid), Column('user_id', types.UnicodeText, ForeignKey('user.id')), Column('user_ip_address', types.UnicodeText), Column('package_id', types.UnicodeText, ForeignKey('package.id')), Column('rating', types.Float), Column('created', types.DateTime, default=datetime.datetime.now))
-class Rating(domain_object.DomainObject):
-    ...
+rating_table = Table(
+    "rating",
+    meta.metadata,
+    Column(
+        "id", types.UnicodeText, primary_key=True, default=_types.make_uuid
+    ),
+    Column("user_id", types.UnicodeText, ForeignKey("user.id")),
+    Column("user_ip_address", types.UnicodeText),
+    Column("package_id", types.UnicodeText, ForeignKey("package.id")),
+    Column("rating", types.Float),
+    Column("created", types.DateTime, default=datetime.datetime.now),
+)
 
-
+class Rating(domain_object.DomainObject): ...

@@ -6,7 +6,7 @@ import logging
 import os
 import six
 
-'''
+"""
 Internationalization utilities.
 
 This module contains code from the pojson project, which is subject to
@@ -40,69 +40,65 @@ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-'''
-if six.PY2:
-    ...
+"""
+if six.PY2: ...
 log = logging.getLogger(__name__)
-_CKAN_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), u'..'))
-_JS_TRANSLATIONS_DIR = os.path.join(_CKAN_DIR, u'public', u'base', u'i18n')
-def get_ckan_i18n_dir():
-    ...
+_CKAN_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), u".."))
+_JS_TRANSLATIONS_DIR = os.path.join(_CKAN_DIR, u"public", u"base", u"i18n")
 
+def get_ckan_i18n_dir(): ...
 def get_locales_from_config():
-    ''' despite the name of this function it gets the locales defined by
-    the config AND also the locals available subject to the config. '''
+    """despite the name of this function it gets the locales defined by
+    the config AND also the locals available subject to the config."""
     ...
 
 available_locales = None
 locales = None
 locales_dict = None
 _non_translated_locals = None
+
 def get_locales():
-    ''' Get list of available locales
+    """Get list of available locales
     e.g. [ 'en', 'de', ... ]
-    '''
+    """
     ...
 
 def non_translated_locals():
-    ''' These are the locales that are available but for which there are
-    no translations. returns a list like ['en', 'de', ...] '''
+    """These are the locales that are available but for which there are
+    no translations. returns a list like ['en', 'de', ...]"""
     ...
 
 def get_locales_dict():
-    ''' Get a dict of the available locales
-    e.g.  { 'en' : Locale('en'), 'de' : Locale('de'), ... } '''
+    """Get a dict of the available locales
+    e.g.  { 'en' : Locale('en'), 'de' : Locale('de'), ... }"""
     ...
 
 def get_available_locales():
-    ''' Get a list of the available locales
-    e.g.  [ Locale('en'), Locale('de'), ... ] '''
+    """Get a list of the available locales
+    e.g.  [ Locale('en'), Locale('de'), ... ]"""
     ...
 
-def get_identifier_from_locale_class(locale):
-    ...
-
+def get_identifier_from_locale_class(locale): ...
 def handle_request(request, tmpl_context):
-    ''' Set the language for the request '''
+    """ Set the language for the request """
     ...
 
 def get_lang():
-    ''' Returns the current language. Based on babel.i18n.get_lang but
-    works when set_lang has not been run (i.e. still in English). '''
+    """Returns the current language. Based on babel.i18n.get_lang but
+    works when set_lang has not been run (i.e. still in English)."""
     ...
 
 def set_lang(language_code):
-    ''' Wrapper to pylons call '''
+    """ Wrapper to pylons call """
     ...
 
 def build_js_translations():
-    '''
+    """
     Build JavaScript translation files.
 
     Takes the PO files from CKAN and from plugins that implement
     ``ITranslation`` and creates corresponding JS translation files in
     ``ckan.i18n_directory``. These include only those translation
     strings that are actually used in JS files.
-    '''
+    """
     ...
-

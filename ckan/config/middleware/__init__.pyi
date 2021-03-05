@@ -18,19 +18,19 @@ from ckan.config.middleware.pylons_app import make_pylons_stack
 log = logging.getLogger(__name__)
 if six.PY2:
     original_charset__set = webob.request.BaseRequest._charset__set
-    def custom_charset__set(self, charset):
-        ...
-    
+    def custom_charset__set(self, charset): ...
+
 _internal_test_request_context = None
+
 def make_app(conf):
-    '''
+    """
     Initialise both the pylons and flask apps, and wrap them in dispatcher
     middleware.
-    '''
+    """
     ...
 
 class AskAppDispatcherMiddleware(object):
-    '''
+    """
     Dispatches incoming requests to either the Flask or Pylons apps depending
     on the WSGI environ.
 
@@ -48,19 +48,13 @@ class AskAppDispatcherMiddleware(object):
 
     Order of precedence if more than one app can handle a url:
         Flask Extension > Pylons Extension > Flask Core > Pylons Core
-    '''
-    def __init__(self, apps=...) -> None:
-        ...
-    
+    """
+
+    def __init__(self, apps=...) -> None: ...
     def ask_around(self, environ):
-        '''Checks with all apps whether they can handle the incoming request
-        '''
+        """Checks with all apps whether they can handle the incoming request"""
         ...
-    
     def __call__(self, environ, start_response):
-        '''Determine which app to call by asking each app if it can handle the
-        url and method defined on the eviron'''
+        """Determine which app to call by asking each app if it can handle the
+        url and method defined on the eviron"""
         ...
-    
-
-

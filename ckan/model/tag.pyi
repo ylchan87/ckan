@@ -8,18 +8,37 @@ from ckan.model import core, domain_object, meta, types as _types, vocabulary
 
 MAX_TAG_LENGTH = 100
 MIN_TAG_LENGTH = 2
-tag_table = Table('tag', meta.metadata, Column('id', types.UnicodeText, primary_key=True, default=_types.make_uuid), Column('name', types.Unicode(MAX_TAG_LENGTH), nullable=False), Column('vocabulary_id', types.Unicode(vocabulary.VOCABULARY_NAME_MAX_LENGTH), ForeignKey('vocabulary.id')), UniqueConstraint('name', 'vocabulary_id'))
-package_tag_table = Table('package_tag', meta.metadata, Column('id', types.UnicodeText, primary_key=True, default=_types.make_uuid), Column('package_id', types.UnicodeText, ForeignKey('package.id')), Column('tag_id', types.UnicodeText, ForeignKey('tag.id')), Column('state', types.UnicodeText, default=core.State.ACTIVE))
+tag_table = Table(
+    "tag",
+    meta.metadata,
+    Column(
+        "id", types.UnicodeText, primary_key=True, default=_types.make_uuid
+    ),
+    Column("name", types.Unicode(MAX_TAG_LENGTH), nullable=False),
+    Column(
+        "vocabulary_id",
+        types.Unicode(vocabulary.VOCABULARY_NAME_MAX_LENGTH),
+        ForeignKey("vocabulary.id"),
+    ),
+    UniqueConstraint("name", "vocabulary_id"),
+)
+package_tag_table = Table(
+    "package_tag",
+    meta.metadata,
+    Column(
+        "id", types.UnicodeText, primary_key=True, default=_types.make_uuid
+    ),
+    Column("package_id", types.UnicodeText, ForeignKey("package.id")),
+    Column("tag_id", types.UnicodeText, ForeignKey("tag.id")),
+    Column("state", types.UnicodeText, default=core.State.ACTIVE),
+)
+
 class Tag(domain_object.DomainObject):
-    def __init__(self, name=..., vocabulary_id=...) -> None:
-        ...
-    
-    def delete(self):
-        ...
-    
+    def __init__(self, name=..., vocabulary_id=...) -> None: ...
+    def delete(self): ...
     @classmethod
     def by_id(cls, tag_id, autoflush=...):
-        '''Return the tag with the given id, or None.
+        """Return the tag with the given id, or None.
 
         :param tag_id: the id of the tag to return
         :type tag_id: string
@@ -28,12 +47,11 @@ class Tag(domain_object.DomainObject):
             that id
         :rtype: ckan.model.tag.Tag
 
-        '''
+        """
         ...
-    
     @classmethod
     def by_name(cls, name, vocab=..., autoflush=...):
-        '''Return the tag with the given name, or None.
+        """Return the tag with the given name, or None.
 
         By default only free tags (tags which do not belong to any vocabulary)
         are returned.
@@ -51,12 +69,11 @@ class Tag(domain_object.DomainObject):
             no tag with that id or name
         :rtype: ckan.model.tag.Tag
 
-        '''
+        """
         ...
-    
     @classmethod
     def get(cls, tag_id_or_name, vocab_id_or_name=...):
-        '''Return the tag with the given id or name, or None.
+        """Return the tag with the given id or name, or None.
 
         By default only free tags (tags which do not belong to any vocabulary)
         are returned.
@@ -76,13 +93,12 @@ class Tag(domain_object.DomainObject):
             no tag with that id or name
         :rtype: ckan.model.tag.Tag
 
-        '''
+        """
         ...
-    
     @classmethod
     @maintain.deprecated()
     def search_by_name(cls, search_term, vocab_id_or_name=...):
-        '''DEPRECATED
+        """DEPRECATED
 
         Return all tags whose names contain a given string.
 
@@ -99,12 +115,11 @@ class Tag(domain_object.DomainObject):
         :returns: a list of tags that match the search term
         :rtype: list of ckan.model.tag.Tag objects
 
-        '''
+        """
         ...
-    
     @classmethod
     def all(cls, vocab_id_or_name=...):
-        '''Return all tags that are currently applied to any dataset.
+        """Return all tags that are currently applied to any dataset.
 
         By default only free tags (tags which do not belong to any vocabulary)
         are returned. If the optional argument ``vocab_id_or_name`` is given
@@ -117,34 +132,27 @@ class Tag(domain_object.DomainObject):
         :returns: a list of all tags that are currently applied to any dataset
         :rtype: list of ckan.model.tag.Tag objects
 
-        '''
+        """
         ...
-    
     @property
     def packages(self):
-        '''Return a list of all packages that have this tag, sorted by name.
+        """Return a list of all packages that have this tag, sorted by name.
 
         :rtype: list of ckan.model.package.Package objects
 
-        '''
+        """
         ...
-    
-    def __repr__(self):
-        ...
-    
-
+    def __repr__(self): ...
 
 class PackageTag(core.StatefulObjectMixin, domain_object.DomainObject):
-    def __init__(self, package=..., tag=..., state=..., **kwargs) -> None:
-        ...
-    
-    def __repr__(self):
-        ...
-    
+    def __init__(self, package=..., tag=..., state=..., **kwargs) -> None: ...
+    def __repr__(self): ...
     @classmethod
     @maintain.deprecated()
-    def by_name(cls, package_name, tag_name, vocab_id_or_name=..., autoflush=...):
-        '''DEPRECATED (and broken - missing the join to Tag)
+    def by_name(
+        cls, package_name, tag_name, vocab_id_or_name=..., autoflush=...
+    ):
+        """DEPRECATED (and broken - missing the join to Tag)
 
         Return the PackageTag for the given package and tag names, or None.
 
@@ -165,11 +173,6 @@ class PackageTag(core.StatefulObjectMixin, domain_object.DomainObject):
             if there is no PackageTag for those package and tag names
         :rtype: ckan.model.tag.PackageTag
 
-        '''
+        """
         ...
-    
-    def related_packages(self):
-        ...
-    
-
-
+    def related_packages(self): ...
