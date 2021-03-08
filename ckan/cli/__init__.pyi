@@ -1,5 +1,6 @@
 import configparser
-from typing import Any, Dict, IO, Mapping, Optional, Union
+
+from typing import Any, Dict, Mapping, Optional, Union
 
 Config = Dict[str, Union[str, Mapping[str, str]]]
 
