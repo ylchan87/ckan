@@ -68,7 +68,7 @@ mail_user = mailer.mail_user
 class _Toolkit:
     @classmethod
     def _render_snippet(
-        cls, template: str, data: Optional[Dict] = None
+        cls, template: str, data: Optional[Dict] = ...
     ) -> _helpers.Markup: ...
     @classmethod
     def _add_template_directory(
@@ -91,13 +91,13 @@ class _Toolkit:
     ) -> None: ...
     @classmethod
     def _requires_ckan_version(
-        cls, min_version: str, max_version: Optional[str] = None
+        cls, min_version: str, max_version: Optional[str] = ...
     ): ...
     @classmethod
     def _check_ckan_version(
         cls,
-        min_version: Optional[str] = None,
-        max_version: Optional[str] = None,
+        min_version: Optional[str] = ...,
+        max_version: Optional[str] = ...,
     ) -> bool: ...
     @classmethod
     def _get_endpoint(cls) -> Union[Tuple[str, str], Tuple[None, None]]: ...
