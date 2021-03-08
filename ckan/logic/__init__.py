@@ -126,9 +126,6 @@ class ValidationError(ActionError):
         return ' - '.join([str(err_msg) for err_msg in err_msgs if err_msg])
 
 
-log = logging.getLogger(__name__)
-
-
 def parse_params(params, ignore_keys=None):
     '''Takes a dict and returns it with some values standardised.
     This is done on a dict before calling tuplize_dict on it.
