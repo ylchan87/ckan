@@ -53,6 +53,7 @@ sqlalchemy-migrate==0.12.0  # via -r requirements.in
 sqlalchemy==1.3.5         # via -r requirements.in, alembic, sqlalchemy-migrate
 sqlparse==0.3.0           # via -r requirements.in, sqlalchemy-migrate
 tempita==0.5.2            # via sqlalchemy-migrate
+typing-extensions~=3.7.4
 tzlocal==1.3              # via -r requirements.in
 unicodecsv==0.14.1        # via -r requirements.in
 urllib3==1.25.11          # via requests
