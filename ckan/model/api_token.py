@@ -33,7 +33,7 @@ api_token_table = Table(
 
 
 class ApiToken(DomainObject):
-    def __init__(self, user_id=None, name=None):
+    def __init__(self, user_id, name='Unnamed'):
         self.id = _make_token()
         self.user_id = user_id
         self.name = name

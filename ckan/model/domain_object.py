@@ -17,7 +17,7 @@ __all__ = ['DomainObject', 'DomainObjectOperation']
 class Enum(set):
     '''Simple enumeration
     e.g. Animal = Enum("dog", "cat", "horse")
-    joey = Animal.DOG
+    joey = Animal.dog
     '''
     def __init__(self, *names):
         super(Enum, self).__init__(names)

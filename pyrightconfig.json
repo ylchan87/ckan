@@ -1,0 +1,6 @@
+{
+  "include": [
+    "ckan"
+  ],
+  "exclude": ["**/tests"]
+}
