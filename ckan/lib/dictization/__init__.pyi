@@ -1,5 +1,3 @@
-# (generated with --quick)
-
 import ckan.model.core
 from typing import Any, Callable, Dict, ItemsView, Iterable, List, Tuple, Type
 
