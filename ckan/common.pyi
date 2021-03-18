@@ -1,5 +1,7 @@
 import flask.globals
 import flask.wrappers
+import simplejson as json
+
 from typing import Any, FrozenSet, Iterable, List, MutableMapping, Optional
 from werkzeug.datastructures import ImmutableDict
 import werkzeug.local

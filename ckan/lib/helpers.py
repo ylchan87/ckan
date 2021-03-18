@@ -186,7 +186,7 @@ def _datestamp_to_datetime(datetime_):
 def redirect_to(*args, **kw):
     '''Issue a redirect: return an HTTP response with a ``302 Moved`` header.
 
-    This is a wrapper for :py:func:`routes.redirect_to` that maintains the
+    This is a wrapper for :py:func:`flask.redirect` that maintains the
     user's selected language when redirecting.
 
     The arguments to this function identify the route to redirect to, they're
@@ -196,18 +196,18 @@ def redirect_to(*args, **kw):
         import ckan.plugins.toolkit as toolkit
 
         # Redirect to /dataset/my_dataset.
-        toolkit.redirect_to('dataset.read',
+        return toolkit.redirect_to('dataset.read',
                             id='my_dataset')
 
     Or, using a named route::
 
-        toolkit.redirect_to('dataset.read', id='changed')
+        return toolkit.redirect_to('dataset.read', id='changed')
 
     If given a single string as argument, this redirects without url parsing
 
-        toolkit.redirect_to('http://example.com')
-        toolkit.redirect_to('/dataset')
-        toolkit.redirect_to('/some/other/path')
+        return toolkit.redirect_to('http://example.com')
+        return toolkit.redirect_to('/dataset')
+        return toolkit.redirect_to('/some/other/path')
 
     '''
     if are_there_flash_messages():

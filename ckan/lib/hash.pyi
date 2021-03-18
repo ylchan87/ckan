@@ -1,0 +1,6 @@
+from typing import Optional
+
+secret: Optional[bytes]
+
+def get_message_hash(value: str) -> str: ...
+def get_redirect() -> Optional[str]: ...

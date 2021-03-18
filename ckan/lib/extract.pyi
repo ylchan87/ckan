@@ -1,0 +1,3 @@
+from typing import Any
+
+def extract_ckan(fileobj: Any, *args: Any, **kw: Any) -> Any: ...
