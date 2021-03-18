@@ -1,5 +1,4 @@
 class BasePage(list):
-
     def __init__(
         self,
         collection,
@@ -10,8 +9,7 @@ class BasePage(list):
         presliced_list=...,
         url=...,
         **kwargs
-    ) -> None:
-        ...
+    ) -> None: ...
     def __repr__(self): ...
     def pager(
         self,
@@ -29,8 +27,7 @@ class BasePage(list):
         curpage_attr=...,
         dotdot_attr=...,
         **kwargs
-    ):
-        ...
+    ): ...
 
 class Page(BasePage):
     def pager(self, *args, **kwargs): ...

@@ -1,7 +1,5 @@
 import datetime
 
-import re
-
 from typing import (
     Any,
     Callable,
@@ -16,10 +14,9 @@ from typing import (
     Union,
 )
 from flask.wrappers import Response
-
+from ckan.lib.pagination import Page
 import ckan.lib.formatters as formatters
 import ckan.model as model
-from markdown.core import Markdown
 
 from markupsafe import Markup
 
