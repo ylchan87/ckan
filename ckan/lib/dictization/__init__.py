@@ -14,7 +14,7 @@ except AttributeError:
     RowProxy = sqlalchemy.engine.base.RowProxy
 
 try:
-    long        # Python 2
+    long # type: ignore
 except NameError:
     long = int  # Python 3
 

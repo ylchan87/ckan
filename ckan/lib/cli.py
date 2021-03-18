@@ -6,12 +6,12 @@ import os
 import sys
 
 import click
-import paste.script
+import paste.script # type: ignore
 import routes
-from paste.registry import Registry
-from paste.script.util.logging_config import fileConfig
-from six.moves import input
-from six.moves.urllib.parse import urlparse
+from paste.registry import Registry # type: ignore
+from paste.script.util.logging_config import fileConfig # type: ignore
+from six.moves import input # type: ignore
+from six.moves.urllib.parse import urlparse # type: ignore
 
 from ckan.config.middleware import make_app
 from ckan.cli import load_config as _get_config
@@ -137,7 +137,7 @@ def load_config(config, load_site_user=True):
 
     registry = Registry()
     registry.prepare()
-    import pylons
+    import pylons # type: ignore
     registry.register(pylons.translator, MockTranslator())
 
     site_user = None

@@ -16,8 +16,8 @@ from __future__ import print_function
 import sys
 
 import jinja2
-from paste.script.templates import Template, var
-from paste.script.create_distro import Command
+from paste.script.templates import Template, var # type: ignore
+from paste.script.create_distro import Command # type: ignore
 
 # Horrible hack to change the behaviour of Paste itself
 # Since this module is only imported when commands are
@@ -57,7 +57,7 @@ class CkanextTemplate(Template):
         # workaround for a paster issue https://github.com/ckan/ckan/issues/2636
         # this is only used from a short-lived paster command
         try:
-            reload(sys)  # Python 2
+            reload(sys) # type: ignore
             sys.setdefaultencoding('utf-8')
         except NameError:
             pass         # Python 3

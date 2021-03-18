@@ -14,7 +14,7 @@ import re
 import six
 
 if six.PY2:
-    import paste.script.command
+    import paste.script.command # type: ignore
 
 
 def simple_conv_specs(s):

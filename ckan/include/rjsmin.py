@@ -62,7 +62,7 @@ __version__ = '1.0.3'
 __all__ = ['jsmin']
 
 import re as _re
-from six.moves import map
+from six.moves import map # type: ignore
 
 
 def _make_jsmin(python_only=False):
@@ -83,13 +83,13 @@ def _make_jsmin(python_only=False):
     # pylint: disable = R0912, R0914, W0612
     if not python_only:
         try:
-            import _rjsmin
+            import _rjsmin # type: ignore
         except ImportError:
             pass
         else:
             return _rjsmin.jsmin
     try:
-        xrange
+        xrange # type: ignore
     except NameError:
         xrange = range # pylint: disable = W0622
 

@@ -52,7 +52,7 @@ class User(core.StatefulObjectMixin,
            domain_object.DomainObject):
 
     VALID_NAME = re.compile(r"^[a-zA-Z0-9_\-]{3,255}$")
-    DOUBLE_SLASH = re.compile(':\/([^/])')
+    DOUBLE_SLASH = re.compile(r':\/([^/])')
 
     @classmethod
     def by_email(cls, email):

@@ -2,7 +2,7 @@
 
 import re
 
-from pylons.util import PylonsInstaller
+from pylons.util import PylonsInstaller # type: ignore
 
 import ckan
 

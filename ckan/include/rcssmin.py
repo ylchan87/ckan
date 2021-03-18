@@ -97,7 +97,7 @@ def _make_cssmin(python_only=False):
 
     if not python_only:
         try:
-            import _rcssmin
+            import _rcssmin # type: ignore
         except ImportError:
             pass
         else:

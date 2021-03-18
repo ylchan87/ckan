@@ -32,10 +32,10 @@ from ckan.common import (c, request, config,
 
 
 if six.PY2:
-    from pylons.controllers import WSGIController
-    from pylons.controllers.util import abort as _abort
-    from pylons.templating import cached_template, pylons_globals
-    from ckan.common import response
+    from pylons.controllers import WSGIController # type: ignore
+    from pylons.controllers.util import abort as _abort # type: ignore
+    from pylons.templating import cached_template, pylons_globals # type: ignore
+    from ckan.common import response # type: ignore
 
 
 log = logging.getLogger(__name__)

@@ -54,9 +54,9 @@ from ckan.lib.webassets_tools import include_asset, render_assets
 from markupsafe import Markup, escape
 
 if six.PY2:
-    from pylons import url as _pylons_default_url
-    from routes import redirect_to as _routes_redirect_to
-    from routes import url_for as _routes_default_url_for
+    from pylons import url as _pylons_default_url # type: ignore
+    from routes import redirect_to as _routes_redirect_to # type: ignore
+    from routes import url_for as _routes_default_url_for # type: ignore
 
 
 log = logging.getLogger(__name__)

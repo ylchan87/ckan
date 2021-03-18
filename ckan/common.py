@@ -21,10 +21,10 @@ from flask_babel import (gettext as flask_ugettext,
 import simplejson as json
 
 if six.PY2:
-    import pylons
-    from pylons.i18n import (ugettext as pylons_ugettext,
+    import pylons # type: ignore
+    from pylons.i18n import (ugettext as pylons_ugettext, # type: ignore
                              ungettext as pylons_ungettext)
-    from pylons import response
+    from pylons import response # type: ignore
 
 current_app = flask.current_app
 

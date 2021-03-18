@@ -161,7 +161,7 @@ class _Toolkit(object):
         import ckan.common as converters
         if six.PY2:
             import ckan.lib.cli as old_cli
-            import pylons
+            import pylons # type: ignore
 
         # Allow class access to these modules
         self.__class__.ckan = ckan
