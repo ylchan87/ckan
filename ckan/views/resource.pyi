@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Union
+from typing import Any, Dict, Optional, Tuple, Union
 import flask
 import ckan.logic as logic
 from flask.views import MethodView
@@ -52,6 +52,8 @@ def view(
 ) -> str: ...
 
 class EditResourceViewView(MethodView):
+    def _prepare(self, id:str, resource_id: str)->Tuple[Dict[str, Any], Dict[str, Any]]:...
+
     def post(
         self,
         package_type: str,

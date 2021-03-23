@@ -75,10 +75,14 @@ def _extra_template_variables(context, data_dict):
 @user.before_request
 def before_request():
     try:
-        context = dict(model=model, user=g.user, auth_user_obj=g.userobj)
+        context = {
+            "model": model,
+            "user": g.user,
+            "auth_user_obj": g.userobj
+        }
         logic.check_access(u'site_read', context)
     except logic.NotAuthorized:
-        blueprint, action = plugins.toolkit.get_endpoint()
+        action = plugins.toolkit.get_endpoint()[1]
         if action not in (
                 u'login',
                 u'request_reset',

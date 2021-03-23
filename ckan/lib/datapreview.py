@@ -89,7 +89,7 @@ def get_preview_plugin(data_dict, return_first=False):
         # if we can preview
         if p_info['can_preview']:
             if return_first:
-                plugin
+                return plugin
             plugins_that_can_preview.append(p_info)
         elif p_info.get('fixable'):
             plugins_fixable.append(p_info)

@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 import six
 from six import string_types
-from six.moves.urllib.parse import urlencode
+from six.moves.urllib.parse import urlencode  # type: ignore
 
 import ckan.lib.base as base
 import ckan.lib.helpers as h
@@ -251,6 +251,9 @@ def _read(id, limit, group_type):
 
     def search_url(params):
         controller = lookup_group_controller(group_type)
+        assert controller, (
+            'Controller cannot be missing because of the join below'
+        )
         action = u'bulk_process' if getattr(
             g, u'action', u'') == u'bulk_process' else u'read'
         url = h.url_for(u'.'.join([controller, action]), id=id)
@@ -863,15 +866,16 @@ class CreateGroupView(MethodView):
             data_dict.update(clean_dict(
                 dict_fns.unflatten(tuplize_dict(parse_params(request.files)))
             ))
-            data_dict['type'] = group_type or u'group'
-            context['message'] = data_dict.get(u'log_message', u'')
-            data_dict['users'] = [{u'name': g.user, u'capacity': u'admin'}]
-            group = _action(u'group_create')(context, data_dict)
-
-        except (NotFound, NotAuthorized) as e:
-            base.abort(404, _(u'Group not found'))
         except dict_fns.DataError:
             base.abort(400, _(u'Integrity Error'))
+
+        data_dict['type'] = group_type or u'group'
+        context['message'] = data_dict.get(u'log_message', u'')
+        data_dict['users'] = [{u'name': g.user, u'capacity': u'admin'}]
+        try:
+            group = _action(u'group_create')(context, data_dict)
+        except (NotFound, NotAuthorized) as e:
+            base.abort(404, _(u'Group not found'))
         except ValidationError as e:
             errors = e.error_dict
             error_summary = e.error_summary
@@ -954,17 +958,17 @@ class EditGroupView(MethodView):
             data_dict.update(clean_dict(
                 dict_fns.unflatten(tuplize_dict(parse_params(request.files)))
             ))
-            context['message'] = data_dict.get(u'log_message', u'')
-            data_dict['id'] = context['id']
-            context['allow_partial_update'] = True
+        except dict_fns.DataError:
+            base.abort(400, _(u'Integrity Error'))
+        context['message'] = data_dict.get(u'log_message', u'')
+        data_dict['id'] = context['id']
+        context['allow_partial_update'] = True
+        try:
             group = _action(u'group_update')(context, data_dict)
             if id != group['name']:
                 _force_reindex(group)
-
         except (NotFound, NotAuthorized) as e:
             base.abort(404, _(u'Group not found'))
-        except dict_fns.DataError:
-            base.abort(400, _(u'Integrity Error'))
         except ValidationError as e:
             errors = e.error_dict
             error_summary = e.error_summary

@@ -5,7 +5,7 @@ import re
 import logging
 
 from ckan.common import config
-
+from jinja2.exceptions import TemplateNotFound
 log = logging.getLogger(__name__)
 
 _template_info_cache = {}
@@ -25,8 +25,6 @@ def find_template(template_name):
 def template_type(template_path):
     return 'jinja2'
 
-class TemplateNotFound(Exception):
-    pass
 
 def template_info(template_name):
     ''' Returns the path and type for a template '''
@@ -37,7 +35,9 @@ def template_info(template_name):
 
     template_path = find_template(template_name)
     if not template_path:
-        raise TemplateNotFound('Template %s cannot be found' % template_name)
+        raise TemplateNotFound(
+            template_path,
+            'Template %s cannot be found' % template_name)
     t_type = template_type(template_path)
 
     # if in debug mode we always want to search for templates so we

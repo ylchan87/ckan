@@ -4,6 +4,11 @@ import ckan.model as model
 import ckan.plugins as p
 import ckan.logic as logic
 
+from ckan.lib.search.common import (
+    SearchIndexError, SearchError, SearchQueryError,
+    # make_connection, is_available, SolrSettings
+)
+
 def text_traceback() -> str: ...
 
 SUPPORTED_SCHEMA_VERSIONS: List[str]

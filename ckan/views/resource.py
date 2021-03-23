@@ -693,7 +693,7 @@ class EditResourceViewView(MethodView):
         except ValidationError as e:
             # Could break preview if validation error
             to_preview = False
-            extra_vars[u'errors'] = e.error_dict,
+            extra_vars[u'errors'] = e.error_dict
             extra_vars[u'error_summary'] = e.error_summary
         except NotAuthorized:
             # This should never happen unless the user maliciously changed
@@ -719,6 +719,7 @@ class EditResourceViewView(MethodView):
 
         package_type = _get_package_type(id)
         data = extra_vars[u'data'] if u'data' in extra_vars else None
+
         if data and u'view_type' in data:
             view_type = data.get(u'view_type')
         else:

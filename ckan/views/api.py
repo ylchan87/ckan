@@ -3,6 +3,7 @@
 import os
 import logging
 import html
+from typing import Any, Dict
 
 from flask import Blueprint, make_response
 import six
@@ -253,13 +254,14 @@ def action(logic_function, ver=API_DEFAULT_VERSION):
                u'api_version': ver, u'auth_user_obj': g.userobj}
     model.Session()._context = context
 
-    return_dict = {u'help': url_for(u'api.action',
-                                    logic_function=u'help_show',
-                                    ver=ver,
-                                    name=logic_function,
-                                    _external=True,
-                                    )
-                   }
+    return_dict: Dict[str, Any] = {
+        u'help': url_for(u'api.action',
+                         logic_function=u'help_show',
+                         ver=ver,
+                         name=logic_function,
+                         _external=True,
+                         )
+    }
 
     # Get the request data
     try:

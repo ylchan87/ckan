@@ -17,6 +17,7 @@ from flask.wrappers import Response
 from ckan.lib.pagination import Page
 import ckan.lib.formatters as formatters
 import ckan.model as model
+from ckan.common import _, json
 
 from markupsafe import Markup
 
@@ -84,6 +85,8 @@ class Message(object):
     def __str__(self) -> str: ...
     def __html__(self) -> Union[Markup, str]: ...
 
+FlashMessage = Any
+
 class _Flash(object):
     categories: List[str] = ...
     default_category: str = ...
@@ -95,7 +98,7 @@ class _Flash(object):
     ) -> None: ...
     def __call__(
         self,
-        message: str,
+        message: FlashMessage,
         category: Optional[str] = ...,
         ignore_duplicate: bool = ...,
         allow_html: bool = ...,
@@ -105,11 +108,11 @@ class _Flash(object):
 
 flash: _Flash
 @core_helper
-def flash_notice(message: str, allow_html: bool = ...) -> None: ...
+def flash_notice(message: FlashMessage, allow_html: bool = ...) -> None: ...
 @core_helper
-def flash_error(message: str, allow_html: bool = ...) -> None: ...
+def flash_error(message: FlashMessage, allow_html: bool = ...) -> None: ...
 @core_helper
-def flash_success(message: str, allow_html: bool = ...) -> None: ...
+def flash_success(message: FlashMessage, allow_html: bool = ...) -> None: ...
 @core_helper
 def are_there_flash_messages() -> bool: ...
 @core_helper
