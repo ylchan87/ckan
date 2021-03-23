@@ -9,7 +9,7 @@ import pytz
 import six
 import sqlalchemy
 
-from six.moves.urllib.parse import urlparse # type: ignore
+from six.moves.urllib.parse import urlparse  # type: ignore
 
 import ckan.model as model
 import ckan.plugins as p
@@ -29,7 +29,7 @@ from ckan.common import _, ungettext, config
 from ckan.exceptions import CkanConfigurationException
 
 if six.PY2:
-    from pylons import config as pylons_config # type: ignore
+    from pylons import config as pylons_config  # type: ignore
 
 
 log = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ def load_environment(conf):
     if six.PY2:
         # this must be run at a time when the env is semi-setup, thus inlined
         # here. Required by the deliverance plugin and iATI
-        from pylons.wsgiapp import PylonsApp # type: ignore
+        from pylons.wsgiapp import PylonsApp  # type: ignore
         import pkg_resources
         find_controller_generic = getattr(
             PylonsApp.find_controller,

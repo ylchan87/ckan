@@ -1,5 +1,14 @@
 import datetime
-from typing import Any, ClassVar, Collection, Dict, Iterable, List, Optional, Pattern
+from typing import (
+    Any,
+    ClassVar,
+    Collection,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Pattern,
+)
 from sqlalchemy import Table
 from ckan.model import core, domain_object, Group
 

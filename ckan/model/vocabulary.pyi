@@ -9,7 +9,6 @@ vocabulary_table: Table
 class Vocabulary(domain_object.DomainObject):
     id: str
     name: str
-
     def __init__(self, name: str) -> None: ...
     @classmethod
     def get(cls, id_or_name: str) -> "Vocabulary": ...

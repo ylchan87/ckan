@@ -12,7 +12,8 @@ from typing import (
     Optional,
     TYPE_CHECKING,
     Tuple,
-    Union,Any
+    Union,
+    Any,
 )
 import ckan.lib.maintain as maintain
 from sqlalchemy import Table
