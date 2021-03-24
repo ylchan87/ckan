@@ -1,12 +1,12 @@
 from typing import Any, Optional
 from sqlalchemy.engine import Engine
 import sqlalchemy.orm as orm
-from sqlalchemy.orm.scoping import ScopedSession
+
 
 from sqlalchemy.orm.session import sessionmaker
 
 engine: Optional[Engine]
-Session: ScopedSession
+Session: Any
 
 create_local_session: sessionmaker
 mapper: Any

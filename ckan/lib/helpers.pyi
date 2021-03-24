@@ -157,6 +157,9 @@ def has_more_facets(
 def unselected_facet_items(facet: str, limit: int = ...) -> List[Dict]: ...
 @core_helper
 def get_param_int(name: str, default: int = ...) -> int: ...
+
+def _url_with_params(url:str, params:Optional[Iterable[Tuple[str, Any]]])->str:
+    ...
 @core_helper
 def sorted_extras(
     package_extras: Dict,

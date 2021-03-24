@@ -11,13 +11,13 @@ from typing import (
 )
 from sqlalchemy import Table
 from ckan.model import core, domain_object, Group
+from sqlalchemy.sql.schema import Column
 
 def set_api_key() -> Optional[str]: ...
 
 user_table: Table
 
 class User(core.StatefulObjectMixin, domain_object.DomainObject):
-
     id: str
     name: str
     password: str

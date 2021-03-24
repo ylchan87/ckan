@@ -41,7 +41,7 @@ class ActionError(Exception):
 class NotFound(ActionError): ...
 class NotAuthorized(ActionError): ...
 
-ErrorDict = Dict[str, List[Union[str, Dict]]]
+ErrorDict = Dict[str, Union[List[Union[str, Dict]], str]]
 
 class ValidationError(ActionError):
     error_dict: ErrorDict

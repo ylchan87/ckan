@@ -1,8 +1,9 @@
 # encoding: utf-8
 
 import logging
+from typing import Dict, Optional
 
-from six.moves.urllib.parse import urlparse
+from six.moves.urllib.parse import urlparse  # type: ignore
 from flask import Blueprint, make_response
 import six
 from six import text_type
@@ -59,16 +60,9 @@ def _enclosure(pkg):
         _external=True
     )
     enc = Enclosure(url)
-    enc.type = u'application/json'
+    enc.mime_type = u'application/json'
     enc.length = text_type(len(json.dumps(pkg)))
     return enc
-
-
-def _set_extras(**kw):
-    extras = []
-    for key, value in six.iteritems(kw):
-        extras.append({key: value})
-    return extras
 
 
 class Enclosure(text_type):
@@ -434,7 +428,9 @@ def _navigation_urls(query, controller, action, item_count, limit, **kwargs):
     Constructs and returns first, last, prev and next links for paging
     """
 
-    urls = dict((rel, None) for rel in u'previous next first last'.split())
+    urls: Dict[str, Optional[str]] = dict(
+        (rel, None) for rel in u'previous next first last'.split()
+    )
 
     page = int(query.get(u'page', 1))
 

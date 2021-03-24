@@ -20,8 +20,9 @@ admin = Blueprint(u'admin', __name__, url_prefix=u'/ckan-admin')
 
 
 def _get_sysadmins():
-    q = model.Session.query(model.User).filter(model.User.sysadmin.is_(True),
-                                               model.User.state == u'active')
+    q = model.Session.query(model.User).filter(
+        model.User.sysadmin.is_(True),  # type: ignore
+        model.User.state == u'active')
     return q
 
 
@@ -53,7 +54,7 @@ def _get_config_items():
 @admin.before_request
 def before_request():
     try:
-        context = dict(model=model, user=g.user, auth_user_obj=g.userobj)
+        context = {"model": model, "user": g.user, "auth_user_obj": g.userobj}
         logic.check_access(u'sysadmin', context)
     except logic.NotAuthorized:
         base.abort(403, _(u'Need to be system administrator to administer'))
@@ -82,7 +83,7 @@ class ResetConfigView(MethodView):
 class ConfigView(MethodView):
     def get(self):
         items = _get_config_options()
-        schema = logic.schema.update_configuration_schema()
+        schema = logic.schema.update_configuration_schema()  # type: ignore
         data = {}
         for key in schema:
             data[key] = config.get(key)

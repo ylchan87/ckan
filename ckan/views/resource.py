@@ -2,6 +2,7 @@
 import cgi
 import json
 import logging
+from typing import Dict, Tuple
 
 import flask
 from flask.views import MethodView
@@ -613,7 +614,7 @@ def view(package_type, id, resource_id, view_id=None):
 
 # FIXME: could anyone think about better name?
 class EditResourceViewView(MethodView):
-    def _prepare(self, id, resource_id):
+    def _prepare(self, id, resource_id)->Tuple[Dict, Dict]:
         context = {
             u'model': model,
             u'session': model.Session,
@@ -783,12 +784,12 @@ class EditResourceViewView(MethodView):
 
 
 def _parse_recline_state(params):
-    state_version = int(request.args.get(u'state_version', u'1'))
+    state_version = int(params.get(u'state_version', u'1'))
     if state_version != 1:
         return None
 
     recline_state = {}
-    for k, v in request.args.items():
+    for k, v in params.items():
         try:
             v = h.json.loads(v)
         except ValueError:

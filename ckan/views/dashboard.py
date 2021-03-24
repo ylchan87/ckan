@@ -22,7 +22,9 @@ def before_request():
         return h.redirect_to(u'user.login')
 
     try:
-        context = dict(model=model, user=g.user, auth_user_obj=g.userobj)
+        context = {
+            "model": model, "user": g.user, "auth_user_obj": g.userobj
+        }
         logic.check_access(u'site_read', context)
     except logic.NotAuthorized:
         base.abort(403, _(u'Not authorized to see this page'))
@@ -56,10 +58,11 @@ def _get_dashboard_context(filter_type=None, filter_id=None, q=None):
             u'group': u'group_show',
             u'organization': u'organization_show',
         }
-        action_function = logic.get_action(action_functions.get(filter_type))
-        # Is this a valid type?
-        if action_function is None:
+        action_name = action_functions.get(filter_type)
+        if action_name is None:
             base.abort(404, _(u'Follow item not found'))
+
+        action_function = logic.get_action(action_name)
         try:
             followee = action_function(context, data_dict)
         except (logic.NotFound, logic.NotAuthorized):

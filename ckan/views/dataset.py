@@ -525,14 +525,12 @@ def read(package_type, id):
         )
         return base.abort(404, msg)
 
-    assert False, u"We should never get here"
-
 
 class CreateView(MethodView):
     def _is_save(self):
         return u'save' in request.form
 
-    def _prepare(self, data=None):
+    def _prepare(self):
 
         context = {
             u'model': model,
@@ -642,7 +640,7 @@ class CreateView(MethodView):
             return self.get(package_type, data_dict, errors, error_summary)
 
     def get(self, package_type, data=None, errors=None, error_summary=None):
-        context = self._prepare(data)
+        context = self._prepare()
         if data and u'type' in data:
             package_type = data[u'type']
 
@@ -709,7 +707,7 @@ class CreateView(MethodView):
 
 
 class EditView(MethodView):
-    def _prepare(self, id, data=None):
+    def _prepare(self):
         context = {
             u'model': model,
             u'session': model.Session,
@@ -720,7 +718,7 @@ class EditView(MethodView):
         return context
 
     def post(self, package_type, id):
-        context = self._prepare(id)
+        context = self._prepare()
         package_type = _get_package_type(id) or package_type
         log.debug(u'Package save request name: %s POST: %r', id, request.form)
         try:
@@ -767,7 +765,7 @@ class EditView(MethodView):
     def get(
         self, package_type, id, data=None, errors=None, error_summary=None
     ):
-        context = self._prepare(id, data)
+        context = self._prepare()
         package_type = _get_package_type(id) or package_type
         try:
             pkg_dict = get_action(u'package_show')(
@@ -1022,7 +1020,7 @@ class GroupView(MethodView):
         return context, pkg_dict
 
     def post(self, package_type, id):
-        context, pkg_dict = self._prepare(id)
+        context = self._prepare(id)[0]
         new_group = request.form.get(u'group_added')
         if new_group:
             data_dict = {

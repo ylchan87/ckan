@@ -84,13 +84,6 @@ def _check_access(action_name, *args, **kw):
     return check_access(_replace_group_org(action_name), *args, **kw)
 
 
-def _render_template(template_name, group_type):
-    u''' render the correct group/org template '''
-    return base.render(
-        _replace_group_org(template_name),
-        extra_vars={u'group_type': group_type})
-
-
 def _force_reindex(grp):
     u''' When the group name has changed, we need to force a reindex
     of the datasets within the group, otherwise they will stop
@@ -706,7 +699,7 @@ def admins(id, group_type, is_organization):
 class BulkProcessView(MethodView):
     u''' Bulk process view'''
 
-    def _prepare(self, group_type, id=None):
+    def _prepare(self, group_type):
 
         # check we are org admin
 
@@ -723,7 +716,7 @@ class BulkProcessView(MethodView):
     def get(self, id, group_type, is_organization):
         extra_vars = {}
         set_org(is_organization)
-        context = self._prepare(group_type, id)
+        context = self._prepare(group_type)
         data_dict = {u'id': id, u'type': group_type}
         data_dict['include_datasets'] = False
         try:
@@ -758,7 +751,7 @@ class BulkProcessView(MethodView):
             _get_group_template(u'bulk_process_template', group_type),
             extra_vars)
 
-    def post(self, id, group_type, is_organization, data=None):
+    def post(self, id, group_type, is_organization):
         set_org(is_organization)
         context = self._prepare(group_type)
         data_dict = {u'id': id, u'type': group_type}
@@ -926,7 +919,7 @@ class CreateGroupView(MethodView):
 class EditGroupView(MethodView):
     u''' Edit group view'''
 
-    def _prepare(self, id, is_organization, data=None):
+    def _prepare(self):
         data_dict = {u'id': id, u'include_datasets': False}
 
         context = {
@@ -940,7 +933,7 @@ class EditGroupView(MethodView):
         }
 
         try:
-            group = _action(u'group_show')(context, data_dict)
+            _action(u'group_show')(context, data_dict)
             check_access(u'group_update', context)
         except NotAuthorized:
             base.abort(403, _(u'Unauthorized to create a group'))
@@ -951,7 +944,7 @@ class EditGroupView(MethodView):
 
     def post(self, group_type, is_organization, id=None):
         set_org(is_organization)
-        context = self._prepare(id, is_organization)
+        context = self._prepare()
         try:
             data_dict = clean_dict(
                 dict_fns.unflatten(tuplize_dict(parse_params(request.form))))
@@ -980,7 +973,7 @@ class EditGroupView(MethodView):
             data=None, errors=None, error_summary=None):
         extra_vars = {}
         set_org(is_organization)
-        context = self._prepare(id, is_organization)
+        context = self._prepare()
         data_dict = {u'id': id, u'include_datasets': False}
         try:
             group_dict = _action(u'group_show')(context, data_dict)

@@ -339,7 +339,6 @@ class EditView(MethodView):
             base.abort(403, _(u'Unauthorized to edit user %s') % u'')
         except logic.NotFound:
             base.abort(404, _(u'User not found'))
-        user_obj = context.get(u'user_obj')
 
         errors = errors or {}
         vars = {
@@ -755,7 +754,7 @@ class PerformResetView(MethodView):
         })
 
     def get(self, id):
-        context, user_dict = self._prepare(id)
+        user_dict = self._prepare(id)[1]
         return base.render(u'user/perform_reset.html', {
             u'user_dict': user_dict
         })
