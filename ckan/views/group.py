@@ -919,7 +919,7 @@ class CreateGroupView(MethodView):
 class EditGroupView(MethodView):
     u''' Edit group view'''
 
-    def _prepare(self):
+    def _prepare(self, id):
         data_dict = {u'id': id, u'include_datasets': False}
 
         context = {
@@ -944,7 +944,7 @@ class EditGroupView(MethodView):
 
     def post(self, group_type, is_organization, id=None):
         set_org(is_organization)
-        context = self._prepare()
+        context = self._prepare(id)
         try:
             data_dict = clean_dict(
                 dict_fns.unflatten(tuplize_dict(parse_params(request.form))))
@@ -973,7 +973,7 @@ class EditGroupView(MethodView):
             data=None, errors=None, error_summary=None):
         extra_vars = {}
         set_org(is_organization)
-        context = self._prepare()
+        context = self._prepare(id)
         data_dict = {u'id': id, u'include_datasets': False}
         try:
             group_dict = _action(u'group_show')(context, data_dict)

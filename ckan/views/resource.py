@@ -614,7 +614,7 @@ def view(package_type, id, resource_id, view_id=None):
 
 # FIXME: could anyone think about better name?
 class EditResourceViewView(MethodView):
-    def _prepare(self, id, resource_id)->Tuple[Dict, Dict]:
+    def _prepare(self, id, resource_id) -> Tuple[Dict, Dict]:
         context = {
             u'model': model,
             u'session': model.Session,

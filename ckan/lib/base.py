@@ -34,7 +34,9 @@ from ckan.common import (c, request, config,
 if six.PY2:
     from pylons.controllers import WSGIController  # type: ignore
     from pylons.controllers.util import abort as _abort  # type: ignore
-    from pylons.templating import cached_template, pylons_globals  # type: ignore
+    from pylons.templating import (  # type: ignore
+        cached_template, pylons_globals
+    )
     from ckan.common import response # type: ignore
 
 
