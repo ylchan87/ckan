@@ -17,6 +17,6 @@ def table_dict_save(
     table_dict: Dict,
     ModelClass: Any,
     context: Dict,
-    extra_attrs: Iterable[str],
+    extra_attrs: Iterable[str]=...,
 ) -> Any: ...
 def table_dictize(obj: Any, context: Dict, **kw) -> Dict[str, Any]: ...

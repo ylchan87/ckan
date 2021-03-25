@@ -1,5 +1,6 @@
 from typing import Any, Callable, Dict, List
 from sqlalchemy.engine import Engine
+from ckan.model import meta
 from ckan.model.meta import (
     Session,
     engine_is_sqlite,
