@@ -10,6 +10,7 @@ import datetime
 import logging
 import re
 import os
+from typing import Any, List
 import pytz
 import tzlocal
 import pprint
@@ -24,19 +25,20 @@ from markdown import markdown
 from bleach import clean as bleach_clean, ALLOWED_TAGS, ALLOWED_ATTRIBUTES
 from ckan.common import asbool, config, is_flask_request
 from flask import redirect as _flask_redirect
-from flask import _request_ctx_stack
+from flask import _request_ctx_stack  # type: ignore
 from flask import url_for as _flask_default_url_for
 from werkzeug.routing import BuildError as FlaskRouteBuildError
 from ckan.lib import i18n
 
 import six
 from six import string_types, text_type
-from six.moves.urllib.parse import (
+from six.moves.urllib.parse import (  # type: ignore
     urlencode, quote, unquote, urlparse, urlunparse
 )
-from six.moves import map
+from six.moves import map  # type: ignore
 import jinja2
 
+import ckan.config
 import ckan.exceptions
 import ckan.model as model
 import ckan.lib.formatters as formatters
@@ -457,6 +459,8 @@ def _url_for_flask(*args, **kw):
         # Flask to pass the host explicitly, so we rebuild the URL manually
         # based on `ckan.site_url`, which is essentially what we did on Pylons
         protocol, host = get_site_protocol_and_host()
+        # these items cannot be empty because CKAN won't start otherwise
+        assert (protocol, host) is not (None, None)
         parts = urlparse(my_url)
         my_url = urlunparse((protocol, host, parts.path, parts.params,
                              parts.query, parts.fragment))
@@ -1754,7 +1758,7 @@ def date_str_to_datetime(date_str):
            despite that not being part of the ISO format.
     '''
 
-    time_tuple = re.split(r'[^\d]+', date_str, maxsplit=5)
+    time_tuple: List[Any] = re.split(r'[^\d]+', date_str, maxsplit=5)
 
     # Extract seconds and microseconds
     if len(time_tuple) >= 6:
@@ -1763,12 +1767,14 @@ def date_str_to_datetime(date_str):
         if not m:
             raise ValueError('Unable to parse %s as seconds.microseconds' %
                              time_tuple[5])
-        seconds = int(m.groupdict().get('seconds'))
-        microseconds = int((str(m.groupdict(0).get('microseconds')) +
+        seconds = int(m.groupdict().get('seconds', 0))
+        microseconds = int((str(m.groupdict().get('microseconds', '0')) +
                             '00000')[0:6])
         time_tuple = time_tuple[:5] + [seconds, microseconds]
 
-    return datetime.datetime(*list(int(item) for item in time_tuple))
+    return datetime.datetime(
+        *list(int(item) for item in time_tuple)  # type: ignore
+    )
 
 
 @core_helper
@@ -2877,7 +2883,7 @@ def load_plugin_helpers():
                 helper_functions[name] = func
     for name, func_list in chained_helpers.items():
         if name not in helper_functions:
-            raise logic.NotFoud(
+            raise logic.NotFound(
                 u'The helper %r is not found for chained helper' % (name))
         for func in reversed(func_list):
             new_func = functools.partial(
