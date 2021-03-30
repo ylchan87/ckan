@@ -21,6 +21,8 @@ from ckan.views.home import CACHE_PARAMETERS
 from ckan.views.dataset import (
     _get_pkg_template, _get_package_type, _setup_template_variables
 )
+from typing import Optional, Union
+from flask.wrappers import Response
 
 Blueprint = flask.Blueprint
 NotFound = logic.NotFound
@@ -49,7 +51,7 @@ prefixed_resource = Blueprint(
 )
 
 
-def read(package_type, id, resource_id):
+def read(package_type: str, id: str, resource_id: str) -> str:
     context = {
         u'model': model,
         u'session': model.Session,
@@ -152,7 +154,7 @@ def read(package_type, id, resource_id):
     return base.render(template, extra_vars)
 
 
-def download(package_type, id, resource_id, filename=None):
+def download(package_type: str, id: str, resource_id: str, filename: Optional[str]=None) -> Response:
     """
     Provides a direct download by either redirecting the user to the url
     stored or downloading an uploaded file directly.
@@ -184,7 +186,7 @@ def download(package_type, id, resource_id, filename=None):
 
 
 class CreateView(MethodView):
-    def post(self, package_type, id):
+    def post(self, package_type: str, id) -> Union[str, Response]:
         save_action = request.form.get(u'save')
         data = clean_dict(
             dict_fns.unflatten(tuplize_dict(parse_params(request.form)))
@@ -287,8 +289,8 @@ class CreateView(MethodView):
             )
 
     def get(
-        self, package_type, id, data=None, errors=None, error_summary=None
-    ):
+        self, package_type: str, id: str, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None
+    ) -> str:
         # get resources for sidebar
         context = {
             u'model': model,
@@ -353,7 +355,7 @@ class EditView(MethodView):
             )
         return context
 
-    def post(self, package_type, id, resource_id):
+    def post(self, package_type: str, id: str, resource_id: str) -> Union[str, Response]:
         context = self._prepare(id)
         data = clean_dict(
             dict_fns.unflatten(tuplize_dict(parse_params(request.form)))
@@ -387,13 +389,13 @@ class EditView(MethodView):
 
     def get(
         self,
-        package_type,
-        id,
-        resource_id,
-        data=None,
-        errors=None,
-        error_summary=None
-    ):
+        package_type: str,
+        id: str,
+        resource_id: str,
+        data: Optional[Dict]=None,
+        errors: Optional[Dict]=None,
+        error_summary: Optional[Dict]=None
+    ) -> str:
         context = self._prepare(id)
         pkg_dict = get_action(u'package_show')(context, {u'id': id})
 
@@ -456,7 +458,7 @@ class DeleteView(MethodView):
             )
         return context
 
-    def post(self, package_type, id, resource_id):
+    def post(self, package_type: str, id: str, resource_id: str) -> Response:
         if u'cancel' in request.form:
             return h.redirect_to(
                 u'{}_resource.edit'.format(package_type),
@@ -483,7 +485,7 @@ class DeleteView(MethodView):
         except NotFound:
             return base.abort(404, _(u'Resource not found'))
 
-    def get(self, package_type, id, resource_id):
+    def get(self, package_type: str, id: str, resource_id: str) -> str:
         context = self._prepare(id)
         try:
             resource_dict = get_action(u'resource_show')(
@@ -513,7 +515,7 @@ class DeleteView(MethodView):
         )
 
 
-def views(package_type, id, resource_id):
+def views(package_type: str, id: str, resource_id: str) -> str:
     package_type = _get_package_type(id)
     context = {
         u'model': model,
@@ -569,7 +571,7 @@ def views(package_type, id, resource_id):
     )
 
 
-def view(package_type, id, resource_id, view_id=None):
+def view(package_type: str, id: str, resource_id: str, view_id: Optional[str]=None) -> str:
     """
     Embedded page for a resource view.
 
@@ -664,7 +666,7 @@ class EditResourceViewView(MethodView):
         )
         return context, extra_vars
 
-    def post(self, package_type, id, resource_id, view_id=None):
+    def post(self, package_type: str, id: str, resource_id: str, view_id: Optional[str]=None) -> Union[str, Response]:
         context, extra_vars = self._prepare(id, resource_id)
         data = clean_dict(
             dict_fns.unflatten(
@@ -711,8 +713,8 @@ class EditResourceViewView(MethodView):
         return self.get(package_type, id, resource_id, view_id, extra_vars)
 
     def get(
-        self, package_type, id, resource_id, view_id=None, post_extra=None
-    ):
+        self, package_type: str, id: str, resource_id: str, view_id: Optional[str]=None, post_extra: Optional[Dict]=None
+    ) -> str:
         context, extra_vars = self._prepare(id, resource_id)
         to_preview = extra_vars[u'to_preview']
         if post_extra:
@@ -821,7 +823,7 @@ def _parse_recline_state(params):
     return recline_state
 
 
-def embedded_dataviewer(package_type, id, resource_id, width=500, height=500):
+def embedded_dataviewer(package_type: str, id: str, resource_id: str, width: int=500, height: int=500) -> str:
     """
     Embedded page for a read-only resource dataview. Allows
     for width and height to be specified as part of the
@@ -887,7 +889,7 @@ def embedded_dataviewer(package_type, id, resource_id, width=500, height=500):
     )
 
 
-def datapreview(package_type, id, resource_id):
+def datapreview(package_type: str, id: str, resource_id: str) -> str:
     """
     Embedded page for a resource data-preview.
 
@@ -935,7 +937,7 @@ def datapreview(package_type, id, resource_id):
         )
 
 
-def register_dataset_plugin_rules(blueprint):
+def register_dataset_plugin_rules(blueprint: Blueprint) -> None:
     blueprint.add_url_rule(u'/new', view_func=CreateView.as_view(str(u'new')))
     blueprint.add_url_rule(
         u'/<resource_id>', view_func=read, strict_slashes=False)

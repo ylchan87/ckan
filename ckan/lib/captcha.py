@@ -3,9 +3,10 @@
 from ckan.common import config
 
 import requests
+from ckan.common import CKANRequest
 
 
-def check_recaptcha(request):
+def check_recaptcha(request: CKANRequest) -> None:
     '''Check a user\'s recaptcha submission is valid, and raise CaptchaError
     on failure.'''
     recaptcha_private_key = config.get('ckan.recaptcha.privatekey', '')

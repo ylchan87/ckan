@@ -1,6 +1,11 @@
 # encoding: utf-8
 
 import sys
+from typing import Dict, Optional, Tuple, Union
+import ckan.lib.helpers as _helpers
+import ckan.common as common
+
+_ = common._
 
 
 class _Toolkit(object):
@@ -347,7 +352,7 @@ content type, cookies, etc.
     # Wrapper for the render_snippet function as it uses keywords rather than
     # dict to pass data.
     @classmethod
-    def _render_snippet(cls, template, data=None):
+    def _render_snippet(cls, template: str, data: Optional[Dict]=None) -> _helpers.Markup:
         '''Render a template snippet and return the output.
 
         See :doc:`/theming/index`.
@@ -358,7 +363,7 @@ content type, cookies, etc.
 
     # new functions
     @classmethod
-    def _add_template_directory(cls, config, relative_path):
+    def _add_template_directory(cls, config: common.CKANConfig, relative_path: str) -> None:
         '''Add a path to the :ref:`extra_template_paths` config setting.
 
         The path is relative to the file calling this function.
@@ -368,7 +373,7 @@ content type, cookies, etc.
                                   'extra_template_paths')
 
     @classmethod
-    def _add_public_directory(cls, config, relative_path):
+    def _add_public_directory(cls, config: common.CKANConfig, relative_path: str) -> None:
         '''Add a path to the :ref:`extra_public_paths` config setting.
 
         The path is relative to the file calling this function.
@@ -412,7 +417,7 @@ content type, cookies, etc.
         return absolute_path
 
     @classmethod
-    def _add_resource(cls, path, name):
+    def _add_resource(cls, path: str, name: str) -> None:
         '''Add a WebAssets library to CKAN.
 
         WebAssets libraries are directories containing static resource
@@ -438,8 +443,8 @@ content type, cookies, etc.
         create_library(name, absolute_path)
 
     @classmethod
-    def _add_ckan_admin_tabs(cls, config, route_name, tab_label,
-                             config_var='ckan.admin_tabs', icon=None):
+    def _add_ckan_admin_tabs(cls, config: common.CKANConfig, route_name: str, tab_label: str,
+                             config_var: str='ckan.admin_tabs', icon: Optional[str]=None) -> None:
         '''
         Update 'ckan.admin_tabs' dict the passed config dict.
         '''
@@ -464,7 +469,7 @@ content type, cookies, etc.
         return [int(part) for part in v_str.split('.')]
 
     @classmethod
-    def _check_ckan_version(cls, min_version=None, max_version=None):
+    def _check_ckan_version(cls, min_version: Optional[str]=None, max_version: Optional[str]=None) -> bool:
         '''Return ``True`` if the CKAN version is greater than or equal to
         ``min_version`` and less than or equal to ``max_version``,
         return ``False`` otherwise.
@@ -497,7 +502,7 @@ content type, cookies, etc.
         return True
 
     @classmethod
-    def _requires_ckan_version(cls, min_version, max_version=None):
+    def _requires_ckan_version(cls, min_version: str, max_version: Optional[str]=None):
         '''Raise :py:exc:`~ckan.plugins.toolkit.CkanVersionException` if the
         CKAN version is not greater than or equal to ``min_version`` and
         less then or equal to ``max_version``.
@@ -531,7 +536,7 @@ content type, cookies, etc.
             raise CkanVersionException(error)
 
     @classmethod
-    def _get_endpoint(cls):
+    def _get_endpoint(cls) -> Union[Tuple[str, str], Tuple[None, None]]:
         """Returns tuple in format: (controller|blueprint, action|view).
         """
         import ckan.common as common

@@ -10,6 +10,9 @@ from ckan.model import package as _package
 from ckan.model import types as _types
 from ckan.model import domain_object
 from ckan.model import user as _user
+from ckan.types import Query
+from ckan.model import package as _package
+from typing import Dict, List, Optional, Tuple
 
 __all__ = ['group_table', 'Group',
            'Member',
@@ -69,8 +72,8 @@ class Member(core.StatefulObjectMixin,
               in a hierarchy.
                  - capacity is 'parent'
     '''
-    def __init__(self, group=None, table_id=None, group_id=None,
-                 table_name=None, capacity='public', state='active'):
+    def __init__(self, group: Optional[str]=None, table_id: Optional[str]=None, group_id: Optional[str]=None,
+                 table_name: Optional[str]=None, capacity: str='public', state: str='active') -> None:
         self.group = group
         self.group_id = group_id
         self.table_id = table_id
@@ -79,7 +82,7 @@ class Member(core.StatefulObjectMixin,
         self.state = state
 
     @classmethod
-    def get(cls, reference):
+    def get(cls, reference: str) -> Optional["Member"]:
         '''Returns a group object referenced by its id or name.'''
         if not reference:
             return None
@@ -89,7 +92,7 @@ class Member(core.StatefulObjectMixin,
             member = cls.by_name(reference)
         return member
 
-    def related_packages(self):
+    def related_packages(self) -> List[_package.Package]:
         # TODO do we want to return all related packages or certain ones?
         return meta.Session.query(_package.Package).filter_by(
             id=self.table_id).all()
@@ -113,9 +116,9 @@ class Member(core.StatefulObjectMixin,
 class Group(core.StatefulObjectMixin,
             domain_object.DomainObject):
 
-    def __init__(self, name=u'', title=u'', description=u'', image_url=u'',
-                 type=u'group', approval_status=u'approved',
-                 is_organization=False):
+    def __init__(self, name: str=u'', title: str=u'', description: str=u'', image_url: str=u'',
+                 type: str=u'group', approval_status: str=u'approved',
+                 is_organization: bool=False) -> None:
         self.name = name
         self.title = title
         self.description = description
@@ -125,14 +128,14 @@ class Group(core.StatefulObjectMixin,
         self.is_organization = is_organization
 
     @property
-    def display_name(self):
+    def display_name(self) -> str:
         if self.title is not None and len(self.title):
             return self.title
         else:
             return self.name
 
     @classmethod
-    def get(cls, reference):
+    def get(cls, reference: str) -> Optional["Group"]:
         '''Returns a group object referenced by its id or name.'''
         query = meta.Session.query(cls).filter(cls.id == reference)
         group = query.first()
@@ -142,7 +145,7 @@ class Group(core.StatefulObjectMixin,
     # Todo: Make sure group names can't be changed to look like group IDs?
 
     @classmethod
-    def all(cls, group_type=None, state=('active',)):
+    def all(cls, group_type: Optional[str]=None, state: Tuple[str]=('active',)) -> Query["Group"]:
         """
         Returns all groups.
         """
@@ -155,7 +158,7 @@ class Group(core.StatefulObjectMixin,
 
         return q.order_by(cls.title)
 
-    def set_approval_status(self, status):
+    def set_approval_status(self, status: str) -> None:
         """
             Aproval status can be set on a group, where currently it does
             nothing other than act as an indication of whether it was
@@ -167,7 +170,7 @@ class Group(core.StatefulObjectMixin,
         if status == "denied":
             pass
 
-    def get_children_groups(self, type='group'):
+    def get_children_groups(self, type: str='group') -> List["Group"]:
         '''Returns the groups one level underneath this group in the hierarchy.
         '''
         # The original intention of this method was to provide the full depth
@@ -183,7 +186,7 @@ class Group(core.StatefulObjectMixin,
                      filter_by(state='active').\
                      all()
 
-    def get_children_group_hierarchy(self, type='group'):
+    def get_children_group_hierarchy(self, type: str='group') -> List[Tuple[str, str, str, str]]:
         '''Returns the groups in all levels underneath this group in the
         hierarchy. The ordering is such that children always come after their
         parent.
@@ -202,7 +205,7 @@ class Group(core.StatefulObjectMixin,
             params(id=self.id, type=type).all()
         return results
 
-    def get_parent_groups(self, type='group'):
+    def get_parent_groups(self, type: str='group') -> List["Group"]:
         '''Returns this group's parent groups.
         Returns a list. Will have max 1 value for organizations.
 
@@ -217,7 +220,7 @@ class Group(core.StatefulObjectMixin,
             filter(Group.state == 'active').\
             all()
 
-    def get_parent_group_hierarchy(self, type='group'):
+    def get_parent_group_hierarchy(self, type: str='group') -> List["Group"]:
         '''Returns this group's parent, parent's parent, parent's parent's
         parent etc.. Sorted with the top level parent first.'''
         return meta.Session.query(Group).\
@@ -225,7 +228,7 @@ class Group(core.StatefulObjectMixin,
             params(id=self.id, type=type).all()
 
     @classmethod
-    def get_top_level_groups(cls, type='group'):
+    def get_top_level_groups(cls, type: str='group') -> List["Group"]:
         '''Returns a list of the groups (of the specified type) which have
         no parent groups. Groups are sorted by title.
         '''
@@ -239,7 +242,7 @@ class Group(core.StatefulObjectMixin,
             filter(Group.state == 'active').\
             order_by(Group.title).all()
 
-    def groups_allowed_to_be_its_parent(self, type='group'):
+    def groups_allowed_to_be_its_parent(self, type: str='group') -> List["Group"]:
         '''Returns a list of the groups (of the specified type) which are
         allowed to be this group's parent. It excludes ones which would
         create a loop in the hierarchy, causing the recursive CTE to
@@ -256,8 +259,8 @@ class Group(core.StatefulObjectMixin,
         return [group for group in all_groups
                 if group.name not in excluded_groups]
 
-    def packages(self, with_private=False, limit=None,
-            return_query=False, context=None):
+    def packages(self, with_private: bool=False, limit: Optional[int]=None,
+            return_query: bool=False, context: Optional[Dict]=None) -> Query[_package.Package]:
         '''Return this group's active packages.
 
         Returns all packages in this group with VDM state ACTIVE
@@ -317,8 +320,8 @@ class Group(core.StatefulObjectMixin,
             return query.all()
 
     @classmethod
-    def search_by_name_or_title(cls, text_query, group_type=None,
-                                is_org=False, limit=20):
+    def search_by_name_or_title(cls, text_query: str, group_type: Optional[str]=None,
+                                is_org: bool=False, limit: int=20) -> Query["Group"]:
         text_query = text_query.strip().lower()
         q = meta.Session.query(cls) \
             .filter(or_(cls.name.contains(text_query),
@@ -334,7 +337,7 @@ class Group(core.StatefulObjectMixin,
         q = q.limit(limit)
         return q
 
-    def add_package_by_name(self, package_name):
+    def add_package_by_name(self, package_name: str) -> None:
         if not package_name:
             return
         package = _package.Package.by_name(package_name)

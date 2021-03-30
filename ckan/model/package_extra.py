@@ -12,6 +12,8 @@ from ckan.model import (
     domain_object,
     types as _types,
 )
+from typing import List
+from ckan.model import package as _package
 
 __all__ = ['PackageExtra', 'package_extra_table']
 
@@ -29,7 +31,7 @@ class PackageExtra(
         core.StatefulObjectMixin,
         domain_object.DomainObject):
 
-    def related_packages(self):
+    def related_packages(self) -> List[_package.Package]:
         return [self.package]
 
 

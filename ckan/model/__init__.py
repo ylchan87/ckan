@@ -131,6 +131,8 @@ from ckan.model.api_token import (
 
 import ckan.migration
 from ckan.common import config
+from typing import Any, Dict, List
+from sqlalchemy.engine import Engine
 
 
 log = logging.getLogger(__name__)
@@ -138,7 +140,7 @@ log = logging.getLogger(__name__)
 DB_CONNECT_RETRIES = 10
 
 
-def init_model(engine):
+def init_model(engine: Engine) -> None:
     '''Call me before using any of the tables or classes in the model'''
     meta.Session.remove()
     meta.Session.configure(bind=engine)
@@ -171,16 +173,16 @@ class Repository():
     #       are_tables_created().
     tables_created_and_initialised = False
 
-    def __init__(self, metadata, session):
+    def __init__(self, metadata: Any, session: Any) -> None:
         self.metadata = metadata
         self.session = session
         self.commit = session.commit
 
-    def commit_and_remove(self):
+    def commit_and_remove(self) -> None:
         self.session.commit()
         self.session.remove()
 
-    def init_db(self):
+    def init_db(self) -> None:
         '''Ensures tables, const data and some default config is created.
         This method MUST be run before using CKAN for the first time.
         Before this method is run, you can either have a clean db or tables
@@ -203,7 +205,7 @@ class Repository():
                 self.tables_created_and_initialised = True
         log.info('Database initialised')
 
-    def clean_db(self):
+    def clean_db(self) -> None:
         self.commit_and_remove()
         meta.metadata = MetaData(self.metadata.bind)
         with warnings.catch_warnings():
@@ -214,7 +216,7 @@ class Repository():
         self.tables_created_and_initialised = False
         log.info('Database tables dropped')
 
-    def create_db(self):
+    def create_db(self) -> None:
         '''Ensures tables, const data and some default config is created.
         i.e. the same as init_db APART from when running tests, when init_db
         has shortcuts.
@@ -222,7 +224,7 @@ class Repository():
         self.metadata.create_all(bind=self.metadata.bind)
         log.info('Database tables created')
 
-    def rebuild_db(self):
+    def rebuild_db(self) -> None:
         '''Clean and init the db'''
         if self.tables_created_and_initialised:
             # just delete data, leaving tables - this is faster
@@ -235,7 +237,7 @@ class Repository():
         self.session.flush()
         log.info('Database rebuilt')
 
-    def delete_all(self):
+    def delete_all(self) -> None:
         '''Delete all data from all tables.'''
         self.session.remove()
         ## use raw connection for performance
@@ -251,18 +253,18 @@ class Repository():
         self.session.commit()
         log.info('Database table data deleted')
 
-    def reset_alembic_output(self):
+    def reset_alembic_output(self) -> None:
         self._alembic_output = []
 
-    def add_alembic_output(self, *args):
+    def add_alembic_output(self, *args: str) -> None:
         self._alembic_output.append(args)
 
-    def take_alembic_output(self, with_reset=True):
+    def take_alembic_output(self, with_reset: bool=True) -> List[str]:
         output = self._alembic_output
         self._alembic_config = []
         return output
 
-    def setup_migration_version_control(self):
+    def setup_migration_version_control(self) -> None:
         self.reset_alembic_output()
         alembic_config = AlembicConfig(self._alembic_ini)
         alembic_config.set_main_option(
@@ -286,7 +288,7 @@ class Repository():
 
         self.alembic_config = alembic_config
 
-    def current_version(self):
+    def current_version(self) -> str:
         try:
             alembic_current(self.alembic_config)
             return self.take_alembic_output()[0][0]
@@ -294,12 +296,12 @@ class Repository():
             # alembic is not initialized yet
             return 'base'
 
-    def downgrade_db(self, version='base'):
+    def downgrade_db(self, version: str='base') -> None:
         self.setup_migration_version_control()
         alembic_downgrade(self.alembic_config, version)
         log.info(u'CKAN database version set to: %s', version)
 
-    def upgrade_db(self, version='head'):
+    def upgrade_db(self, version: str='head') -> None:
         '''Upgrade db using sqlalchemy migrations.
 
         @param version: version to upgrade to (if None upgrade to latest)
@@ -324,7 +326,7 @@ class Repository():
         else:
             log.info(u'CKAN database version remains as: %s', version_after)
 
-    def are_tables_created(self):
+    def are_tables_created(self) -> bool:
         meta.metadata = MetaData(self.metadata.bind)
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', '.*(reflection|geometry).*')
@@ -335,13 +337,13 @@ class Repository():
 repo = Repository(meta.metadata, meta.Session)
 
 
-def is_id(id_string):
+def is_id(id_string: str) -> bool:
     '''Tells the client if the string looks like a revision id or not'''
     reg_ex = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
     return bool(re.match(reg_ex, id_string))
 
 
-def parse_db_config(config_key=u'sqlalchemy.url'):
+def parse_db_config(config_key: str=u'sqlalchemy.url') -> Dict[str, str]:
     u''' Takes a config key for a database connection url and parses it into
     a dictionary. Expects a url like:
 

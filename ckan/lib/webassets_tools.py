@@ -18,7 +18,7 @@ env = None
 yaml.warnings({u'YAMLLoadWarning': False})
 
 
-def create_library(name, path):
+def create_library(name: str, path: str) -> None:
     """Create WebAssets library(set of Bundles).
     """
     config_path = os.path.join(path, u'webassets.yml')
@@ -44,7 +44,7 @@ def create_library(name, path):
     env.append_path(path)
 
 
-def webassets_init():
+def webassets_init() -> None:
     global env
 
     static_path = get_webassets_path()
@@ -78,7 +78,7 @@ def _make_asset_collection():
     return {u'style': [], u'script': [], u'included': set()}
 
 
-def include_asset(name):
+def include_asset(name: str) -> None:
     from ckan.lib.helpers import url_for_static_or_external
     try:
         if not g.webassets:
@@ -131,7 +131,7 @@ def _to_tag(url, type_):
     return u''
 
 
-def render_assets(type_):
+def render_assets(type_: str) -> Markup:
     try:
         assets = g.webassets
     except AttributeError:
@@ -145,7 +145,7 @@ def render_assets(type_):
     return Markup(tags)
 
 
-def get_webassets_path():
+def get_webassets_path() -> str:
     webassets_path = config.get(u'ckan.webassets.path')
 
     if not webassets_path:
@@ -164,5 +164,5 @@ def get_webassets_path():
     return webassets_path
 
 
-def add_public_path(path, url):
+def add_public_path(path: str, url: str) -> None:
     env.append_path(path, url)

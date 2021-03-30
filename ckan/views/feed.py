@@ -16,6 +16,8 @@ import ckan.model as model
 import ckan.logic as logic
 import ckan.plugins as plugins
 import json
+from typing import Any, List
+from flask.wrappers import Response
 
 log = logging.getLogger(__name__)
 
@@ -66,7 +68,7 @@ def _enclosure(pkg):
 
 
 class Enclosure(text_type):
-    def __init__(self, url):
+    def __init__(self, url: str) -> None:
         self.url = url
         self.length = u'0'
         self.mime_type = u'application/json'
@@ -75,18 +77,18 @@ class Enclosure(text_type):
 class CKANFeed(FeedGenerator):
     def __init__(
         self,
-        feed_title,
-        feed_link,
-        feed_description,
-        language,
-        author_name,
-        feed_guid,
-        feed_url,
-        previous_page,
-        next_page,
-        first_page,
-        last_page,
-    ):
+        feed_title: str,
+        feed_link: str,
+        feed_description: str,
+        language: str,
+        author_name: str,
+        feed_guid: str,
+        feed_url: str,
+        previous_page: str,
+        next_page: str,
+        first_page: str,
+        last_page: str,
+    ) -> None:
         super(CKANFeed, self).__init__()
 
         self.title(feed_title)
@@ -107,10 +109,10 @@ class CKANFeed(FeedGenerator):
                 continue
             self.link(href=href, rel=rel)
 
-    def writeString(self, encoding):
+    def writeString(self, encoding: str) -> str:
         return self.atom_str(encoding=encoding)
 
-    def add_item(self, **kwargs):
+    def add_item(self, **kwargs: Any) -> None:
         entry = self.add_entry()
         for key, value in kwargs.items():
             if key in {u"published", u"updated"} and not value.tzinfo:
@@ -133,8 +135,8 @@ class CKANFeed(FeedGenerator):
             getattr(entry, key)(value)
 
 
-def output_feed(results, feed_title, feed_description, feed_link, feed_url,
-                navigation_urls, feed_guid):
+def output_feed(results: List[Dict], feed_title: str, feed_description: str, feed_link: str, feed_url: str,
+                navigation_urls: Dict[str, str], feed_guid: str) -> Response:
     author_name = config.get(u'ckan.feeds.author_name', u'').strip() or \
         config.get(u'ckan.site_id', u'').strip()
 
@@ -187,7 +189,7 @@ def output_feed(results, feed_title, feed_description, feed_link, feed_url,
     return resp
 
 
-def group(id):
+def group(id: str) -> Response:
     try:
         context = {
             u'model': model,
@@ -202,7 +204,7 @@ def group(id):
     return group_or_organization(group_dict, is_org=False)
 
 
-def organization(id):
+def organization(id: str) -> Response:
     try:
         context = {
             u'model': model,
@@ -219,7 +221,7 @@ def organization(id):
     return group_or_organization(group_dict, is_org=True)
 
 
-def tag(id):
+def tag(id: str) -> Response:
     data_dict, params = _parse_url_params()
     data_dict['fq'] = u'tags: "%s"' % id
 
@@ -252,7 +254,7 @@ def tag(id):
         navigation_urls=navigation_urls)
 
 
-def group_or_organization(obj_dict, is_org):
+def group_or_organization(obj_dict: Dict, is_org: bool) -> Response:
     data_dict, params = _parse_url_params()
     if is_org:
         key = u'owner_org'
@@ -320,7 +322,7 @@ def _parse_url_params():
     return data_dict, params
 
 
-def general():
+def general() -> Response:
     data_dict, params = _parse_url_params()
     data_dict['q'] = u'*:*'
 
@@ -351,7 +353,7 @@ def general():
         navigation_urls=navigation_urls)
 
 
-def custom():
+def custom() -> Response:
     """
     Custom atom feed
 

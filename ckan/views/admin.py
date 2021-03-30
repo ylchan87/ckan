@@ -13,6 +13,8 @@ import ckan.lib.navl.dictization_functions as dict_fns
 import ckan.logic as logic
 import ckan.model as model
 from ckan.common import g, _, config, request
+from typing import Union
+from flask.wrappers import Response
 
 log = logging.getLogger(__name__)
 
@@ -52,7 +54,7 @@ def _get_config_items():
 
 
 @admin.before_request
-def before_request():
+def before_request() -> None:
     try:
         context = {"model": model, "user": g.user, "auth_user_obj": g.userobj}
         logic.check_access(u'sysadmin', context)
@@ -60,18 +62,18 @@ def before_request():
         base.abort(403, _(u'Need to be system administrator to administer'))
 
 
-def index():
+def index() -> str:
     data = dict(sysadmins=[a.name for a in _get_sysadmins()])
     return base.render(u'admin/index.html', extra_vars=data)
 
 
 class ResetConfigView(MethodView):
-    def get(self):
+    def get(self) -> Union[str, Response]:
         if u'cancel' in request.args:
             return h.redirect_to(u'admin.config')
         return base.render(u'admin/confirm_reset.html', extra_vars={})
 
-    def post(self):
+    def post(self) -> Response:
         # remove sys info items
         for item in _get_config_items():
             model.delete_system_info(item)
@@ -81,7 +83,7 @@ class ResetConfigView(MethodView):
 
 
 class ConfigView(MethodView):
-    def get(self):
+    def get(self) -> str:
         items = _get_config_options()
         schema = logic.schema.update_configuration_schema()  # type: ignore
         data = {}
@@ -92,7 +94,7 @@ class ConfigView(MethodView):
 
         return base.render(u'admin/config.html', extra_vars=vars)
 
-    def post(self):
+    def post(self) -> Union[str, Response]:
         try:
             req = request.form.copy()
             req.update(request.files.to_dict())
@@ -156,7 +158,7 @@ class TrashView(MethodView):
             }
         }
 
-    def get(self):
+    def get(self) -> str:
         ent_type = request.args.get(u'name')
 
         if ent_type:
@@ -168,7 +170,7 @@ class TrashView(MethodView):
         data = dict(data=self.deleted_entities, messages=self.messages)
         return base.render(u'admin/trash.html', extra_vars=data)
 
-    def post(self):
+    def post(self) -> Response:
         if u'cancel' in request.form:
             return h.redirect_to(u'admin.trash')
 

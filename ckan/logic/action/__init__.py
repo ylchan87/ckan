@@ -7,9 +7,13 @@ import six
 
 from ckan.logic import NotFound
 from ckan.common import _
+from ckan.types import ErrorDict
+from ckan import model
+from ckan.model.domain_object import DomainObject
+from typing import Dict, Mapping
 
 
-def rename_keys(dict_, key_map, reverse=False, destructive=False):
+def rename_keys(dict_: Dict, key_map: Mapping, reverse: bool=False, destructive: bool=False) -> Dict:
     '''Returns a dict that has particular keys renamed,
     according to the key_map.
 
@@ -30,7 +34,7 @@ def rename_keys(dict_, key_map, reverse=False, destructive=False):
     return new_dict
 
 
-def get_domain_object(model, domain_object_ref):
+def get_domain_object(model: model, domain_object_ref: str) -> DomainObject:
     '''For an id or name, return the corresponding domain object.
     (First match returned, in order: system, package, group, auth_group, user).
     '''
@@ -48,7 +52,7 @@ def get_domain_object(model, domain_object_ref):
     raise NotFound('Domain object %r not found' % domain_object_ref)
 
 
-def error_summary(error_dict):
+def error_summary(error_dict: ErrorDict) -> Dict[str, str]:
     ''' Do some i18n stuff on the error_dict keys '''
 
     def prettify(field_name):

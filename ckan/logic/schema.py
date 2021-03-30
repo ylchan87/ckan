@@ -7,9 +7,10 @@ from six import text_type
 import ckan.model
 import ckan.plugins as plugins
 from ckan.logic import get_validator
+from ckan.types import ComplexSchemaFunc, PlainSchemaFunc
 
 
-def validator_args(fn):
+def validator_args(fn: ComplexSchemaFunc) -> PlainSchemaFunc:
     u'''collect validator names from argument names
     and pass them to wrapped function'''
 

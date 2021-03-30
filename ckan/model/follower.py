@@ -7,16 +7,20 @@ import sqlalchemy
 from ckan.model import core
 import ckan.model
 from ckan.model import domain_object
+from typing import List, Optional, TypeVar
+
+Follower = TypeVar("Follower")
+Followed = TypeVar("Followed")
 
 
 class ModelFollowingModel(domain_object.DomainObject):
-    def __init__(self, follower_id, object_id):
+    def __init__(self, follower_id: str, object_id: str) -> None:
         self.follower_id = follower_id
         self.object_id = object_id
         self.datetime = datetime.datetime.now()
 
     @classmethod
-    def get(cls, follower_id, object_id):
+    def get(cls, follower_id: str, object_id: str) -> Optional[Followed]:
         '''Return a ModelFollowingModel object for the given follower_id and
         object_id, or None if no such follower exists.
 
@@ -27,7 +31,7 @@ class ModelFollowingModel(domain_object.DomainObject):
             return following[0]
 
     @classmethod
-    def is_following(cls, follower_id, object_id):
+    def is_following(cls, follower_id: str, object_id: str) -> bool:
         '''Return True if follower_id is currently following object_id, False
         otherwise.
 
@@ -35,24 +39,24 @@ class ModelFollowingModel(domain_object.DomainObject):
         return cls.get(follower_id, object_id) is not None
 
     @classmethod
-    def followee_count(cls, follower_id):
+    def followee_count(cls, follower_id: str) -> int:
         '''Return the number of objects followed by the follower.'''
         return cls._get_followees(follower_id).count()
 
     @classmethod
-    def followee_list(cls, follower_id):
+    def followee_list(cls, follower_id: str) -> List[Followed]:
         '''Return a list of objects followed by the follower.'''
         query = cls._get_followees(follower_id).all()
         followees = cls._filter_following_objects(query)
         return followees
 
     @classmethod
-    def follower_count(cls, object_id):
+    def follower_count(cls, object_id: str) -> int:
         '''Return the number of followers of the object.'''
         return cls._get_followers(object_id).count()
 
     @classmethod
-    def follower_list(cls, object_id):
+    def follower_list(cls: Follower, object_id) -> Follower:
         '''Return a list of followers of the object.'''
         query = cls._get_followers(object_id).all()
         followers = cls._filter_following_objects(query)

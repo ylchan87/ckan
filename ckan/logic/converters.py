@@ -10,9 +10,11 @@ import ckan.lib.navl.dictization_functions as df
 import ckan.logic.validators as validators
 
 from ckan.common import _
+from typing import Any, Dict
+from ckan.types import Context, ErrorDict, TuplizedKey
 
 
-def convert_to_extras(key, data, errors, context):
+def convert_to_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: ErrorDict, context: Context) -> Any:
 
     # Get the current extras index
     current_indexes = [k[1] for k in data.keys()
@@ -24,7 +26,7 @@ def convert_to_extras(key, data, errors, context):
     data[('extras', new_index, 'value')] = data[key]
 
 
-def convert_from_extras(key, data, errors, context):
+def convert_from_extras(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: ErrorDict, context: Context) -> Any:
 
     def remove_from_extras(data, key):
         to_remove = []
@@ -50,7 +52,7 @@ def extras_unicode_convert(extras, context):
         extras[extra] = text_type(extras[extra])
     return extras
 
-def free_tags_only(key, data, errors, context):
+def free_tags_only(key: TuplizedKey, data: Dict[TuplizedKey, Any], errors: ErrorDict, context: Context) -> Any:
     tag_number = key[1]
     if not data.get(('tags', tag_number, 'vocabulary_id')):
         return
@@ -58,7 +60,7 @@ def free_tags_only(key, data, errors, context):
         if k[0] == 'tags' and k[1] == tag_number:
             del data[k]
 
-def convert_to_tags(vocab):
+def convert_to_tags(vocab: Any) -> Any:
     def callable(key, data, errors, context):
         new_tags = data.get(key)
         if not new_tags:
@@ -85,7 +87,7 @@ def convert_to_tags(vocab):
             data[('tags', num + n, 'vocabulary_id')] = v.id
     return callable
 
-def convert_from_tags(vocab):
+def convert_from_tags(vocab: Any) -> Any:
     def callable(key, data, errors, context):
         v = model.Vocabulary.get(vocab)
         if not v:
@@ -100,7 +102,7 @@ def convert_from_tags(vocab):
         data[key] = tags
     return callable
 
-def convert_user_name_or_id_to_id(user_name_or_id, context):
+def convert_user_name_or_id_to_id(user_name_or_id: Any, context: Context) -> Any:
     '''Return the user id for the given user name or id.
 
     The point of this function is to convert user names to ids. If you have
@@ -124,7 +126,7 @@ def convert_user_name_or_id_to_id(user_name_or_id, context):
         raise df.Invalid('%s: %s' % (_('Not found'), _('User')))
     return result.id
 
-def convert_package_name_or_id_to_id(package_name_or_id, context):
+def convert_package_name_or_id_to_id(package_name_or_id: Any, context: Context) -> Any:
     '''Return the package id for the given package name or id.
 
     The point of this function is to convert package names to ids. If you have
@@ -149,7 +151,7 @@ def convert_package_name_or_id_to_id(package_name_or_id, context):
         raise df.Invalid('%s: %s' % (_('Not found'), _('Dataset')))
     return result.id
 
-def convert_group_name_or_id_to_id(group_name_or_id, context):
+def convert_group_name_or_id_to_id(group_name_or_id: Any, context: Context) -> Any:
     '''Return the group id for the given group name or id.
 
     The point of this function is to convert group names to ids. If you have
@@ -175,7 +177,7 @@ def convert_group_name_or_id_to_id(group_name_or_id, context):
     return result.id
 
 
-def convert_to_json_if_string(value, context):
+def convert_to_json_if_string(value: Any, context: Context) -> Any:
     if isinstance(value, string_types):
         try:
             return json.loads(value)
@@ -185,13 +187,13 @@ def convert_to_json_if_string(value, context):
         return value
 
 
-def convert_to_list_if_string(value, context=None):
+def convert_to_list_if_string(value: Any, context=None) -> Any:
     if isinstance(value, string_types):
         return [value]
     else:
         return value
 
-def json_or_string(value):
+def json_or_string(value: Any) -> Any:
     """
     parse string values as json, return string if that fails
     """
@@ -202,7 +204,7 @@ def json_or_string(value):
             pass
     return value
 
-def json_list_or_string(value):
+def json_list_or_string(value: Any) -> Any:
     """
     parse string values as json or comma-separated lists, return
     string as a one-element list if that fails
@@ -216,7 +218,7 @@ def json_list_or_string(value):
     return value
 
 
-def remove_whitespace(value, context):
+def remove_whitespace(value: Any, context: Context) -> Any:
     if isinstance(value, string_types):
         return value.strip()
     return value

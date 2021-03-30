@@ -18,6 +18,8 @@ from six.moves import xrange
 import ckan.lib.base as base
 import ckan.lib.helpers as h
 from ckan.common import config
+from typing import Any, Dict, Optional
+from markupsafe import Markup
 
 
 log = logging.getLogger(__name__)
@@ -35,7 +37,7 @@ def _get_extensions():
             AssetExtension]
 
 
-def get_jinja_env_options():
+def get_jinja_env_options() -> Dict:
     return dict(
         loader=CkanFileSystemLoader(config['computed_template_paths']),
         autoescape=True,
@@ -45,7 +47,7 @@ def get_jinja_env_options():
 
 ### Filters
 
-def empty_and_escape(value):
+def empty_and_escape(value: Optional[str]) -> Markup:
     ''' returns '' for a None value else escapes the content useful for form
     elements. '''
     if value is None:
@@ -55,7 +57,7 @@ def empty_and_escape(value):
 
 ### Tags
 
-def regularise_html(html):
+def regularise_html(html: Optional[str]) -> Optional[str]:
     ''' Take badly formatted html with strings etc and make it beautiful
     generally remove surlus whitespace and kill \n this will break <code><pre>
     tags but they should not be being translated '''
@@ -362,7 +364,7 @@ Provides a class that holds runtime and parsing time options.
 :license: BSD, see LICENSE for more details.
 '''
 
-def jinja2_getattr(self, obj, attribute):
+def jinja2_getattr(self, obj: Any, attribute: str) -> Any:
     """Get an item or attribute of an object but prefer the attribute.
     Unlike :meth:`getitem` the attribute *must* be a bytestring.
 

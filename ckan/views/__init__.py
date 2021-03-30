@@ -15,6 +15,8 @@ from ckan.lib.i18n import get_locales_from_config
 import ckan.plugins as p
 
 import logging
+from typing import Any, Callable, Optional
+from flask.wrappers import Response
 log = logging.getLogger(__name__)
 
 APIKEY_HEADER_NAME_KEY = u'apikey_header_name'
@@ -23,13 +25,13 @@ APIKEY_HEADER_NAME_DEFAULT = u'X-CKAN-API-Key'
 
 class LazyView(object):
 
-    def __init__(self, import_name, view_name=None):
+    def __init__(self, import_name: str, view_name: Optional[str]=None) -> None:
         self.__module__, self.__name__ = import_name.rsplit(u'.', 1)
         self.import_name = import_name
         self.view_name = view_name
 
     @cached_property
-    def view(self):
+    def view(self) -> Callable:
         actual_view = import_string(self.import_name)
         if self.view_name:
             actual_view = actual_view.as_view(self.view_name)
@@ -39,7 +41,7 @@ class LazyView(object):
         return self.view(*args, **kwargs)
 
 
-def check_session_cookie(response):
+def check_session_cookie(response: Response) -> Response:
     u'''
     The cookies for auth (auth_tkt) and session (ckan) are separate. This
     checks whether a user is logged in, and determines the validity of the
@@ -69,7 +71,7 @@ def check_session_cookie(response):
     return response
 
 
-def set_cors_headers_for_response(response):
+def set_cors_headers_for_response(response: Response) -> Response:
     u'''
     Set up Access Control Allow headers if either origin_allow_all is True, or
     the request Origin is in the origin_whitelist.
@@ -97,7 +99,7 @@ def set_cors_headers_for_response(response):
     return response
 
 
-def set_cache_control_headers_for_response(response):
+def set_cache_control_headers_for_response(response: Response) -> Response:
 
     # __no_cache__ should not be present when caching is allowed
     allow_cache = u'__no_cache__' not in request.environ
@@ -119,7 +121,7 @@ def set_cache_control_headers_for_response(response):
     return response
 
 
-def identify_user():
+def identify_user() -> Optional[Response]:
     u'''Try to identify the user
     If the user is identified then:
       g.user = user name (unicode)
@@ -235,11 +237,11 @@ def _get_user_for_apikey():
     return user
 
 
-def set_controller_and_action():
+def set_controller_and_action() -> None:
     g.controller, g.action = p.toolkit.get_endpoint()
 
 
-def handle_i18n(environ=None):
+def handle_i18n(environ: Optional[Any]=None) -> None:
     u'''
     Strips the locale code from the requested url
     (eg '/sk/about' -> '/about') and sets environ variables for the
@@ -272,7 +274,7 @@ def handle_i18n(environ=None):
         set_ckan_current_url(environ)
 
 
-def set_ckan_current_url(environ):
+def set_ckan_current_url(environ: Any) -> None:
     # Current application url
     path_info = environ[u'PATH_INFO']
     # sort out weird encodings

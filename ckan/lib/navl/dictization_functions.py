@@ -6,6 +6,7 @@ import json
 import six
 from six import text_type
 from ckan.common import config, _
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple
 
 
 class Missing(object):
@@ -64,12 +65,12 @@ class Invalid(DictizationError):
     when the given value is invalid.
 
     '''
-    def __init__(self, error, key=None):
+    def __init__(self, error: str, key: Optional[Any]=None) -> None:
         self.error = error
 
 
 class DataError(DictizationError):
-    def __init__(self, error):
+    def __init__(self, error: str) -> None:
         self.error = error
 
 
@@ -78,13 +79,13 @@ class StopOnError(DictizationError):
     pass
 
 
-def flattened_order_key(key):
+def flattened_order_key(key: Iterable) -> Tuple:
     '''order by key length first then values'''
 
     return tuple([len(key)] + list(key))
 
 
-def flatten_schema(schema, flattened=None, key=None):
+def flatten_schema(schema: Dict, flattened: Optional[Dict]=None, key: Optional[List]=None) -> Dict[Tuple, Any]:
     '''convert schema into flat dict, where the keys become tuples
 
     e.g.
@@ -116,7 +117,7 @@ def flatten_schema(schema, flattened=None, key=None):
     return flattened
 
 
-def get_all_key_combinations(data, flattened_schema):
+def get_all_key_combinations(data: Dict, flattened_schema: Dict[Tuple, Any]) -> Set[Tuple]:
     '''Compare the schema against the given data and get all valid tuples that
     match the schema ignoring the last value in the tuple.
 
@@ -138,7 +139,7 @@ def get_all_key_combinations(data, flattened_schema):
     return combinations
 
 
-def make_full_schema(data, schema):
+def make_full_schema(data: Dict, schema: Dict) -> Dict:
     '''make schema by getting all valid combinations and making sure that all
     keys are available'''
 
@@ -160,7 +161,7 @@ def make_full_schema(data, schema):
     return full_schema
 
 
-def augment_data(data, schema):
+def augment_data(data: Dict, schema: Dict) -> Dict:
     '''Takes 'flattened' data, compares it with the schema, and returns it with
     any problems marked, as follows:
 
@@ -218,7 +219,7 @@ def augment_data(data, schema):
     return new_data
 
 
-def convert(converter, key, converted_data, errors, context):
+def convert(converter: Callable, key: Any, converted_data: Dict, errors: Dict[str, List], context: Dict) -> None:
 
     try:
         value = converter(converted_data.get(key))
@@ -254,7 +255,7 @@ def convert(converter, key, converted_data, errors, context):
         return
 
 
-def validate(data, schema, context=None):
+def validate(data: Dict, schema: Dict, context: Optional[Dict]=None) -> Tuple[Dict, Dict]:
     '''Validate an unflattened nested dict against a schema.'''
     context = context or {}
 
@@ -345,7 +346,7 @@ def _validate(data, schema, context):
     return converted_data, errors
 
 
-def flatten_list(data, flattened=None, old_key=None):
+def flatten_list(data: List[Dict], flattened: Optional[Dict]=None, old_key: Optional[List]=None) -> Dict:
     '''flatten a list of dicts'''
 
     flattened = flattened or {}
@@ -360,7 +361,7 @@ def flatten_list(data, flattened=None, old_key=None):
     return flattened
 
 
-def flatten_dict(data, flattened=None, old_key=None):
+def flatten_dict(data: Dict, flattened: Optional[Dict]=None, old_key: Optional[List]=None) -> Dict:
     '''Flatten a dict'''
 
     flattened = flattened or {}
@@ -376,7 +377,7 @@ def flatten_dict(data, flattened=None, old_key=None):
     return flattened
 
 
-def unflatten(data):
+def unflatten(data: Dict) -> Dict:
     '''Unflatten a simple dict whose keys are tuples.
 
     e.g.
@@ -442,7 +443,7 @@ class MissingNullEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def check_dict(data_dict, select_dict, parent_path=()):
+def check_dict(data_dict: Dict, select_dict: Dict, parent_path: Tuple=()) -> List[Tuple]:
     """
     return list of key tuples from select_dict whose values don't match
     corresponding values in data_dict.
@@ -467,7 +468,7 @@ def check_dict(data_dict, select_dict, parent_path=()):
     return unmatched
 
 
-def check_list(data_list, select_list, parent_path=()):
+def check_list(data_list: List, select_list: List, parent_path: Tuple=()) -> List[Tuple]:
     """
     return list of key tuples from select_list whose values don't match
     corresponding values in data_list.
@@ -492,7 +493,7 @@ def check_list(data_list, select_list, parent_path=()):
     return unmatched
 
 
-def resolve_string_key(data, string_key):
+def resolve_string_key(data: Dict, string_key: str) -> Tuple[Any, Tuple]:
     """
     return (child, parent_path) if string_key is found in data
     raise DataError on incompatible types or key not found.
@@ -544,7 +545,7 @@ def resolve_string_key(data, string_key):
     return current, tuple(parent_path)
 
 
-def check_string_key(data_dict, string_key, value):
+def check_string_key(data_dict: Dict, string_key: str, value: Any) -> List[Tuple]:
     """
     return list of key tuples from string_key whose values don't match
     corresponding values in data_dict.
@@ -562,7 +563,7 @@ def check_string_key(data_dict, string_key, value):
     return []
 
 
-def filter_glob_match(data_dict, glob_patterns):
+def filter_glob_match(data_dict: Dict, glob_patterns: List[str]) -> None:
     """
     remove keys and values from data_dict in-place based on glob patterns.
 
@@ -640,7 +641,7 @@ def _filter_glob_match(data, parsed_globs):
     data[:] = [e for i, e in enumerate(data) if i not in removed - protected]
 
 
-def update_merge_dict(data_dict, update_dict, parent_path=()):
+def update_merge_dict(data_dict: Dict, update_dict: Dict, parent_path: Tuple=()) -> None:
     """
     update data_dict keys and values in-place based on update_dict.
 
@@ -661,7 +662,7 @@ def update_merge_dict(data_dict, update_dict, parent_path=()):
             data_dict[k] = v
 
 
-def update_merge_list(data_list, update_list, parent_path=()):
+def update_merge_list(data_list: List, update_list: List, parent_path: Tuple=()) -> None:
     """
     update data_list entries in-place based on update_list.
 
@@ -682,7 +683,7 @@ def update_merge_list(data_list, update_list, parent_path=()):
             data_list[i] = v
 
 
-def update_merge_string_key(data_dict, string_key, value):
+def update_merge_string_key(data_dict: Dict, string_key: str, value: Any) -> None:
     """
     update data_dict entries in-place based on string_key and value.
     Also supports extending existing lists with `__extend` suffix.

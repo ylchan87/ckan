@@ -1,7 +1,8 @@
+from typing import Any
 # encoding: utf-8
 
 
-def skip_based_on_legacy_engine_version(op, filename):
+def skip_based_on_legacy_engine_version(op: Any, filename: str) -> bool:
     u'''Safe way to update instances sqlalchemy-migrate migrations applied.
 
     CKAN `db upgrade/init` command is trying to obtain current version

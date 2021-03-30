@@ -9,12 +9,13 @@ from logging.config import fileConfig as loggingFileConfig
 from six.moves.configparser import ConfigParser
 
 from ckan.exceptions import CkanConfigurationException
+from typing import Any, Optional
 
 log = logging.getLogger(__name__)
 
 
 class CKANConfigLoader(object):
-    def __init__(self, filename):
+    def __init__(self, filename: str) -> None:
         self.config_file = filename.strip()
         self.config = dict()
         self.parser = ConfigParser()
@@ -57,15 +58,15 @@ class CKANConfigLoader(object):
             self._read_config_file(use_config_path)
             self._update_config()
 
-    def get_config(self):
+    def get_config(self) -> Config:
         return self.config.copy()
 
 
-def error_shout(exception):
+def error_shout(exception: Any) -> None:
     click.secho(str(exception), fg=u'red', err=True)
 
 
-def load_config(ini_path=None):
+def load_config(ini_path: Optional[str]=None) -> Config:
     if ini_path:
         if ini_path.startswith(u'~'):
             ini_path = os.path.expanduser(ini_path)

@@ -20,9 +20,12 @@ from ckan.model import core
 from ckan.model import types as _types
 from ckan.model import domain_object
 from ckan.common import config, asbool
+from ckan.types import Query
+from typing import Any, Dict, Iterable, List, Optional
+from ckan.model import Group
 
 
-def set_api_key():
+def set_api_key() -> Optional[str]:
     if asbool(config.get('ckan.auth.create_default_api_keys', False)):
         return _types.make_uuid()
     return None
@@ -55,18 +58,18 @@ class User(core.StatefulObjectMixin,
     DOUBLE_SLASH = re.compile(r':\/([^/])')
 
     @classmethod
-    def by_email(cls, email):
+    def by_email(cls, email: str) -> List["User"]:
         return meta.Session.query(cls).filter_by(email=email).all()
 
     @classmethod
-    def get(cls, user_reference):
+    def get(cls, user_reference: str) -> Optional["User"]:
         query = meta.Session.query(cls).autoflush(False)
         query = query.filter(or_(cls.name == user_reference,
                                  cls.id == user_reference))
         return query.first()
 
     @classmethod
-    def all(cls):
+    def all(cls) -> List["User"]:
         '''Return all users in this CKAN instance.
 
         :rtype: list of ckan.model.user.User objects
@@ -76,19 +79,19 @@ class User(core.StatefulObjectMixin,
         return q.all()
 
     @property
-    def display_name(self):
+    def display_name(self) -> str:
         if self.fullname is not None and len(self.fullname.strip()) > 0:
             return self.fullname
         return self.name
 
     @property
-    def email_hash(self):
+    def email_hash(self) -> str:
         e = ''
         if self.email:
             e = self.email.strip().lower().encode('utf8')
         return md5(six.ensure_binary(e)).hexdigest()
 
-    def get_reference_preferred_for_uri(self):
+    def get_reference_preferred_for_uri(self) -> str:
         '''Returns a reference (e.g. name, id) for this user
         suitable for the user\'s URI.
         When there is a choice, the most preferable one will be
@@ -144,7 +147,7 @@ class User(core.StatefulObjectMixin,
         else:
             return False
 
-    def validate_password(self, password):
+    def validate_password(self, password: str) -> None:
         '''
         Check the password against existing credentials.
 
@@ -172,7 +175,7 @@ class User(core.StatefulObjectMixin,
     password = property(_get_password, _set_password)
 
     @classmethod
-    def check_name_valid(cls, name):
+    def check_name_valid(cls, name: str) -> bool:
         if not name \
             or not len(name.strip()) \
             or not cls.VALID_NAME.match(name):
@@ -180,15 +183,15 @@ class User(core.StatefulObjectMixin,
         return True
 
     @classmethod
-    def check_name_available(cls, name):
+    def check_name_available(cls, name: str) -> bool:
         return cls.by_name(name) == None
 
-    def as_dict(self):
+    def as_dict(self) -> Dict:
         _dict = domain_object.DomainObject.as_dict(self)
         del _dict['password']
         return _dict
 
-    def number_created_packages(self, include_private_and_draft=False):
+    def number_created_packages(self, include_private_and_draft: bool=False) -> int:
         # have to import here to avoid circular imports
         import ckan.model as model
 
@@ -213,24 +216,24 @@ class User(core.StatefulObjectMixin,
             )
         ).scalar()
 
-    def activate(self):
+    def activate(self) -> None:
         ''' Activate the user '''
         self.state = core.State.ACTIVE
 
-    def set_pending(self):
+    def set_pending(self) -> None:
         ''' Set the user as pending '''
         self.state = core.State.PENDING
 
-    def is_deleted(self):
+    def is_deleted(self) -> bool:
         return self.state == core.State.DELETED
 
-    def is_pending(self):
+    def is_pending(self) -> bool:
         return self.state == core.State.PENDING
 
-    def is_in_group(self, group_id):
+    def is_in_group(self, group_id: str) -> bool:
         return group_id in self.get_group_ids()
 
-    def is_in_groups(self, group_ids):
+    def is_in_groups(self, group_ids: Iterable[str]) -> bool:
         ''' Given a list of group ids, returns True if this user is in
         any of those groups '''
         guser = set(self.get_group_ids())
@@ -238,12 +241,12 @@ class User(core.StatefulObjectMixin,
 
         return len(guser.intersection(gids)) > 0
 
-    def get_group_ids(self, group_type=None, capacity=None):
+    def get_group_ids(self, group_type: Optional[str]=None, capacity: Optional[str]=None) -> List[str]:
         ''' Returns a list of group ids that the current user belongs to '''
         return [g.id for g in
                 self.get_groups(group_type=group_type, capacity=capacity)]
 
-    def get_groups(self, group_type=None, capacity=None):
+    def get_groups(self, group_type: Optional[str]=None, capacity: Optional[str]=None) -> Group:
         import ckan.model as model
 
         q = meta.Session.query(model.Group)\
@@ -265,7 +268,7 @@ class User(core.StatefulObjectMixin,
         return groups
 
     @classmethod
-    def search(cls, querystr, sqlalchemy_query=None, user_name=None):
+    def search(cls, querystr: str, sqlalchemy_query: Optional[Any]=None, user_name: Optional[str]=None) -> Query["User"]:
         '''Search name, fullname, email. '''
         if sqlalchemy_query is None:
             query = meta.Session.query(cls)
@@ -285,7 +288,7 @@ class User(core.StatefulObjectMixin,
         return query
 
     @classmethod
-    def user_ids_for_name_or_id(cls, user_list=[]):
+    def user_ids_for_name_or_id(cls, user_list: List[str]=[]) -> List[str]:
         '''
         This function returns a list of ids from an input that can be a list of
         names or ids

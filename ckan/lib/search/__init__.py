@@ -22,12 +22,14 @@ from ckan.lib.search.query import (
     TagSearchQuery, ResourceSearchQuery, PackageSearchQuery,
     QueryOptions, convert_legacy_parameters_to_solr
 )
+from ckan.lib.search.index import SearchIndex
+from typing import Dict, List, Any, Optional
 
 
 log = logging.getLogger(__name__)
 
 
-def text_traceback():
+def text_traceback() -> str:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         res = 'the original traceback:'.join(
@@ -72,7 +74,7 @@ def _normalize_type(_type):
     return _type.strip().lower()
 
 
-def index_for(_type):
+def index_for(_type: str) -> SearchIndex:
     """ Get a SearchIndex instance sub-class suitable for
         the specified type. """
     try:
@@ -83,7 +85,7 @@ def index_for(_type):
         return NoopSearchIndex()
 
 
-def query_for(_type):
+def query_for(_type: str) -> Dict:
     """ Get a SearchQuery instance sub-class suitable for the specified
         type. """
     try:
@@ -93,7 +95,7 @@ def query_for(_type):
         raise SearchError("Unknown search type: %s" % _type)
 
 
-def dispatch_by_operation(entity_type, entity, operation):
+def dispatch_by_operation(entity_type: str, entity: Dict, operation: str) -> None:
     """Call the appropriate index method for a given notification."""
     try:
         index = index_for(entity_type)
@@ -116,7 +118,7 @@ class SynchronousSearchPlugin(p.SingletonPlugin):
     """Update the search index automatically."""
     p.implements(p.IDomainObjectModification, inherit=True)
 
-    def notify(self, entity, operation):
+    def notify(self, entity: Any, operation: str) -> None:
         if not isinstance(entity, model.Package):
             return
         if operation != model.domain_object.DomainObjectOperation.deleted:
@@ -135,8 +137,8 @@ class SynchronousSearchPlugin(p.SingletonPlugin):
             log.warn("Discarded Sync. indexing for: %s" % entity)
 
 
-def rebuild(package_id=None, only_missing=False, force=False, refresh=False,
-            defer_commit=False, package_ids=None, quiet=False):
+def rebuild(package_id: Optional[str]=None, only_missing: bool=False, force: bool=False, refresh: bool=False,
+            defer_commit: bool=False, package_ids: Optional[List[str]]=None, quiet: bool=False):
     '''
         Rebuilds the search index.
 
@@ -212,13 +214,13 @@ def rebuild(package_id=None, only_missing=False, force=False, refresh=False,
     log.info('Finished rebuilding search index.')
 
 
-def commit():
+def commit() -> None:
     package_index = index_for(model.Package)
     package_index.commit()
     log.info('Commited pending changes on the search index')
 
 
-def check():
+def check() -> None:
     package_query = query_for(model.Package)
 
     log.debug("Checking packages search index...")
@@ -234,19 +236,19 @@ def check():
         print((pkg.metadata_modified.strftime('%Y-%m-%d'), pkg.name))
 
 
-def show(package_reference):
+def show(package_reference: str) -> Dict:
     package_query = query_for(model.Package)
     return package_query.get_index(package_reference)
 
 
-def clear(package_reference):
+def clear(package_reference: str) -> None:
     package_index = index_for(model.Package)
     log.debug("Clearing search index for dataset %s..." %
               package_reference)
     package_index.delete_package({'id': package_reference})
 
 
-def clear_all():
+def clear_all() -> None:
     package_index = index_for(model.Package)
     log.debug("Clearing search index...")
     package_index.clear()
@@ -269,7 +271,7 @@ def _get_schema_from_solr(file_offset):
 
     return response
 
-def check_solr_schema_version(schema_file=None):
+def check_solr_schema_version(schema_file: Optional[str]=None) -> bool:
     '''
         Checks if the schema version of the SOLR server is compatible
         with this CKAN version.

@@ -16,6 +16,8 @@ import ckan.model as model
 from ckan.common import _, g
 
 import ckan.lib.maintain as maintain
+from typing import Callable, Dict, KeysView, List, Optional, Tuple, Union
+from ckan.types import AuthResult
 
 log = getLogger(__name__)
 
@@ -25,17 +27,17 @@ class AuthFunctions:
     accessed directly we will create an instance of it and then remove it.'''
     _functions = {}
 
-    def clear(self):
+    def clear(self) -> None:
         ''' clear any stored auth functions. '''
         self._functions.clear()
 
-    def keys(self):
+    def keys(self) -> KeysView:
         ''' Return a list of known auth functions.'''
         if not self._functions:
             self._build()
         return self._functions.keys()
 
-    def get(self, function):
+    def get(self, function: str) -> Optional[Callable]:
         ''' Return the requested auth function. '''
         if not self._functions:
             self._build()
@@ -130,18 +132,18 @@ _AuthFunctions = AuthFunctions()
 del AuthFunctions
 
 
-def clear_auth_functions_cache():
+def clear_auth_functions_cache() -> None:
     _AuthFunctions.clear()
 
 
-def auth_functions_list():
+def auth_functions_list() -> KeysView:
     '''Returns a list of the names of the auth functions available.  Currently
     this is to allow the Auth Audit to know if an auth function is available
     for a given action.'''
     return _AuthFunctions.keys()
 
 
-def is_sysadmin(username):
+def is_sysadmin(username: str) -> Optional[bool]:
     ''' Returns True is username is a sysadmin '''
     user = _get_user(username)
     return user and user.sysadmin
@@ -172,7 +174,7 @@ def _get_user(username):
     return model.User.get(username)
 
 
-def get_group_or_org_admin_ids(group_id):
+def get_group_or_org_admin_ids(group_id: Optional[str]) -> List[str]:
     if not group_id:
         return []
     group_id = model.Group.get(group_id).id
@@ -184,14 +186,14 @@ def get_group_or_org_admin_ids(group_id):
     return [a.table_id for a in q.all()]
 
 
-def is_authorized_boolean(action, context, data_dict=None):
+def is_authorized_boolean(action: str, context: Dict, data_dict: Optional[Dict]=None) -> bool:
     ''' runs the auth function but just returns True if allowed else False
     '''
     outcome = is_authorized(action, context, data_dict=data_dict)
     return outcome.get('success', False)
 
 
-def is_authorized(action, context, data_dict=None):
+def is_authorized(action: str, context: Dict, data_dict: Optional[Dict]=None) -> AuthResult:
     if context.get('ignore_auth'):
         return {'success': True}
 
@@ -236,7 +238,7 @@ ROLE_PERMISSIONS = OrderedDict([
 ])
 
 
-def get_collaborator_capacities():
+def get_collaborator_capacities() -> Tuple[str]:
     if check_config_permission('allow_admin_collaborators'):
         return ('admin', 'editor', 'member')
     else:
@@ -255,12 +257,12 @@ def _trans_role_member():
     return _('Member')
 
 
-def trans_role(role):
+def trans_role(role: str) -> str:
     module = sys.modules[__name__]
     return getattr(module, '_trans_role_%s' % role)()
 
 
-def roles_list():
+def roles_list() -> List[Dict]:
     ''' returns list of roles for forms '''
     roles = []
     for role in ROLE_PERMISSIONS:
@@ -268,7 +270,7 @@ def roles_list():
     return roles
 
 
-def roles_trans():
+def roles_trans() -> Dict[str, str]:
     ''' return dict of roles with translation '''
     roles = {}
     for role in ROLE_PERMISSIONS:
@@ -276,7 +278,7 @@ def roles_trans():
     return roles
 
 
-def get_roles_with_permission(permission):
+def get_roles_with_permission(permission: str) -> List[str]:
     ''' returns the roles with the permission requested '''
     roles = []
     for role in ROLE_PERMISSIONS:
@@ -286,7 +288,7 @@ def get_roles_with_permission(permission):
     return roles
 
 
-def has_user_permission_for_group_or_org(group_id, user_name, permission):
+def has_user_permission_for_group_or_org(group_id: str, user_name: str, permission: str) -> bool:
     ''' Check if the user has the given permissions for the group, allowing for
     sysadmin rights and permission cascading down a group hierarchy.
 
@@ -343,7 +345,7 @@ def _has_user_permission_for_groups(user_id, permission, group_ids,
     return False
 
 
-def users_role_for_group_or_org(group_id, user_name):
+def users_role_for_group_or_org(group_id: str, user_name: str) -> Optional[str]:
     ''' Returns the user's role for the group. (Ignores privileges that cascade
     in a group hierarchy.)
 
@@ -367,7 +369,7 @@ def users_role_for_group_or_org(group_id, user_name):
     return None
 
 
-def has_user_permission_for_some_org(user_name, permission):
+def has_user_permission_for_some_org(user_name: str, permission: str) -> bool:
     ''' Check if the user has the given permission for any organization. '''
     user_id = get_user_id_for_username(user_name, allow_none=True)
     if not user_id:
@@ -398,7 +400,7 @@ def has_user_permission_for_some_org(user_name, permission):
     return bool(q.count())
 
 
-def get_user_id_for_username(user_name, allow_none=False):
+def get_user_id_for_username(user_name: str, allow_none: bool=False) -> Optional[str]:
     ''' Helper function to get user id '''
     # first check if we have the user object already and get from there
     user = _get_user(user_name)
@@ -409,7 +411,7 @@ def get_user_id_for_username(user_name, allow_none=False):
     raise Exception('Not logged in user')
 
 
-def can_manage_collaborators(package_id, user_id):
+def can_manage_collaborators(package_id: str, user_id: str) -> bool:
     '''
     Returns True if a user is allowed to manage the collaborators of a given
     dataset.
@@ -444,7 +446,7 @@ def can_manage_collaborators(package_id, user_id):
     return user_is_collaborator_on_dataset(user_id, pkg.id, 'admin')
 
 
-def user_is_collaborator_on_dataset(user_id, dataset_id, capacity=None):
+def user_is_collaborator_on_dataset(user_id: str, dataset_id: str, capacity: Optional[Union[str, List[str]]]=None) -> bool:
     '''
     Returns True if the provided user is a collaborator on the provided
     dataset.
@@ -488,7 +490,7 @@ CONFIG_PERMISSIONS_DEFAULTS = {
 }
 
 
-def check_config_permission(permission):
+def check_config_permission(permission: str) -> Union[List[str], bool]:
     '''Returns the configuration value for the provided permission
 
     Permission is a string indentifying the auth permission (eg
@@ -524,13 +526,13 @@ def check_config_permission(permission):
 
 
 @maintain.deprecated('Use auth_is_loggedin_user instead')
-def auth_is_registered_user():
+def auth_is_registered_user() -> bool:
     '''
     This function is deprecated, please use the auth_is_loggedin_user instead
     '''
     return auth_is_loggedin_user()
 
-def auth_is_loggedin_user():
+def auth_is_loggedin_user() -> bool:
     ''' Do we have a logged in user '''
     try:
         context_user = g.user
@@ -538,7 +540,7 @@ def auth_is_loggedin_user():
         context_user = None
     return bool(context_user)
 
-def auth_is_anon_user(context):
+def auth_is_anon_user(context: Dict) -> bool:
     ''' Is this an anonymous user?
         eg Not logged in if a web request and not user defined in context
         if logic functions called directly

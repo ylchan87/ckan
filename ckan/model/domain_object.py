@@ -9,6 +9,10 @@ from sqlalchemy import orm
 from six import string_types
 
 from ckan.model import meta, core
+from typing import Any, Dict, Set, Tuple, Type, TypeVar
+
+EnumMember = TypeVar("EnumMember")
+TDomain = TypeVar("TDomain")
 
 
 __all__ = ['DomainObject', 'DomainObjectOperation']
@@ -19,7 +23,7 @@ class Enum(set):
     e.g. Animal = Enum("dog", "cat", "horse")
     joey = Animal.dog
     '''
-    def __init__(self, *names):
+    def __init__(self, *names: EnumMember) -> None:
         super(Enum, self).__init__(names)
 
     def __getattr__(self, name):
@@ -34,16 +38,16 @@ class DomainObject(object):
     text_search_fields = []
     Session = meta.Session
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         for k,v in kwargs.items():
             setattr(self, k, v)
 
     @classmethod
-    def count(cls):
+    def count(cls) -> int:
         return cls.Session.query(cls).count()
 
     @classmethod
-    def by_name(cls, name, autoflush=True, for_update=False):
+    def by_name(cls: Type[TDomain], name: str, autoflush: bool=True, for_update: bool=False) -> TDomain:
         q = meta.Session.query(cls).autoflush(autoflush
             ).filter_by(name=name)
         if for_update:
@@ -51,7 +55,7 @@ class DomainObject(object):
         return q.first()
 
     @classmethod
-    def text_search(cls, query, term):
+    def text_search(cls, query: Any, term: str) -> Any:
         register = cls
         make_like = lambda x,y: x.ilike('%' + y + '%')
         q = None
@@ -61,36 +65,36 @@ class DomainObject(object):
         return query.filter(q)
 
     @classmethod
-    def active(cls):
+    def active(cls) -> Any:
         return meta.Session.query(cls).filter_by(state=core.State.ACTIVE)
 
-    def save(self):
+    def save(self) -> None:
         self.add()
         self.commit()
 
-    def add(self):
+    def add(self) -> None:
         self.Session.add(self)
 
-    def commit_remove(self):
+    def commit_remove(self) -> None:
         self.commit()
         self.remove()
 
-    def commit(self):
+    def commit(self) -> None:
         self.Session.commit()
 
-    def remove(self):
+    def remove(self) -> None:
         self.Session.remove()
 
-    def delete(self):
+    def delete(self) -> None:
         # stateful objects have this method overridden - see
         # core.StatefulObjectMixin
         self.Session.delete(self)
 
-    def purge(self):
+    def purge(self) -> None:
         self.Session().autoflush = False
         self.Session.delete(self)
 
-    def as_dict(self):
+    def as_dict(self) -> Dict:
         """
         returns: ordered dict with fields from table. Date/time values
         are converted to strings for json compatibilty
@@ -106,7 +110,7 @@ class DomainObject(object):
             _dict[col.name] = val
         return _dict
 
-    def from_dict(self, _dict):
+    def from_dict(self, _dict: Dict) -> Tuple[Set, Dict]:
         """
         Loads data from dict into table.
 

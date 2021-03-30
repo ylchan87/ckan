@@ -6,6 +6,7 @@ from zope.interface import implementer
 from repoze.who.interfaces import IAuthenticator
 
 from ckan.model import User
+from typing import Any, Mapping, Optional
 
 log = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ log = logging.getLogger(__name__)
 @implementer(IAuthenticator)
 class UsernamePasswordAuthenticator(object):
 
-    def authenticate(self, environ, identity):
+    def authenticate(self, environ: Any, identity: Mapping) -> Optional[str]:
         if not ('login' in identity and 'password' in identity):
             return None
 

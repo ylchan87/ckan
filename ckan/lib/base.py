@@ -29,6 +29,7 @@ from ckan.views import (identify_user,
                         )
 from ckan.common import (c, request, config,
                          session, is_flask_request, asbool)
+from typing import Any, Dict, NoReturn, Optional
 
 
 if six.PY2:
@@ -46,7 +47,7 @@ APIKEY_HEADER_NAME_KEY = 'apikey_header_name'
 APIKEY_HEADER_NAME_DEFAULT = 'X-CKAN-API-Key'
 
 
-def abort(status_code=None, detail='', headers=None, comment=None):
+def abort(status_code: Optional[int]=None, detail: str='', headers: Optional[Dict]=None, comment: Optional[str]=None) -> NoReturn:
     '''Abort the current request immediately by returning an HTTP exception.
 
     This is a wrapper for :py:func:`pylons.controllers.util.abort` that adds
@@ -77,7 +78,7 @@ def abort(status_code=None, detail='', headers=None, comment=None):
                   comment=comment)
 
 
-def render_snippet(*template_names, **kw):
+def render_snippet(*template_names: str, **kw: Any) -> str:
     ''' Helper function for rendering snippets. Rendered html has
     comment tags added to show the template used. NOTE: unlike other
     render functions this takes a list of keywords instead of a dict for
@@ -113,7 +114,7 @@ def render_snippet(*template_names, **kw):
         raise last_exc or TemplateNotFound
 
 
-def render_jinja2(template_name, extra_vars):
+def render_jinja2(template_name: str, extra_vars: Dict) -> str:
     env = config['pylons.app_globals'].jinja_env
     template = env.get_template(template_name)
     return template.render(**extra_vars)

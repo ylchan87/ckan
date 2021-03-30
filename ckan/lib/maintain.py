@@ -5,12 +5,15 @@ import inspect
 import time
 import logging
 import re
+from typing import Callable, List, TypeVar, Union
+
+F = TypeVar("F")
 
 
 log = logging.getLogger(__name__)
 
 
-def deprecated(message=''):
+def deprecated(message: str='') -> Callable[[F], F]:
     ''' This is a decorator used to mark functions as deprecated.
 
     It logs a warning when the function is called. If a message is
@@ -38,7 +41,7 @@ def deprecated(message=''):
     return decorator
 
 
-def timer(params):
+def timer(params: Union[Callable, List[str]]) -> Callable:
     ''' Decorator function for basic performance testing. It logs the time
     taken to call a function.  It can either be used as a basic decorator or an
     array of parameter names can be passed. If parameter names are passed then

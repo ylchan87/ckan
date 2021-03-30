@@ -27,6 +27,7 @@ from ckan.lib.i18n import build_js_translations
 
 from ckan.common import _, ungettext, config
 from ckan.exceptions import CkanConfigurationException
+from typing import Dict
 
 if six.PY2:
     from pylons import config as pylons_config  # type: ignore
@@ -39,7 +40,7 @@ log = logging.getLogger(__name__)
 warnings.simplefilter('ignore', UserWarning)
 
 
-def load_environment(conf):
+def load_environment(conf: Dict):
     """
     Configure the Pylons environment via the ``pylons.config`` object. This
     code should only need to be run once.

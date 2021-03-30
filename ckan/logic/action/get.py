@@ -29,6 +29,8 @@ import ckan.lib.datapreview as datapreview
 import ckan.authz as authz
 
 from ckan.common import _
+from typing import Dict, List, Optional, Tuple, Union, Any
+from ckan.types import Context, DataDict
 
 log = logging.getLogger('ckan.logic')
 
@@ -70,7 +72,7 @@ def _activity_stream_get_filtered_users():
     return model.User.user_ids_for_name_or_id(users_list)
 
 
-def site_read(context, data_dict=None):
+def site_read(context: Context, data_dict: Optional[DataDict]=None) -> bool:
     '''Return ``True``.
 
     :rtype: bool
@@ -80,7 +82,7 @@ def site_read(context, data_dict=None):
 
 
 @logic.validate(logic.schema.default_pagination_schema)
-def package_list(context, data_dict):
+def package_list(context: Context, data_dict: DataDict) -> List[str]:
     '''Return a list of the names of the site's datasets (packages).
 
     :param limit: if given, the list of datasets will be broken into pages of
@@ -122,7 +124,7 @@ def package_list(context, data_dict):
 
 
 @logic.validate(logic.schema.default_package_list_schema)
-def current_package_list_with_resources(context, data_dict):
+def current_package_list_with_resources(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a list of the site's datasets (packages) and their resources.
 
     The list is sorted most-recently-modified first.
@@ -163,7 +165,7 @@ def current_package_list_with_resources(context, data_dict):
     return search.get('results', [])
 
 
-def member_list(context, data_dict=None):
+def member_list(context: Context, data_dict: Optional[DataDict]=None) -> List[Tuple]:
     '''Return the members of a group.
 
     The user must have permission to 'get' the group.
@@ -216,7 +218,7 @@ def member_list(context, data_dict=None):
             for m in q.all()]
 
 
-def package_collaborator_list(context, data_dict):
+def package_collaborator_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of all collaborators for a given package.
 
     Currently you must be an Admin on the package owner organization to
@@ -268,7 +270,7 @@ def package_collaborator_list(context, data_dict):
     return [collaborator.as_dict() for collaborator in collaborators]
 
 
-def package_collaborator_list_for_user(context, data_dict):
+def package_collaborator_list_for_user(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a list of all package the user is a collaborator in
 
     Note: This action requires the collaborators feature to be enabled with
@@ -450,7 +452,7 @@ def _group_or_org_list(context, data_dict, is_org=False):
     return group_list
 
 
-def group_list(context, data_dict):
+def group_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a list of the names of the site's groups.
 
     :param type: the type of group to list (optional, default: ``'group'``),
@@ -504,7 +506,7 @@ def group_list(context, data_dict):
     return _group_or_org_list(context, data_dict)
 
 
-def organization_list(context, data_dict):
+def organization_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a list of the names of the site's organizations.
 
     :param type: the type of organization to list (optional,
@@ -564,7 +566,7 @@ def organization_list(context, data_dict):
     return _group_or_org_list(context, data_dict, is_org=True)
 
 
-def group_list_authz(context, data_dict):
+def group_list_authz(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of groups that the user is authorized to edit.
 
     :param available_only: remove the existing groups in the package
@@ -627,7 +629,7 @@ def group_list_authz(context, data_dict):
     return group_list
 
 
-def organization_list_for_user(context, data_dict):
+def organization_list_for_user(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the organizations that the user has a given permission for.
 
     Specifically it returns the list of organizations that the currently
@@ -738,7 +740,7 @@ def organization_list_for_user(context, data_dict):
     return orgs_list
 
 
-def license_list(context, data_dict):
+def license_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of licenses available for datasets on the site.
 
     :rtype: list of dictionaries
@@ -754,7 +756,7 @@ def license_list(context, data_dict):
     return licenses
 
 
-def tag_list(context, data_dict):
+def tag_list(context: Context, data_dict: DataDict) -> Union[List[Dict], List[str]]:
     '''Return a list of the site's tags.
 
     By default only free tags (tags that don't belong to a vocabulary) are
@@ -800,7 +802,7 @@ def tag_list(context, data_dict):
     return tag_list
 
 
-def user_list(context, data_dict):
+def user_list(context: Context, data_dict: DataDict) -> Union[List[Dict], List[str]]:
     '''Return a list of the site's user accounts.
 
     :param q: filter the users returned to those whose names contain a string
@@ -904,7 +906,7 @@ def user_list(context, data_dict):
     return users_list
 
 
-def package_relationships_list(context, data_dict):
+def package_relationships_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a dataset (package)'s relationships.
 
     :param id: the id or name of the first package
@@ -955,7 +957,7 @@ def package_relationships_list(context, data_dict):
     return relationship_dicts
 
 
-def package_show(context, data_dict):
+def package_show(context: Context, data_dict: DataDict) -> Dict:
     '''Return the metadata of a dataset (package) and its resources.
 
     :param id: the id or name of the dataset
@@ -1061,7 +1063,7 @@ def _add_tracking_summary_to_resource_dict(resource_dict, model):
     resource_dict['tracking_summary'] = tracking_summary
 
 
-def resource_show(context, data_dict):
+def resource_show(context: Context, data_dict: DataDict) -> Dict:
     '''Return the metadata of a resource.
 
     :param id: the id of the resource
@@ -1099,7 +1101,7 @@ def resource_show(context, data_dict):
     return resource_dict
 
 
-def resource_view_show(context, data_dict):
+def resource_view_show(context: Context, data_dict: DataDict) -> Dict:
     '''
     Return the metadata of a resource_view.
 
@@ -1123,7 +1125,7 @@ def resource_view_show(context, data_dict):
     return model_dictize.resource_view_dictize(resource_view, context)
 
 
-def resource_view_list(context, data_dict):
+def resource_view_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''
     Return the list of resource views for a particular resource.
 
@@ -1226,7 +1228,7 @@ def _group_or_org_show(context, data_dict, is_org=False):
     return group_dict
 
 
-def group_show(context, data_dict):
+def group_show(context: Context, data_dict: DataDict) -> Dict:
     '''Return the details of a group.
 
     :param id: the id or name of the group
@@ -1262,7 +1264,7 @@ def group_show(context, data_dict):
     return _group_or_org_show(context, data_dict)
 
 
-def organization_show(context, data_dict):
+def organization_show(context: Context, data_dict: DataDict) -> Dict:
     '''Return the details of a organization.
 
     :param id: the id or name of the organization
@@ -1298,7 +1300,7 @@ def organization_show(context, data_dict):
     return _group_or_org_show(context, data_dict, is_org=True)
 
 
-def group_package_show(context, data_dict):
+def group_package_show(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the datasets (packages) of a group.
 
     :param id: the id or name of the group
@@ -1337,7 +1339,7 @@ def group_package_show(context, data_dict):
     return result['results']
 
 
-def tag_show(context, data_dict):
+def tag_show(context: Context, data_dict: DataDict) -> Dict:
     '''Return the details of a tag and all its datasets.
 
     :param id: the name or id of the tag
@@ -1372,7 +1374,7 @@ def tag_show(context, data_dict):
                                      include_datasets=include_datasets)
 
 
-def user_show(context, data_dict):
+def user_show(context: Context, data_dict: DataDict) -> Dict:
     '''Return a user account.
 
     Either the ``id`` or the ``user_obj`` parameter must be given.
@@ -1477,7 +1479,7 @@ def user_show(context, data_dict):
 
 
 @logic.validate(logic.schema.default_autocomplete_schema)
-def package_autocomplete(context, data_dict):
+def package_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a list of datasets (packages) that match a string.
 
     Datasets with names or titles that contain the query string will be
@@ -1540,7 +1542,7 @@ def package_autocomplete(context, data_dict):
 
 
 @logic.validate(logic.schema.default_autocomplete_schema)
-def format_autocomplete(context, data_dict):
+def format_autocomplete(context: Context, data_dict: DataDict) -> List[str]:
     '''Return a list of resource formats whose names contain a string.
 
     :param q: the string to search for
@@ -1577,7 +1579,7 @@ def format_autocomplete(context, data_dict):
 
 
 @logic.validate(logic.schema.default_autocomplete_schema)
-def user_autocomplete(context, data_dict):
+def user_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a list of user names that contain a string.
 
     :param q: the string to search for
@@ -1637,7 +1639,7 @@ def _group_or_org_autocomplete(context, data_dict, is_org):
     return group_list
 
 
-def group_autocomplete(context, data_dict):
+def group_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
     '''
     Return a list of group names that contain a string.
 
@@ -1656,7 +1658,7 @@ def group_autocomplete(context, data_dict):
     return _group_or_org_autocomplete(context, data_dict, is_org=False)
 
 
-def organization_autocomplete(context, data_dict):
+def organization_autocomplete(context: Context, data_dict: DataDict) -> List[Dict]:
     '''
     Return a list of organization names that contain a string.
 
@@ -1675,7 +1677,7 @@ def organization_autocomplete(context, data_dict):
     return _group_or_org_autocomplete(context, data_dict, is_org=True)
 
 
-def package_search(context, data_dict):
+def package_search(context: Context, data_dict: DataDict) -> List[Dict]:
     '''
     Searches for packages satisfying a given search criteria.
 
@@ -1969,7 +1971,7 @@ def package_search(context, data_dict):
 
 
 @logic.validate(logic.schema.default_resource_search_schema)
-def resource_search(context, data_dict):
+def resource_search(context: Context, data_dict: DataDict) -> Dict:
     '''
     Searches for resources satisfying a given search criteria.
 
@@ -2214,7 +2216,7 @@ def _tag_search(context, data_dict):
     return q.all(), count
 
 
-def tag_search(context, data_dict):
+def tag_search(context: Context, data_dict: DataDict) -> Dict:
     '''Return a list of tags whose names contain a given string.
 
     By default only free tags (tags that don't belong to any vocabulary) are
@@ -2251,7 +2253,7 @@ def tag_search(context, data_dict):
             'results': [_table_dictize(tag, context) for tag in tags]}
 
 
-def tag_autocomplete(context, data_dict):
+def tag_autocomplete(context: Context, data_dict: DataDict) -> List[str]:
     '''Return a list of tag names that contain a given string.
 
     By default only free tags (tags that don't belong to any vocabulary) are
@@ -2282,7 +2284,7 @@ def tag_autocomplete(context, data_dict):
         return []
 
 
-def task_status_show(context, data_dict):
+def task_status_show(context: Context, data_dict: DataDict) -> Dict:
     '''Return a task status.
 
     Either the ``id`` parameter *or* the ``entity_id``, ``task_type`` *and*
@@ -2327,7 +2329,7 @@ def task_status_show(context, data_dict):
     return task_status_dict
 
 
-def term_translation_show(context, data_dict):
+def term_translation_show(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the translations for the given term(s) and language(s).
 
     :param terms: the terms to search for translations of, e.g. ``'Russian'``,
@@ -2380,7 +2382,7 @@ def term_translation_show(context, data_dict):
 
 
 # Only internal services are allowed to call get_site_user.
-def get_site_user(context, data_dict):
+def get_site_user(context: Context, data_dict: DataDict) -> Dict:
     '''Return the ckan site user
 
     :param defer_commit: by default (or if set to false) get_site_user will
@@ -2410,7 +2412,7 @@ def get_site_user(context, data_dict):
             'apikey': user.apikey}
 
 
-def status_show(context, data_dict):
+def status_show(context: Context, data_dict: DataDict) -> Dict:
     '''Return a dictionary with information about the site's configuration.
 
     :rtype: dictionary
@@ -2431,7 +2433,7 @@ def status_show(context, data_dict):
     }
 
 
-def vocabulary_list(context, data_dict):
+def vocabulary_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a list of all the site's tag vocabularies.
 
     :rtype: list of dictionaries
@@ -2444,7 +2446,7 @@ def vocabulary_list(context, data_dict):
     return model_dictize.vocabulary_list_dictize(vocabulary_objects, context)
 
 
-def vocabulary_show(context, data_dict):
+def vocabulary_show(context: Context, data_dict: DataDict) -> Dict:
     '''Return a single tag vocabulary.
 
     :param id: the id or name of the vocabulary
@@ -2467,7 +2469,7 @@ def vocabulary_show(context, data_dict):
 
 
 @logic.validate(logic.schema.default_activity_list_schema)
-def user_activity_list(context, data_dict):
+def user_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a user's public activity stream.
 
     You must be authorized to view the user's profile.
@@ -2511,7 +2513,7 @@ def user_activity_list(context, data_dict):
 
 
 @logic.validate(logic.schema.default_activity_list_schema)
-def package_activity_list(context, data_dict):
+def package_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a package's activity stream (not including detail)
 
     You must be authorized to view the package.
@@ -2564,7 +2566,7 @@ def package_activity_list(context, data_dict):
 
 
 @logic.validate(logic.schema.default_activity_list_schema)
-def group_activity_list(context, data_dict):
+def group_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a group's activity stream.
 
     You must be authorized to view the group.
@@ -2617,7 +2619,7 @@ def group_activity_list(context, data_dict):
 
 
 @logic.validate(logic.schema.default_activity_list_schema)
-def organization_activity_list(context, data_dict):
+def organization_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return a organization's activity stream.
 
     :param id: the id or name of the organization
@@ -2668,7 +2670,7 @@ def organization_activity_list(context, data_dict):
 
 
 @logic.validate(logic.schema.default_dashboard_activity_list_schema)
-def recently_changed_packages_activity_list(context, data_dict):
+def recently_changed_packages_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the activity stream of all recently added or changed packages.
 
     :param offset: where to start getting activity items from
@@ -2707,7 +2709,7 @@ def _follower_count(context, data_dict, default_schema, ModelClass):
     return ModelClass.follower_count(data_dict['id'])
 
 
-def user_follower_count(context, data_dict):
+def user_follower_count(context: Context, data_dict: DataDict) -> int:
     '''Return the number of followers of a user.
 
     :param id: the id or name of the user
@@ -2722,7 +2724,7 @@ def user_follower_count(context, data_dict):
         context['model'].UserFollowingUser)
 
 
-def dataset_follower_count(context, data_dict):
+def dataset_follower_count(context: Context, data_dict: DataDict) -> int:
     '''Return the number of followers of a dataset.
 
     :param id: the id or name of the dataset
@@ -2737,7 +2739,7 @@ def dataset_follower_count(context, data_dict):
         context['model'].UserFollowingDataset)
 
 
-def group_follower_count(context, data_dict):
+def group_follower_count(context: Context, data_dict: DataDict) -> int:
     '''Return the number of followers of a group.
 
     :param id: the id or name of the group
@@ -2752,7 +2754,7 @@ def group_follower_count(context, data_dict):
         context['model'].UserFollowingGroup)
 
 
-def organization_follower_count(context, data_dict):
+def organization_follower_count(context: Context, data_dict: DataDict) -> int:
     '''Return the number of followers of an organization.
 
     :param id: the id or name of the organization
@@ -2783,7 +2785,7 @@ def _follower_list(context, data_dict, default_schema, FollowerClass):
     return model_dictize.user_list_dictize(users, context)
 
 
-def user_follower_list(context, data_dict):
+def user_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of users that are following the given user.
 
     :param id: the id or name of the user
@@ -2799,7 +2801,7 @@ def user_follower_list(context, data_dict):
         context['model'].UserFollowingUser)
 
 
-def dataset_follower_list(context, data_dict):
+def dataset_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of users that are following the given dataset.
 
     :param id: the id or name of the dataset
@@ -2815,7 +2817,7 @@ def dataset_follower_list(context, data_dict):
         context['model'].UserFollowingDataset)
 
 
-def group_follower_list(context, data_dict):
+def group_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of users that are following the given group.
 
     :param id: the id or name of the group
@@ -2831,7 +2833,7 @@ def group_follower_list(context, data_dict):
         context['model'].UserFollowingGroup)
 
 
-def organization_follower_list(context, data_dict):
+def organization_follower_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of users that are following the given organization.
 
     :param id: the id or name of the organization
@@ -2866,7 +2868,7 @@ def _am_following(context, data_dict, default_schema, FollowerClass):
     return FollowerClass.is_following(userobj.id, object_id)
 
 
-def am_following_user(context, data_dict):
+def am_following_user(context: Context, data_dict: DataDict) -> bool:
     '''Return ``True`` if you're following the given user, ``False`` if not.
 
     :param id: the id or name of the user
@@ -2881,7 +2883,7 @@ def am_following_user(context, data_dict):
         context['model'].UserFollowingUser)
 
 
-def am_following_dataset(context, data_dict):
+def am_following_dataset(context: Context, data_dict: DataDict) -> bool:
     '''Return ``True`` if you're following the given dataset, ``False`` if not.
 
     :param id: the id or name of the dataset
@@ -2896,7 +2898,7 @@ def am_following_dataset(context, data_dict):
         context['model'].UserFollowingDataset)
 
 
-def am_following_group(context, data_dict):
+def am_following_group(context: Context, data_dict: DataDict) -> bool:
     '''Return ``True`` if you're following the given group, ``False`` if not.
 
     :param id: the id or name of the group
@@ -2921,7 +2923,7 @@ def _followee_count(context, data_dict, FollowerClass):
     return FollowerClass.followee_count(data_dict['id'])
 
 
-def followee_count(context, data_dict):
+def followee_count(context: Context, data_dict: DataDict) -> int:
     '''Return the number of objects that are followed by the given user.
 
     Counts all objects, of any type, that the given user is following
@@ -2949,7 +2951,7 @@ def followee_count(context, data_dict):
     return sum((followee_users, followee_datasets, followee_groups))
 
 
-def user_followee_count(context, data_dict):
+def user_followee_count(context: Context, data_dict: DataDict) -> int:
     '''Return the number of users that are followed by the given user.
 
     :param id: the id of the user
@@ -2963,7 +2965,7 @@ def user_followee_count(context, data_dict):
         context['model'].UserFollowingUser)
 
 
-def dataset_followee_count(context, data_dict):
+def dataset_followee_count(context: Context, data_dict: DataDict) -> int:
     '''Return the number of datasets that are followed by the given user.
 
     :param id: the id of the user
@@ -2977,7 +2979,7 @@ def dataset_followee_count(context, data_dict):
         context['model'].UserFollowingDataset)
 
 
-def group_followee_count(context, data_dict):
+def group_followee_count(context: Context, data_dict: DataDict) -> int:
     '''Return the number of groups that are followed by the given user.
 
     :param id: the id of the user
@@ -2992,7 +2994,7 @@ def group_followee_count(context, data_dict):
 
 
 @logic.validate(logic.schema.default_follow_user_schema)
-def followee_list(context, data_dict):
+def followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of objects that are followed by the given user.
 
     Returns all objects, of any type, that the given user is following
@@ -3056,7 +3058,7 @@ def followee_list(context, data_dict):
     return followee_dicts
 
 
-def user_followee_list(context, data_dict):
+def user_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of users that are followed by the given user.
 
     :param id: the id of the user
@@ -3087,7 +3089,7 @@ def user_followee_list(context, data_dict):
     return model_dictize.user_list_dictize(users, context)
 
 
-def dataset_followee_list(context, data_dict):
+def dataset_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of datasets that are followed by the given user.
 
     :param id: the id or name of the user
@@ -3120,7 +3122,7 @@ def dataset_followee_list(context, data_dict):
             for dataset in datasets]
 
 
-def group_followee_list(context, data_dict):
+def group_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of groups that are followed by the given user.
 
     :param id: the id or name of the user
@@ -3134,7 +3136,7 @@ def group_followee_list(context, data_dict):
     return _group_or_org_followee_list(context, data_dict, is_org=False)
 
 
-def organization_followee_list(context, data_dict):
+def organization_followee_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the list of organizations that are followed by the given user.
 
     :param id: the id or name of the user
@@ -3173,7 +3175,7 @@ def _group_or_org_followee_list(context, data_dict, is_org=False):
 
 
 @logic.validate(logic.schema.default_dashboard_activity_list_schema)
-def dashboard_activity_list(context, data_dict):
+def dashboard_activity_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the authorized (via login or API key) user's dashboard activity
        stream.
 
@@ -3226,7 +3228,7 @@ def dashboard_activity_list(context, data_dict):
     return activity_dicts
 
 
-def dashboard_new_activities_count(context, data_dict):
+def dashboard_new_activities_count(context: Context, data_dict: DataDict) -> int:
     '''Return the number of new activities in the user's dashboard.
 
     Return the number of new activities in the authorized user's dashboard
@@ -3245,7 +3247,7 @@ def dashboard_new_activities_count(context, data_dict):
     return len([activity for activity in activities if activity['is_new']])
 
 
-def activity_show(context, data_dict):
+def activity_show(context: Context, data_dict: DataDict) -> Dict:
     '''Show details of an item of 'activity' (part of the activity stream).
 
     :param id: the id of the activity
@@ -3273,7 +3275,7 @@ def activity_show(context, data_dict):
     return activity
 
 
-def activity_data_show(context, data_dict):
+def activity_data_show(context: Context, data_dict: DataDict) -> Dict:
     '''Show the data from an item of 'activity' (part of the activity
     stream).
 
@@ -3313,7 +3315,7 @@ def activity_data_show(context, data_dict):
     return activity_data
 
 
-def activity_diff(context, data_dict):
+def activity_diff(context: Context, data_dict: DataDict) -> Dict:
     '''Returns a diff of the activity, compared to the previous version of the
     object
 
@@ -3412,7 +3414,7 @@ def _unpick_search(sort, allowed_fields=None, total=None):
     return sorts
 
 
-def member_roles_list(context, data_dict):
+def member_roles_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the possible roles for members of groups and organizations.
 
     :param group_type: the group type, either ``"group"`` or ``"organization"``
@@ -3434,7 +3436,7 @@ def member_roles_list(context, data_dict):
     return roles_list
 
 
-def help_show(context, data_dict):
+def help_show(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return the help string for a particular API action.
 
     :param name: Action function name (eg `user_create`, `package_search`)
@@ -3459,7 +3461,7 @@ def help_show(context, data_dict):
     return function.__doc__
 
 
-def config_option_show(context, data_dict):
+def config_option_show(context: Context, data_dict: DataDict) -> Any:
     '''Show the current value of a particular configuration option.
 
     Only returns runtime-editable config options (the ones returned by
@@ -3492,7 +3494,7 @@ def config_option_show(context, data_dict):
     return config.get(key, None)
 
 
-def config_option_list(context, data_dict):
+def config_option_list(context: Context, data_dict: DataDict) -> List[str]:
     '''Return a list of runtime-editable config options keys that can be
        updated with :py:func:`~ckan.logic.action.update.config_option_update`.
 
@@ -3508,7 +3510,7 @@ def config_option_list(context, data_dict):
 
 
 @logic.validate(logic.schema.job_list_schema)
-def job_list(context, data_dict):
+def job_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''List enqueued background jobs.
 
     :param list queues: Queues to list jobs from. If not given then the
@@ -3532,7 +3534,7 @@ def job_list(context, data_dict):
     return dictized_jobs
 
 
-def job_show(context, data_dict):
+def job_show(context: Context, data_dict: DataDict) -> Dict:
     '''Show details for a background job.
 
     :param string id: The ID of the background job.
@@ -3550,7 +3552,7 @@ def job_show(context, data_dict):
         raise NotFound
 
 
-def api_token_list(context, data_dict):
+def api_token_list(context: Context, data_dict: DataDict) -> List[Dict]:
     '''Return list of all available API Tokens for current user.
 
     :returns: collection of all API Tokens

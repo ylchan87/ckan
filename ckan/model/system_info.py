@@ -13,6 +13,7 @@ from six import text_type
 from ckan.model import meta
 from ckan.model import core
 from ckan.model import domain_object
+from typing import Any, Optional
 
 __all__ = ['system_info_table', 'SystemInfo',
            'get_system_info', 'set_system_info']
@@ -29,7 +30,7 @@ system_info_table = Table(
 class SystemInfo(core.StatefulObjectMixin,
                  domain_object.DomainObject):
 
-    def __init__(self, key, value):
+    def __init__(self, key: str, value: str) -> None:
 
         super(SystemInfo, self).__init__()
 
@@ -40,7 +41,7 @@ class SystemInfo(core.StatefulObjectMixin,
 meta.mapper(SystemInfo, system_info_table)
 
 
-def get_system_info(key, default=None):
+def get_system_info(key: str, default: Optional[str]=None) -> Optional[str]:
     ''' get data from system_info table '''
     from sqlalchemy.exc import ProgrammingError
     try:
@@ -53,7 +54,7 @@ def get_system_info(key, default=None):
 
 
 
-def delete_system_info(key, default=None):
+def delete_system_info(key: str, default: Optional[Any]=None) -> None:
     ''' delete data from system_info table '''
     obj = meta.Session.query(SystemInfo).filter_by(key=key).first()
     if obj:
@@ -61,7 +62,7 @@ def delete_system_info(key, default=None):
         meta.Session.commit()
 
 
-def set_system_info(key, value):
+def set_system_info(key: str, value: str) -> Optional[bool]:
     ''' save data in the system_info table '''
     obj = None
     obj = meta.Session.query(SystemInfo).filter_by(key=key).first()

@@ -15,6 +15,7 @@ from ckan.common import config
 from ckan.lib.search.common import (
     make_connection, SearchError, SearchQueryError
 )
+from typing import Any, Dict, List, NoReturn, Optional
 
 log = logging.getLogger(__name__)
 
@@ -32,11 +33,11 @@ QUERY_FIELDS = "name^4 title^4 tags^2 groups^2 text"
 
 solr_regex = re.compile(r'([\\+\-&|!(){}\[\]^"~*?:])')
 
-def escape_legacy_argument(val):
+def escape_legacy_argument(val: str) -> str:
     # escape special chars \+-&|!(){}[]^"~*?:
     return solr_regex.sub(r'\\\1', val)
 
-def convert_legacy_parameters_to_solr(legacy_params):
+def convert_legacy_parameters_to_solr(legacy_params: Dict) -> Dict:
     '''API v1 and v2 allowed search params that the SOLR syntax does not
     support, so use this function to convert those to SOLR syntax.
     See tests for examples.
@@ -96,7 +97,7 @@ class QueryOptions(dict):
     INTEGER_OPTIONS = ['offset', 'limit']
     UNSUPPORTED_OPTIONS = ['filter_by_downloadable', 'filter_by_openness']
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         from ckan.lib.search import DEFAULT_OPTIONS
 
         # set values according to the defaults
@@ -106,7 +107,7 @@ class QueryOptions(dict):
 
         super(QueryOptions, self).__init__(**kwargs)
 
-    def validate(self):
+    def validate(self) -> None:
         for key, value in self.items():
             if key in self.BOOLEAN_OPTIONS:
                 try:
@@ -135,12 +136,12 @@ class SearchQuery(object):
     to be used for only one query, i.e. it sets state. Definitely not thread-safe.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.results = []
         self.count = 0
 
     @property
-    def open_licenses(self):
+    def open_licenses(self) -> List[str]:
         # this isn't exactly the very best place to put these, but they stay
         # there persistently.
         # TODO: figure out if they change during run-time.
@@ -152,13 +153,13 @@ class SearchQuery(object):
                     _open_licenses.append(license.id)
         return _open_licenses
 
-    def get_all_entity_ids(self, max_results=1000):
+    def get_all_entity_ids(self, max_results: int=1000):
         """
         Return a list of the IDs of all indexed packages.
         """
         return []
 
-    def run(self, query=None, terms=[], fields={}, facet_by=[], options=None, **kwargs):
+    def run(self, query: Optional[str]=None, terms: List[st]=[], fields: Dict={}, facet_by: List[str]=[], options: Optional[Dict]=None, **kwargs: Any) -> NoReturn:
         raise SearchError("SearchQuery.run() not implemented!")
 
     # convenience, allows to query(..)
@@ -167,7 +168,7 @@ class SearchQuery(object):
 
 class TagSearchQuery(SearchQuery):
     """Search for tags."""
-    def run(self, query=None, fields=None, options=None, **kwargs):
+    def run(self, query: Optional[str]=None, fields: Optional[Dict]=None, options: Optional[Dict]=None, **kwargs: Any) -> Dict:
         query = [] if query is None else query
         fields = {} if fields is None else fields
 
@@ -207,7 +208,7 @@ class TagSearchQuery(SearchQuery):
 
 class ResourceSearchQuery(SearchQuery):
     """Search for resources."""
-    def run(self, fields={}, options=None, **kwargs):
+    def run(self, fields: Dict={}, options: Optional[Dict]=None, **kwargs: Any) -> Dict:
         if options is None:
             options = QueryOptions(**kwargs)
         else:
@@ -251,7 +252,7 @@ class ResourceSearchQuery(SearchQuery):
 
 
 class PackageSearchQuery(SearchQuery):
-    def get_all_entity_ids(self, max_results=1000):
+    def get_all_entity_ids(self, max_results: int=1000) -> List[str]:
         """
         Return a list of the IDs of all indexed packages.
         """
@@ -263,7 +264,7 @@ class PackageSearchQuery(SearchQuery):
         data = conn.search(query, fq=fq, rows=max_results, fl='id')
         return [r.get('id') for r in data.docs]
 
-    def get_index(self,reference):
+    def get_index(self,reference: str) -> Dict:
         query = {
             'rows': 1,
             'q': 'name:"%s" OR id:"%s"' % (reference,reference),
@@ -290,7 +291,7 @@ class PackageSearchQuery(SearchQuery):
             return solr_response.docs[0]
 
 
-    def run(self, query, permission_labels=None, **kwargs):
+    def run(self, query: Dict, permission_labels: List[str]=None, **kwargs: Any) -> Dict:
         '''
         Performs a dataset search using the given query.
 
@@ -417,7 +418,7 @@ class PackageSearchQuery(SearchQuery):
         return {'results': self.results, 'count': self.count}
 
 
-def solr_literal(t):
+def solr_literal(t: str) -> str:
     '''
     return a safe literal string for a solr query. Instead of escaping
     each of + - && || ! ( ) { } [ ] ^ " ~ * ? : \ / we're just dropping

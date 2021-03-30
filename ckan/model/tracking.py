@@ -4,6 +4,7 @@ from sqlalchemy import types, Column, Table, text
 
 from ckan.model import meta
 from ckan.model import domain_object
+from typing import Dict
 
 __all__ = ['tracking_summary_table', 'TrackingSummary', 'tracking_raw_table']
 
@@ -28,7 +29,7 @@ tracking_summary_table = Table('tracking_summary', meta.metadata,
 class TrackingSummary(domain_object.DomainObject):
 
     @classmethod
-    def get_for_package(cls, package_id):
+    def get_for_package(cls, package_id: str) -> Dict[str, int]:
         obj = meta.Session.query(cls).autoflush(False)
         obj = obj.filter_by(package_id=package_id)
         if meta.Session.query(obj.exists()).scalar():
@@ -40,7 +41,7 @@ class TrackingSummary(domain_object.DomainObject):
 
 
     @classmethod
-    def get_for_resource(cls, url):
+    def get_for_resource(cls, url: str) -> Dict[str, int]:
         obj = meta.Session.query(cls).autoflush(False)
         data = obj.filter_by(url=url).order_by(text('tracking_date desc')).first()
         if data:

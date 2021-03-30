@@ -10,6 +10,8 @@ import ckan.model as model
 from ckan.common import config
 from ckan.logic.schema import default_create_api_token_schema
 from ckan.exceptions import CkanConfigurationException
+from datetime import datetime
+from typing import Any, Dict, Optional
 
 log = logging.getLogger(__name__)
 
@@ -49,24 +51,24 @@ def _get_secret(encode):
     return value
 
 
-def into_seconds(dt):
+def into_seconds(dt: datetime) -> int:
     return timegm(dt.timetuple())
 
 
-def get_schema():
+def get_schema() -> Dict:
     schema = default_create_api_token_schema()
     for plugin in _get_plugins():
         schema = plugin.create_api_token_schema(schema)
     return schema
 
 
-def postprocess(data, jti, data_dict):
+def postprocess(data: Dict, jti: str, data_dict: Dict) -> Dict:
     for plugin in _get_plugins():
         data = plugin.postprocess_api_token(data, jti, data_dict)
     return data
 
 
-def decode(encoded, **kwargs):
+def decode(encoded: str, **kwargs: Any) -> Optional[Dict]:
     for plugin in _get_plugins():
         data = plugin.decode_api_token(encoded, **kwargs)
         if data:
@@ -87,7 +89,7 @@ def decode(encoded, **kwargs):
     return data
 
 
-def encode(data, **kwargs):
+def encode(data: Dict, **kwargs: Any) -> str:
     for plugin in _get_plugins():
         token = plugin.encode_api_token(data, **kwargs)
         if token:
@@ -103,13 +105,13 @@ def encode(data, **kwargs):
     return token
 
 
-def add_extra(result):
+def add_extra(result: Dict) -> Dict:
     for plugin in _get_plugins():
         result = plugin.add_extra_fields(result)
     return result
 
 
-def get_user_from_token(token, update_access_time=True):
+def get_user_from_token(token: str, update_access_time: bool=True) -> Optional[model.User]:
     data = decode(token)
     if not data:
         return

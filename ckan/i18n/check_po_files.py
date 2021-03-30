@@ -12,12 +12,13 @@ import polib
 import re
 
 import six
+from typing import List, Tuple
 
 if six.PY2:
     import paste.script.command  # type: ignore
 
 
-def simple_conv_specs(s):
+def simple_conv_specs(s: str) -> list:
     '''Return the simple Python string conversion specifiers in the string s.
 
     e.g. ['%s', '%i']
@@ -29,7 +30,7 @@ def simple_conv_specs(s):
     return simple_conv_specs_re.findall(s)
 
 
-def mapping_keys(s):
+def mapping_keys(s: str) -> list:
     '''Return a sorted list of the mapping keys in the string s.
 
     e.g. ['%(name)s', '%(age)i']
@@ -41,7 +42,7 @@ def mapping_keys(s):
     return sorted(mapping_keys_re.findall(s))
 
 
-def replacement_fields(s):
+def replacement_fields(s: str) -> list:
     '''Return a sorted list of the Python replacement fields in the string s.
 
     e.g. ['{}', '{2}', '{object}', '{target}']
@@ -65,7 +66,7 @@ if six.PY2:
             check_po_files(self.args)
 
 
-def check_po_files(paths):
+def check_po_files(paths: List[str]) -> None:
     for path in paths:
         print(u'Checking file {}'.format(path))
         errors = check_po_file(path)
@@ -76,7 +77,7 @@ def check_po_files(paths):
                     msgid, msgstr.encode('ascii', 'replace')))
 
 
-def check_po_file(path):
+def check_po_file(path: str) -> List[Tuple[str, str]]:
     errors = []
 
     def check_translation(validator, msgid, msgstr):

@@ -14,6 +14,7 @@ import ckan.lib.munge as munge
 import ckan.logic as logic
 import ckan.plugins as plugins
 from ckan.common import config
+from typing import Dict, Optional, Union
 
 ALLOWED_UPLOAD_TYPES = (cgi.FieldStorage, FlaskFileStorage)
 MB = 1 << 20
@@ -46,7 +47,7 @@ def _get_underlying_file(wrapper):
     return wrapper.file
 
 
-def get_uploader(upload_to, old_filename=None):
+def get_uploader(upload_to: str, old_filename: Optional[str]=None) -> UploadProtocol:
     '''Query IUploader plugins and return an uploader instance for general
     files.'''
     upload = None
@@ -60,7 +61,7 @@ def get_uploader(upload_to, old_filename=None):
     return upload
 
 
-def get_resource_uploader(data_dict):
+def get_resource_uploader(data_dict: Dict) -> ResourceUploadProtocol:
     '''Query IUploader plugins and return a resource uploader instance.'''
     upload = None
     for plugin in plugins.PluginImplementations(plugins.IUploader):
@@ -73,7 +74,7 @@ def get_resource_uploader(data_dict):
     return upload
 
 
-def get_storage_path():
+def get_storage_path() -> Union[str, bool]:
     '''Function to cache storage path'''
     global _storage_path
 
@@ -90,14 +91,14 @@ def get_storage_path():
     return _storage_path
 
 
-def get_max_image_size():
+def get_max_image_size() -> int:
     global _max_image_size
     if _max_image_size is None:
         _max_image_size = int(config.get('ckan.max_image_size', 2))
     return _max_image_size
 
 
-def get_max_resource_size():
+def get_max_resource_size() -> int:
     global _max_resource_size
     if _max_resource_size is None:
         _max_resource_size = int(config.get('ckan.max_resource_size', 10))
@@ -105,7 +106,7 @@ def get_max_resource_size():
 
 
 class Upload(object):
-    def __init__(self, object_type, old_filename=None):
+    def __init__(self, object_type: str, old_filename: Optional[str]=None) -> None:
         ''' Setup upload by creating a subdirectory of the storage directory
         of name object_type. old_filename is the name of the file in the url
         field last time'''
@@ -129,7 +130,7 @@ class Upload(object):
         if old_filename:
             self.old_filepath = os.path.join(self.storage_path, old_filename)
 
-    def update_data_dict(self, data_dict, url_field, file_field, clear_field):
+    def update_data_dict(self, data_dict: Dict, url_field: str, file_field: str, clear_field: str) -> None:
         ''' Manipulate data from the data_dict.  url_field is the name of the
         field where the upload is going to be. file_field is name of the key
         where the FieldStorage is kept (i.e the field where the file data
@@ -162,7 +163,7 @@ class Upload(object):
             if self.clear and self.url == self.old_filename:
                 data_dict[url_field] = ''
 
-    def upload(self, max_size=2):
+    def upload(self, max_size: int=2) -> None:
         ''' Actually upload the file.
         This should happen just before a commit but after the data has
         been validated and flushed to the db. This is so we do not store
@@ -190,7 +191,7 @@ class Upload(object):
 
 
 class ResourceUpload(object):
-    def __init__(self, resource):
+    def __init__(self, resource: Dict) -> None:
         path = get_storage_path()
         config_mimetype_guess = config.get('ckan.mimetype_guess', 'file_ext')
 
@@ -246,17 +247,17 @@ class ResourceUpload(object):
         elif self.clear:
             resource['url_type'] = ''
 
-    def get_directory(self, id):
+    def get_directory(self, id: str) -> str:
         directory = os.path.join(self.storage_path,
                                  id[0:3], id[3:6])
         return directory
 
-    def get_path(self, id):
+    def get_path(self, id: str) -> str:
         directory = self.get_directory(id)
         filepath = os.path.join(directory, id[6:])
         return filepath
 
-    def upload(self, id, max_size=10):
+    def upload(self, id: str, max_size: int=10) -> None:
         '''Actually upload the file.
 
         :returns: ``'file uploaded'`` if a new file was successfully uploaded

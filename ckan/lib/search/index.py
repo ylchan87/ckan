@@ -26,6 +26,7 @@ from ckan.plugins import (PluginImplementations,
 import ckan.logic as logic
 import ckan.lib.plugins as lib_plugins
 import ckan.lib.navl.dictization_functions
+from typing import Dict, NoReturn
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ RELATIONSHIP_TYPES = PackageRelationship.types
 # Regular expression used to strip invalid XML characters
 _illegal_xml_chars_re = re.compile(u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]')
 
-def escape_xml_illegal_chars(val, replacement=''):
+def escape_xml_illegal_chars(val: str, replacement: str='') -> str:
     '''
         Replaces any character not supported by XML with
         a replacement string (default is an empty string)
@@ -53,7 +54,7 @@ def escape_xml_illegal_chars(val, replacement=''):
     return _illegal_xml_chars_re.sub(replacement, val)
 
 
-def clear_index():
+def clear_index() -> None:
     conn = make_connection()
     query = "+site_id:\"%s\"" % (config.get('ckan.site_id'))
     try:
@@ -76,39 +77,39 @@ class SearchIndex(object):
     only have to implement ``update_dict`` and ``remove_dict``.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def insert_dict(self, data):
+    def insert_dict(self, data: Dict) -> None:
         """ Insert new data from a dictionary. """
         return self.update_dict(data)
 
-    def update_dict(self, data):
+    def update_dict(self, data: Dict) -> None:
         """ Update data from a dictionary. """
         log.debug("NOOP Index: %s" % ",".join(data.keys()))
 
-    def remove_dict(self, data):
+    def remove_dict(self, data: Dict) -> None:
         """ Delete an index entry uniquely identified by ``data``. """
         log.debug("NOOP Delete: %s" % ",".join(data.keys()))
 
-    def clear(self):
+    def clear(self) -> None:
         """ Delete the complete index. """
         clear_index()
 
-    def get_all_entity_ids(self):
+    def get_all_entity_ids(self) -> NoReturn:
         """ Return a list of entity IDs in the index. """
         raise NotImplemented
 
 class NoopSearchIndex(SearchIndex): pass
 
 class PackageSearchIndex(SearchIndex):
-    def remove_dict(self, pkg_dict):
+    def remove_dict(self, pkg_dict: Dict) -> None:
         self.delete_package(pkg_dict)
 
-    def update_dict(self, pkg_dict, defer_commit=False):
+    def update_dict(self, pkg_dict: Dict, defer_commit: bool=False) -> None:
         self.index_package(pkg_dict, defer_commit)
 
-    def index_package(self, pkg_dict, defer_commit=False):
+    def index_package(self, pkg_dict: Dict, defer_commit: bool=False) -> None:
         if pkg_dict is None:
             return
 
@@ -314,7 +315,7 @@ class PackageSearchIndex(SearchIndex):
         commit_debug_msg = 'Not committed yet' if defer_commit else 'Committed'
         log.debug('Updated index for %s [%s]' % (pkg_dict.get('name'), commit_debug_msg))
 
-    def commit(self):
+    def commit(self) -> None:
         try:
             conn = make_connection()
             conn.commit(waitSearcher=False)
@@ -322,7 +323,7 @@ class PackageSearchIndex(SearchIndex):
             log.exception(e)
             raise SearchIndexError(e)
 
-    def delete_package(self, pkg_dict):
+    def delete_package(self, pkg_dict: Dict) -> None:
         conn = make_connection()
         query = "+%s:%s AND +(id:\"%s\" OR name:\"%s\") AND +site_id:\"%s\"" % \
                 (TYPE_FIELD, PACKAGE_TYPE, pkg_dict.get('id'), pkg_dict.get('id'), config.get('ckan.site_id'))

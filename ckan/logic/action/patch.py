@@ -8,9 +8,11 @@ from ckan.logic import (
     check_access as _check_access,
     get_or_bust as _get_or_bust,
 )
+from typing import Dict
+from ckan.types import Context, DataDict
 
 
-def package_patch(context, data_dict):
+def package_patch(context: Context, data_dict: DataDict) -> Dict:
     '''Patch a dataset (package).
 
     :param id: the id or name of the dataset
@@ -51,7 +53,7 @@ def package_patch(context, data_dict):
     return _update.package_update(context, patched)
 
 
-def resource_patch(context, data_dict):
+def resource_patch(context: Context, data_dict: DataDict) -> Dict:
     '''Patch a resource
 
     :param id: the id of the resource
@@ -80,7 +82,7 @@ def resource_patch(context, data_dict):
     return _update.resource_update(context, patched)
 
 
-def group_patch(context, data_dict):
+def group_patch(context: Context, data_dict: DataDict) -> Dict:
     '''Patch a group
 
     :param id: the id or name of the group
@@ -111,7 +113,7 @@ def group_patch(context, data_dict):
         dict(context, allow_partial_update=True), patched)
 
 
-def organization_patch(context, data_dict):
+def organization_patch(context: Context, data_dict: DataDict) -> Dict:
     '''Patch an organization
 
     :param id: the id or name of the organization
@@ -142,7 +144,7 @@ def organization_patch(context, data_dict):
         dict(context, allow_partial_update=True), patched)
 
 
-def user_patch(context, data_dict):
+def user_patch(context: Context, data_dict: DataDict) -> Dict:
     '''Patch a user
 
     :param id: the id or name of the user

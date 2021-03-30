@@ -53,6 +53,11 @@ from ckan.views import (identify_user,
 
 import logging
 from logging.handlers import SMTPHandler
+from ckan.lib.helpers import HelperAttributeDict
+from flask.blueprints import Blueprint
+from flask.wrappers import Response
+from werkzeug.local import LocalProxy
+from typing import Any, Dict, Tuple, Union
 log = logging.getLogger(__name__)
 
 
@@ -115,7 +120,7 @@ class CKANBabel(Babel):
             self._i18n_path_idx += 1
 
 
-def make_flask_stack(conf):
+def make_flask_stack(conf: Dict) -> Any:
     """ This has to pass the flask app through all the same middleware that
     Pylons used """
 
@@ -338,7 +343,7 @@ def make_flask_stack(conf):
     return app
 
 
-def get_locale():
+def get_locale() -> str:
     u'''
     Return the value of the `CKAN_LANG` key of the WSGI environ,
     set by the I18nMiddleware based on the URL.
@@ -349,7 +354,7 @@ def get_locale():
         config.get(u'ckan.locale_default', u'en'))
 
 
-def ckan_before_request():
+def ckan_before_request() -> None:
     u'''
     Common handler executed before all Flask requests
 
@@ -377,7 +382,7 @@ def ckan_before_request():
     return response
 
 
-def ckan_after_request(response):
+def ckan_after_request(response: Response) -> Response:
     u'''Common handler executed after all Flask requests'''
 
     # Dispose of the SQLALchemy session
@@ -400,14 +405,14 @@ def ckan_after_request(response):
     return response
 
 
-def helper_functions():
+def helper_functions() -> Dict[str, HelperAttributeDict]:
     u'''Make helper functions (`h`) available to Flask templates'''
     if not helpers.helper_functions:
         helpers.load_plugin_helpers()
     return dict(h=helpers.helper_functions)
 
 
-def c_object():
+def c_object() -> Dict[str, LocalProxy]:
     u'''
     Expose `c` as an alias of `g` in templates for backwards compatibility
     '''
@@ -447,7 +452,7 @@ class CKANFlask(MultiStaticFlask):
 
     app_name = 'flask_app'
 
-    def can_handle_request(self, environ):
+    def can_handle_request(self, environ: Any) -> Union[Tuple[bool, str], Tuple[bool, str, str]]:
         '''
         Decides whether it can handle a request with the Flask app by
         matching the request environ against the route mapper
@@ -476,7 +481,7 @@ class CKANFlask(MultiStaticFlask):
         except HTTPException:
             return (False, self.app_name)
 
-    def register_extension_blueprint(self, blueprint, **kwargs):
+    def register_extension_blueprint(self, blueprint: Blueprint, **kwargs: Dict):
         '''
         This method should be used to register blueprints that come from
         extensions, so there's an opportunity to add extension-specific

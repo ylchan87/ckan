@@ -2,9 +2,10 @@
 
 from jinja2.ext import babel_extract
 from ckan.lib.jinja_extensions import _get_extensions
+from typing import Any
 
 
-def extract_ckan(fileobj, *args, **kw):
+def extract_ckan(fileobj: Any, *args: Any, **kw: Any) -> Any:
     extensions = [
         ':'.join([ext.__module__, ext.__name__])
         if isinstance(ext, type)

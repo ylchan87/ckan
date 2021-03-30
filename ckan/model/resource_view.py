@@ -5,6 +5,7 @@ import sqlalchemy as sa
 from ckan.model import meta
 from ckan.model import types as _types
 from ckan.model import domain_object
+from typing import Collection, KeysView, Optional, Tuple
 
 __all__ = ['ResourceView', 'resource_view_table']
 
@@ -24,7 +25,7 @@ resource_view_table = sa.Table(
 
 class ResourceView(domain_object.DomainObject):
     @classmethod
-    def get(cls, reference):
+    def get(cls, reference: str) -> Optional["ResourceView"]:
         '''Returns a ResourceView object referenced by its id.'''
         if not reference:
             return None
@@ -34,11 +35,11 @@ class ResourceView(domain_object.DomainObject):
         return view
 
     @classmethod
-    def get_columns(cls):
+    def get_columns(cls) -> KeysView:
         return resource_view_table.columns.keys()
 
     @classmethod
-    def get_count_not_in_view_types(cls, view_types):
+    def get_count_not_in_view_types(cls, view_types: Collection[str]) -> Collection[Tuple[str, int]]:
         '''Returns the count of ResourceView not in the view types list'''
         query = meta.Session.query(ResourceView.view_type,
                                    sa.func.count(ResourceView.id)) \
@@ -48,7 +49,7 @@ class ResourceView(domain_object.DomainObject):
         return query.all()
 
     @classmethod
-    def delete_not_in_view_types(cls, view_types):
+    def delete_not_in_view_types(cls, view_types: Collection[str]) -> None:
         '''Delete the Resource Views not in the received view types list'''
         query = meta.Session.query(ResourceView) \
                     .filter(sa.not_(ResourceView.view_type.in_(view_types)))
@@ -56,7 +57,7 @@ class ResourceView(domain_object.DomainObject):
         return query.delete(synchronize_session='fetch')
 
     @classmethod
-    def delete_all(cls, view_types=[]):
+    def delete_all(cls, view_types: Collection[str]=[]) -> None:
         '''Delete all Resource Views, or all of a particular type'''
         query = meta.Session.query(ResourceView)
 

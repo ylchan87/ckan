@@ -10,6 +10,7 @@ from sqlalchemy.ext.mutable import MutableDict
 
 import ckan.plugins.toolkit as tk
 from ckan.model import meta, User, DomainObject
+from typing import Any, Optional
 
 
 __all__ = [u"ApiToken", u"api_token_table"]
@@ -33,20 +34,20 @@ api_token_table = Table(
 
 
 class ApiToken(DomainObject):
-    def __init__(self, user_id=None, name='Unnamed'):
+    def __init__(self, user_id: str=None, name: str='Unnamed') -> None:
         self.id = _make_token()
         self.user_id = user_id
         self.name = name
 
     @classmethod
-    def get(cls, id):
+    def get(cls, id: str) -> Optional["ApiToken"]:
         if not id:
             return None
 
         return meta.Session.query(cls).get(id)
 
     @classmethod
-    def revoke(cls, id):
+    def revoke(cls, id: str) -> bool:
         token = cls.get(id)
         if token:
             meta.Session.delete(token)
@@ -54,12 +55,12 @@ class ApiToken(DomainObject):
             return True
         return False
 
-    def touch(self, commit=False):
+    def touch(self, commit: bool=False) -> None:
         self.last_access = datetime.datetime.utcnow()
         if commit:
             meta.Session.commit()
 
-    def set_extra(self, key, value, commit=False):
+    def set_extra(self, key: str, value: Any, commit: bool=False) -> None:
         extras = self.plugin_extras or {}
         extras[key] = value
         self.plugin_extras = copy.deepcopy(extras)

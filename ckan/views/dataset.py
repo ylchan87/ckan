@@ -26,6 +26,9 @@ from ckan.lib.plugins import lookup_package_plugin
 from ckan.lib.render import TemplateNotFound
 from ckan.lib.search import SearchError, SearchQueryError, SearchIndexError
 from ckan.views import LazyView
+from typing import Dict, Optional, Union
+from flask.blueprints import Blueprint
+from flask.wrappers import Response
 
 
 NotFound = logic.NotFound
@@ -48,13 +51,13 @@ dataset = Blueprint(
 )
 
 
-def _setup_template_variables(context, data_dict, package_type=None):
+def _setup_template_variables(context:Dict, data_dict:Dict, package_type:Optional[str]=None) -> None:
     return lookup_package_plugin(package_type).setup_template_variables(
         context, data_dict
     )
 
 
-def _get_pkg_template(template_type, package_type=None):
+def _get_pkg_template(template_type:str, package_type:Optional[str]=None) -> str:
     pkg_plugin = lookup_package_plugin(package_type)
     method = getattr(pkg_plugin, template_type)
     try:
@@ -70,19 +73,19 @@ def _encode_params(params):
             for k, v in params]
 
 
-def url_with_params(url, params):
+def url_with_params(url: str, params: Params) -> str:
     params = _encode_params(params)
     return url + u'?' + urlencode(params)
 
 
-def search_url(params, package_type=None):
+def search_url(params: Params, package_type: str=None) -> str:
     if not package_type:
         package_type = u'dataset'
     url = h.url_for(u'{0}.search'.format(package_type))
     return url_with_params(url, params)
 
 
-def drill_down_url(alternative_url=None, **by):
+def drill_down_url(alternative_url: str=None, **by: Dict) -> str:
     return h.add_url_param(
         alternative_url=alternative_url,
         controller=u'dataset',
@@ -91,7 +94,7 @@ def drill_down_url(alternative_url=None, **by):
     )
 
 
-def remove_field(package_type, key, value=None, replace=None):
+def remove_field(package_type: Optional[str], key: str, value: Optional[str]=None, replace: Optional[str]=None):
     if not package_type:
         package_type = u'dataset'
     url = h.url_for(u'{0}.search'.format(package_type))
@@ -155,7 +158,7 @@ def _form_save_redirect(pkg_name, action, package_type=None):
     return h.redirect_to(url)
 
 
-def _get_package_type(id):
+def _get_package_type(id:str) -> Optional[str]:
     """
     Given the id of a package this method will return the type of the
     package, or 'dataset' if no type is currently set
@@ -166,7 +169,7 @@ def _get_package_type(id):
     return None
 
 
-def _get_search_details():
+def _get_search_details() -> Dict:
     fq = u''
 
     # fields_grouped will contain a dict of params containing
@@ -201,7 +204,7 @@ def _get_search_details():
     }
 
 
-def search(package_type):
+def search(package_type: str) -> str:
     extra_vars = {}
 
     try:
@@ -386,7 +389,7 @@ def search(package_type):
     )
 
 
-def resources(package_type, id):
+def resources(package_type: str, id: str) -> Union[Response, str]:
     context = {
         u'model': model,
         u'session': model.Session,
@@ -428,7 +431,7 @@ def resources(package_type, id):
     )
 
 
-def read(package_type, id):
+def read(package_type: str, id: str) -> Union[Response, str]:
     context = {
         u'model': model,
         u'session': model.Session,
@@ -545,7 +548,7 @@ class CreateView(MethodView):
             return base.abort(403, _(u'Unauthorized to create a package'))
         return context
 
-    def post(self, package_type):
+    def post(self, package_type: str) -> Union[Response, str]:
         # The staged add dataset used the new functionality when the dataset is
         # partially created so we need to know if we actually are updating or
         # this is a real new.
@@ -639,7 +642,7 @@ class CreateView(MethodView):
             data_dict[u'state'] = u'none'
             return self.get(package_type, data_dict, errors, error_summary)
 
-    def get(self, package_type, data=None, errors=None, error_summary=None):
+    def get(self, package_type: str, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> str:
         context = self._prepare()
         if data and u'type' in data:
             package_type = data[u'type']
@@ -717,7 +720,7 @@ class EditView(MethodView):
         }
         return context
 
-    def post(self, package_type, id):
+    def post(self, package_type: str, id: str) -> Union[Response, str]:
         context = self._prepare()
         package_type = _get_package_type(id) or package_type
         log.debug(u'Package save request name: %s POST: %r', id, request.form)
@@ -763,8 +766,8 @@ class EditView(MethodView):
             return self.get(package_type, id, data_dict, errors, error_summary)
 
     def get(
-        self, package_type, id, data=None, errors=None, error_summary=None
-    ):
+        self, package_type: str, id: str, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None
+    ) -> Union[Response, str]:
         context = self._prepare()
         package_type = _get_package_type(id) or package_type
         try:
@@ -863,7 +866,7 @@ class DeleteView(MethodView):
         }
         return context
 
-    def post(self, package_type, id):
+    def post(self, package_type: str, id: str) -> Response:
         if u'cancel' in request.form:
             return h.redirect_to(u'{}.edit'.format(package_type), id=id)
         context = self._prepare()
@@ -880,7 +883,7 @@ class DeleteView(MethodView):
         h.flash_notice(_(u'Dataset has been deleted.'))
         return h.redirect_to(package_type + u'.search')
 
-    def get(self, package_type, id):
+    def get(self, package_type: str, id: str) -> Union[Response, str]:
         context = self._prepare()
         try:
             pkg_dict = get_action(u'package_show')(context, {u'id': id})
@@ -905,7 +908,7 @@ class DeleteView(MethodView):
         )
 
 
-def follow(package_type, id):
+def follow(package_type: str, id: str) -> Response:
     """Start following this dataset.
     """
     context = {
@@ -932,7 +935,7 @@ def follow(package_type, id):
     return h.redirect_to(u'{}.read'.format(package_type), id=id)
 
 
-def unfollow(package_type, id):
+def unfollow(package_type: str, id: str) -> Response:
     """Stop following this dataset.
     """
     context = {
@@ -962,7 +965,7 @@ def unfollow(package_type, id):
     return h.redirect_to(u'{}.read'.format(package_type), id=id)
 
 
-def followers(package_type, id=None):
+def followers(package_type: str, id: Optional[str]=None) -> Union[Response, str]:
     context = {
         u'model': model,
         u'session': model.Session,
@@ -1019,7 +1022,7 @@ class GroupView(MethodView):
             return base.abort(404, _(u'Dataset not found'))
         return context, pkg_dict
 
-    def post(self, package_type, id):
+    def post(self, package_type: str, id: str) -> Response:
         context = self._prepare(id)[0]
         new_group = request.form.get(u'group_added')
         if new_group:
@@ -1052,7 +1055,7 @@ class GroupView(MethodView):
                 return base.abort(404, _(u'Group not found'))
         return h.redirect_to(u'{}.groups'.format(package_type), id=id)
 
-    def get(self, package_type, id):
+    def get(self, package_type: str, id: str) -> str:
         context, pkg_dict = self._prepare(id)
         dataset_type = pkg_dict[u'type'] or package_type
         context[u'is_member'] = True
@@ -1084,7 +1087,7 @@ class GroupView(MethodView):
         )
 
 
-def activity(package_type, id):
+def activity(package_type: str, id: str) -> Union[Response, str]:
     """Render this package's public activity stream page.
     """
     context = {
@@ -1122,7 +1125,7 @@ def activity(package_type, id):
     )
 
 
-def changes(id, package_type=None):
+def changes(id: str, package_type: Optional[str]=None) -> Union[Response, str]:
     '''
     Shows the changes to a dataset in one particular activity stream item.
     '''
@@ -1163,7 +1166,7 @@ def changes(id, package_type=None):
     )
 
 
-def changes_multiple(package_type=None):
+def changes_multiple(package_type: Optional[str]=None) -> Union[Response, str]:
     '''
     Called when a user specifies a range of versions they want to look at
     changes between. Verifies that the range is valid and finds the set of
@@ -1245,7 +1248,7 @@ def changes_multiple(package_type=None):
     )
 
 
-def collaborators_read(package_type, id):
+def collaborators_read(package_type: str, id: str) -> Union[Response, str]:
     context = {u'model': model, u'user': g.user}
     data_dict = {u'id': id}
 
@@ -1263,7 +1266,7 @@ def collaborators_read(package_type, id):
         u'pkg_dict': pkg_dict})
 
 
-def collaborator_delete(package_type, id, user_id):
+def collaborator_delete(package_type: str, id: str, user_id) -> Response:
     context = {u'model': model, u'user': g.user}
 
     try:
@@ -1284,7 +1287,7 @@ def collaborator_delete(package_type, id, user_id):
 
 class CollaboratorEditView(MethodView):
 
-    def post(self, package_type, id):
+    def post(self, package_type: str, id: str) -> Response:
         context = {u'model': model, u'user': g.user}
 
         try:
@@ -1322,7 +1325,7 @@ class CollaboratorEditView(MethodView):
 
         return h.redirect_to(u'dataset.collaborators_read', id=id)
 
-    def get(self, package_type, id):
+    def get(self, package_type: str, id) -> Union[Response, str]:
         context = {u'model': model, u'user': g.user}
         data_dict = {u'id': id}
 
@@ -1367,11 +1370,11 @@ class CollaboratorEditView(MethodView):
 
 
 # deprecated
-def history(package_type, id):
+def history(package_type: str, id: str) -> Response:
     return h.redirect_to(u'{}.activity'.format(package_type), id=id)
 
 
-def register_dataset_plugin_rules(blueprint):
+def register_dataset_plugin_rules(blueprint: Blueprint):
     blueprint.add_url_rule(u'/', view_func=search, strict_slashes=False)
     blueprint.add_url_rule(u'/new', view_func=CreateView.as_view(str(u'new')))
     blueprint.add_url_rule(u'/<id>', view_func=read)

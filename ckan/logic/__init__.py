@@ -15,6 +15,11 @@ import ckan.lib.navl.dictization_functions as df
 import ckan.plugins as p
 
 from ckan.common import _, c
+from typing import Any, Callable, Container, Dict, List, Literal, Optional, Tuple, TypeVar, Union
+from ckan.types import ErrorDict, Context
+from werkzeug.datastructures import MultiDict
+
+Decorated = TypeVar("Decorated")
 
 log = logging.getLogger(__name__)
 _validate = df.validate
@@ -30,7 +35,7 @@ class UsernamePasswordError(Exception):
 
 class ActionError(Exception):
 
-    def __init__(self, message=''):
+    def __init__(self, message: str=''):
         self.message = message
         super(ActionError, self).__init__(message)
 
@@ -67,7 +72,7 @@ class ValidationError(ActionError):
     ``data_dict`` fails.
 
     '''
-    def __init__(self, error_dict, error_summary=None, extra_msg=None):
+    def __init__(self, error_dict: ErrorDict, error_summary: Optional[Dict[str, str]]=None, extra_msg: Optional[str]=None) -> None:
         if not isinstance(error_dict, dict):
             error_dict = {'message': error_dict}
         # tags errors are a mess so let's clean them up
@@ -126,7 +131,7 @@ class ValidationError(ActionError):
         return ' - '.join([str(err_msg) for err_msg in err_msgs if err_msg])
 
 
-def parse_params(params, ignore_keys=None):
+def parse_params(params: MultiDict, ignore_keys: Optional[Container]=None) -> Dict[str, Union[str, List[str]]]:
     '''Takes a dict and returns it with some values standardised.
     This is done on a dict before calling tuplize_dict on it.
     '''
@@ -151,7 +156,7 @@ def parse_params(params, ignore_keys=None):
     return parsed
 
 
-def clean_dict(data_dict):
+def clean_dict(data_dict: Dict[str, Any]) -> Dict[str, Any]:
     '''Takes a dict and if any of the values are lists of dicts,
     the empty dicts are stripped from the lists (recursive).
 
@@ -186,7 +191,7 @@ def clean_dict(data_dict):
     return data_dict
 
 
-def tuplize_dict(data_dict):
+def tuplize_dict(data_dict: Dict[str, Any]) -> Dict[Tuple, Any]:
     '''Takes a dict with keys of the form 'table__0__key' and converts them
     to a tuple like ('table', 0, 'key').
 
@@ -208,7 +213,7 @@ def tuplize_dict(data_dict):
     return tuplized_dict
 
 
-def untuplize_dict(tuplized_dict):
+def untuplize_dict(tuplized_dict: Dict[Tuple, Any]) -> Dict[str, Any]:
 
     data_dict = {}
     for key, value in six.iteritems(tuplized_dict):
@@ -217,7 +222,7 @@ def untuplize_dict(tuplized_dict):
     return data_dict
 
 
-def flatten_to_string_key(dict):
+def flatten_to_string_key(dict: Dict) -> Dict[str, Any]:
 
     flattented = df.flatten_dict(dict)
     return untuplize_dict(flattented)
@@ -242,7 +247,7 @@ def _prepopulate_context(context):
     return context
 
 
-def check_access(action, context, data_dict=None):
+def check_access(action: str, context: Context, data_dict: Optional[Dict]=None) -> Literal[True]:
     '''Calls the authorization function for the provided action
 
     This is the only function that should be called to determine whether a
@@ -320,11 +325,11 @@ def check_access(action, context, data_dict=None):
 _actions = {}
 
 
-def clear_actions_cache():
+def clear_actions_cache() -> None:
     _actions.clear()
 
 
-def chained_action(func):
+def chained_action(func: Callable) -> Callable:
     func.chained_action = True
     return func
 
@@ -333,7 +338,7 @@ def _is_chained_action(func):
     return getattr(func, 'chained_action', False)
 
 
-def get_action(action):
+def get_action(action: str) -> Callable:
     '''Return the named :py:mod:`ckan.logic.action` function.
 
     For example ``get_action('package_create')`` will normally return the
@@ -506,7 +511,7 @@ def get_action(action):
     return _actions[action]
 
 
-def get_or_bust(data_dict, keys):
+def get_or_bust(data_dict: Dict, keys: Union[str, List[str]]) -> Union[Any, Tuple]:
     '''Return the value(s) from the given data_dict for the given key(s).
 
     Usage::
@@ -545,7 +550,7 @@ def get_or_bust(data_dict, keys):
     return tuple(values)
 
 
-def validate(schema_func, can_skip_validator=False):
+def validate(schema_func: Callable[[], Dict], can_skip_validator: bool=False) -> Callable[[Callable], Callable]:
     ''' A decorator that validates an action function against a given schema
     '''
     def action_decorator(action):
@@ -564,7 +569,7 @@ def validate(schema_func, can_skip_validator=False):
     return action_decorator
 
 
-def side_effect_free(action):
+def side_effect_free(action: Decorated) -> Decorated:
     '''A decorator that marks the given action function as side-effect-free.
 
     Action functions decorated with this decorator can be called with an HTTP
@@ -592,7 +597,7 @@ def side_effect_free(action):
     return action
 
 
-def auth_sysadmins_check(action):
+def auth_sysadmins_check(action: Decorated) -> Decorated:
     '''A decorator that prevents sysadmins from being automatically authorized
     to call an action function.
 
@@ -610,13 +615,13 @@ def auth_sysadmins_check(action):
     return action
 
 
-def auth_audit_exempt(action):
+def auth_audit_exempt(action: Decorated) -> Decorated:
     ''' Dirty hack to stop auth audit being done '''
     action.auth_audit_exempt = True
     return action
 
 
-def auth_allow_anonymous_access(action):
+def auth_allow_anonymous_access(action: Decorated) -> Decorated:
     ''' Flag an auth function as not requiring a logged in user
 
     This means that check_access won't automatically raise a NotAuthorized
@@ -628,7 +633,7 @@ def auth_allow_anonymous_access(action):
     return action
 
 
-def auth_disallow_anonymous_access(action):
+def auth_disallow_anonymous_access(action: Decorated) -> Decorated:
     ''' Flag an auth function as requiring a logged in user
 
     This means that check_access will automatically raise a NotAuthorized
@@ -639,7 +644,7 @@ def auth_disallow_anonymous_access(action):
     return action
 
 
-def chained_auth_function(func):
+def chained_auth_function(func: Decorated) -> Decorated:
     '''
     Decorator function allowing authentication functions to be chained.
     '''
@@ -657,13 +662,13 @@ class UnknownValidator(Exception):
 _validators_cache = {}
 
 
-def clear_validators_cache():
+def clear_validators_cache() -> None:
     _validators_cache.clear()
 
 
 # This function exists mainly so that validators can be made available to
 # extensions via ckan.plugins.toolkit.
-def get_validator(validator):
+def get_validator(validator: str) -> Callable:
     '''Return a validator function by name.
 
     :param validator: the name of the validator function to return,
@@ -697,7 +702,7 @@ def get_validator(validator):
         raise UnknownValidator('Validator `%s` does not exist' % validator)
 
 
-def model_name_to_class(model_module, model_name):
+def model_name_to_class(model_module: Any, model_name: str) -> Any:
     '''Return the class in model_module that has the same name as the
     received string.
 

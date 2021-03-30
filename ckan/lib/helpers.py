@@ -54,6 +54,11 @@ from ckan.lib.pagination import Page
 from ckan.common import _, ungettext, c, g, request, session, json
 from ckan.lib.webassets_tools import include_asset, render_assets
 from markupsafe import Markup, escape
+from typing import Dict, Iterable, Optional, Tuple, TypeVar, Union
+from flask.wrappers import Response
+
+T = TypeVar("T")
+Helper = TypeVar("Helper", bound=BaseHelper)
 
 if six.PY2:
     from pylons import url as _pylons_default_url  # type: ignore
@@ -93,7 +98,7 @@ LEGACY_ROUTE_NAMES = {
 
 
 class HelperAttributeDict(dict):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(HelperAttributeDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
@@ -121,13 +126,13 @@ class literal(Markup):
     __slots__ = ()
 
     @classmethod
-    def escape(cls, s):
+    def escape(cls, s: Optional[str]) -> Markup:
         if s is None:
             return Markup(u"")
         return super(literal, cls).escape(s)
 
 
-def core_helper(f, name=None):
+def core_helper(f: Helper, name: Optional[str]=None) -> Helper:
     """
     Register a function as a builtin helper method.
     """
@@ -146,7 +151,7 @@ def _is_chained_helper(func):
     return getattr(func, 'chained_helper', False)
 
 
-def chained_helper(func):
+def chained_helper(func: Helper) -> Helper:
     """Decorator function allowing helper functions to be chained.
     """
     func.chained_helper = True
@@ -185,7 +190,7 @@ def _datestamp_to_datetime(datetime_):
 
 
 @core_helper
-def redirect_to(*args, **kw):
+def redirect_to(*args: Any, **kw: Any) -> Response:
     '''Issue a redirect: return an HTTP response with a ``302 Moved`` header.
 
     This is a wrapper for :py:func:`flask.redirect` that maintains the
@@ -249,7 +254,9 @@ def url(*args, **kw):
 
 
 @core_helper
-def get_site_protocol_and_host():
+def get_site_protocol_and_host() -> Union[
+    Tuple[str, str], Tuple[None, None]
+]:
     '''Return the protocol and host of the configured `ckan.site_url`.
     This is needed to generate valid, full-qualified URLs.
 
@@ -306,7 +313,7 @@ def _get_auto_flask_context():
 
 
 @core_helper
-def url_for(*args, **kw):
+def url_for(*args: Any, **kw: Any) -> str:
     '''Return the URL for an endpoint given some parameters.
 
     This is a wrapper for :py:func:`flask.url_for`
@@ -495,7 +502,7 @@ def _url_for_pylons(*args, **kw):
 
 
 @core_helper
-def url_for_static(*args, **kw):
+def url_for_static(*args: Any, **kw: Any) -> str:
     '''Returns the URL for static content that doesn't get translated (eg CSS)
 
     It'll raise CkanUrlException if called with an external URL
@@ -512,7 +519,7 @@ def url_for_static(*args, **kw):
 
 
 @core_helper
-def url_for_static_or_external(*args, **kw):
+def url_for_static_or_external(*args: Any, **kw: Any) -> str:
     '''Returns the URL for static content that doesn't get translated (eg CSS),
     or external URLs
     '''
@@ -537,7 +544,7 @@ def url_for_static_or_external(*args, **kw):
 
 
 @core_helper
-def is_url(*args, **kw):
+def is_url(*args: Any, **kw: Any) -> bool:
     '''
     Returns True if argument parses as a http, https or ftp URL
     '''
@@ -637,7 +644,7 @@ def _local_url(url_to_amend, **kw):
 
 
 @core_helper
-def url_is_local(url):
+def url_is_local(url: str) -> bool:
     '''Returns True if url is local'''
     if not url or url.startswith('//'):
         return False
@@ -650,32 +657,32 @@ def url_is_local(url):
 
 
 @core_helper
-def full_current_url():
+def full_current_url() -> str:
     ''' Returns the fully qualified current url (eg http://...) useful
     for sharing etc '''
     return (url_for(request.environ['CKAN_CURRENT_URL'], qualified=True))
 
 
 @core_helper
-def current_url():
+def current_url() -> str:
     ''' Returns current url unquoted'''
     return unquote(request.environ['CKAN_CURRENT_URL'])
 
 
 @core_helper
-def lang():
+def lang() -> Optional[str]:
     ''' Return the language code for the current locale eg `en` '''
     return request.environ.get('CKAN_LANG')
 
 
 @core_helper
-def ckan_version():
+def ckan_version() -> str:
     '''Return CKAN version'''
     return ckan.__version__
 
 
 @core_helper
-def lang_native_name(lang=None):
+def lang_native_name(lang: Optional[str]=None) -> str:
     ''' Return the language name currently used in it's localised form
         either from parameter or current environ setting'''
     lang = lang or lang()
@@ -686,13 +693,13 @@ def lang_native_name(lang=None):
 
 
 @core_helper
-def is_rtl_language():
+def is_rtl_language() -> bool:
     return lang() in config.get('ckan.i18n.rtl_languages',
                                 'he ar fa_IR').split()
 
 
 @core_helper
-def get_rtl_css():
+def get_rtl_css() -> str:
     return config.get('ckan.i18n.rtl_css', '/base/css/main-rtl.css')
 
 
@@ -706,7 +713,7 @@ class Message(object):
     * ``category``: the category specified when the message was created.
     '''
 
-    def __init__(self, category, message, allow_html):
+    def __init__(self, category: str, message: str, allow_html: bool) -> None:
         self.category = category
         self.message = message
         self.allow_html = allow_html
@@ -731,8 +738,8 @@ class _Flash(object):
     # Default category if none is specified.
     default_category = ""
 
-    def __init__(self, session_key="flash", categories=None,
-                 default_category=None):
+    def __init__(self, session_key: str="flash", categories: Optional[List[str]]=None,
+                 default_category: Optional[str]=None) -> None:
         self.session_key = session_key
         if categories is not None:
             self.categories = categories
@@ -764,14 +771,14 @@ class _Flash(object):
         messages.append(new_message_tuple)
         session.save()
 
-    def pop_messages(self):
+    def pop_messages(self) -> List[Message]:
         messages = session.pop(self.session_key, [])
         # only save session if it has changed
         if messages:
             session.save()
         return [Message(*m) for m in messages]
 
-    def are_there_messages(self):
+    def are_there_messages(self) -> bool:
         return bool(session.get(self.session_key))
 
 
@@ -781,25 +788,25 @@ _flash = flash
 
 
 @core_helper
-def flash_notice(message, allow_html=False):
+def flash_notice(message: FlashMessage, allow_html: bool=False) -> None:
     ''' Show a flash message of type notice '''
     flash(message, category='alert-info', allow_html=allow_html)
 
 
 @core_helper
-def flash_error(message, allow_html=False):
+def flash_error(message: FlashMessage, allow_html: bool=False) -> None:
     ''' Show a flash message of type error '''
     flash(message, category='alert-error', allow_html=allow_html)
 
 
 @core_helper
-def flash_success(message, allow_html=False):
+def flash_success(message: FlashMessage, allow_html: bool=False) -> None:
     ''' Show a flash message of type success '''
     flash(message, category='alert-success', allow_html=allow_html)
 
 
 @core_helper
-def are_there_flash_messages():
+def are_there_flash_messages() -> bool:
     ''' Returns True if there are flash messages for the current user '''
     return flash.are_there_messages()
 
@@ -912,7 +919,7 @@ def _input_tag(type, name, value=None, id=None, **attrs):
 
 
 @core_helper
-def link_to(label, url, **attrs):
+def link_to(label: str, url: str, **attrs: Any) -> Markup:
     attrs = _preprocess_dom_attrs(attrs)
     attrs['href'] = url
     if label == '' or label is None:
@@ -932,7 +939,7 @@ def submit(name, value=None, id=None, **attrs):
 
 
 @core_helper
-def nav_link(text, *args, **kwargs):
+def nav_link(text: str, *args: Any, **kwargs: Any) -> Union[Markup, str]:
     '''
     :param class_: pass extra class(es) to add to the ``<a>`` tag
     :param icon: name of ckan icon to use within the link
@@ -1014,7 +1021,11 @@ def subnav_named_route(text, named_route, **kwargs):
 
 
 @core_helper
-def build_nav_main(*args):
+def build_nav_main(*args: Union[
+        Tuple[str, str],
+        Tuple[str, str, List[str]],
+        Tuple[str, str, List[str], str],
+    ]) -> Markup:
     """Build a set of menu items.
 
     Outputs ``<li><a href="...">title</a></li>``
@@ -1038,7 +1049,7 @@ def build_nav_main(*args):
 
 
 @core_helper
-def build_nav_icon(menu_item, title, **kw):
+def build_nav_icon(menu_item: str, title: str, **kw: Any) -> Markup:
     '''Build a navigation item used for example in ``user/read_base.html``.
 
     Outputs ``<li><a href="..."><i class="icon.."></i> title</a></li>``.
@@ -1057,7 +1068,7 @@ def build_nav_icon(menu_item, title, **kw):
 
 
 @core_helper
-def build_nav(menu_item, title, **kw):
+def build_nav(menu_item: str, title: str, **kw: Any) -> Markup:
     '''Build a navigation item used for example breadcrumbs.
 
     Outputs ``<li><a href="...">title</a></li>``.
@@ -1093,7 +1104,7 @@ def map_pylons_to_flask_route_name(menu_item):
 
 
 @core_helper
-def build_extra_admin_nav():
+def build_extra_admin_nav() -> Markup:
     '''Build extra navigation items used in ``admin/base.html`` for values
     defined in the config option ``ckan.admin_tabs``. Typically this is
     populated by extensions.
@@ -1150,14 +1161,14 @@ def _make_menu_item(menu_item, title, **kw):
 
 
 @core_helper
-def default_group_type(type_='group'):
+def default_group_type(type_: str='group') -> str:
     """Get default group/organization type for using site-wide.
     """
     return str(config.get('ckan.default.{}_type'.format(type_), type_))
 
 
 @core_helper
-def humanize_entity_type(entity_type, object_type, purpose):
+def humanize_entity_type(entity_type: str, object_type: str, purpose: str) -> str:
     """Convert machine-readable representation of package/group type into
     human-readable form.
 
@@ -1218,7 +1229,7 @@ def humanize_entity_type(entity_type, object_type, purpose):
 
 @core_helper
 def get_facet_items_dict(
-        facet, search_facets=None, limit=None, exclude_active=False):
+        facet: str, search_facets: Optional[Dict]=None, limit: Optional[int]=None, exclude_active: bool=False) -> List[Dict]:
     '''Return the list of unselected facet items for the given facet, sorted
     by count.
 
@@ -1266,7 +1277,7 @@ def get_facet_items_dict(
 
 
 @core_helper
-def has_more_facets(facet, search_facets, limit=None, exclude_active=False):
+def has_more_facets(facet: str, search_facets: Dict, limit: Optional[int]=None, exclude_active: bool=False) -> bool:
     '''
     Returns True if there are more facet items for the given facet than the
     limit.
@@ -1300,7 +1311,7 @@ def has_more_facets(facet, search_facets, limit=None, exclude_active=False):
 
 
 @core_helper
-def unselected_facet_items(facet, limit=10):
+def unselected_facet_items(facet: str, limit: int=10) -> List[Dict]:
     '''Return the list of unselected facet items for the given facet, sorted
     by count.
 
@@ -1351,14 +1362,14 @@ def get_facet_title(name):
 
 
 @core_helper
-def get_param_int(name, default=10):
+def get_param_int(name: str, default: int=10) -> int:
     try:
         return int(request.params.get(name, default))
     except ValueError:
         return default
 
 
-def _url_with_params(url, params):
+def _url_with_params(url:str, params:Optional[Iterable[Tuple[str, Any]]]) -> str:
     if not params:
         return url
     params = [(k, v.encode('utf-8') if isinstance(v, string_types) else str(v))
@@ -1367,7 +1378,7 @@ def _url_with_params(url, params):
 
 
 @core_helper
-def sorted_extras(package_extras, auto_clean=False, subs=None, exclude=None):
+def sorted_extras(package_extras: Dict, auto_clean: bool=False, subs: Dict[str, str]=None, exclude: List[str]=None) -> List[Tuple[str, Any]]:
     ''' Used for outputting package extras
 
     :param package_extras: the package extras
@@ -1401,7 +1412,7 @@ def sorted_extras(package_extras, auto_clean=False, subs=None, exclude=None):
 
 
 @core_helper
-def check_access(action, data_dict=None):
+def check_access(action: str, data_dict: Optional[Dict]=None) -> bool:
     if not getattr(g, u'user', None):
         g.user = ''
     context = {'model': model,
@@ -1430,7 +1441,7 @@ def get_action(action_name, data_dict=None):
 
 
 @core_helper
-def linked_user(user, maxlength=0, avatar=20):
+def linked_user(user: Union[str, model.User], maxlength: int=0, avatar: int=20) -> Union[Markup, str]:
     if not isinstance(user, model.User):
         user_name = text_type(user)
         user = model.User.get(user_name)
@@ -1456,7 +1467,7 @@ def linked_user(user, maxlength=0, avatar=20):
 
 
 @core_helper
-def group_name_to_title(name):
+def group_name_to_title(name: str) -> str:
     group = model.Group.by_name(name)
     if group is not None:
         return group.display_name
@@ -1464,7 +1475,7 @@ def group_name_to_title(name):
 
 
 @core_helper
-def truncate(text, length=30, indicator='...', whole_word=False):
+def truncate(text: str, length: int=30, indicator: str='...', whole_word: bool=False) -> str:
     """Truncate ``text`` with replacement characters.
 
     ``length``
@@ -1507,7 +1518,7 @@ def truncate(text, length=30, indicator='...', whole_word=False):
 
 
 @core_helper
-def markdown_extract(text, extract_length=190):
+def markdown_extract(text: str, extract_length: int=190) -> Union[str, Markup]:
     ''' return the plain text representation of markdown encoded text.  That
     is the texted without any html tags.  If extract_length is 0 then it
     will not be truncated.'''
@@ -1530,12 +1541,12 @@ def markdown_extract(text, extract_length=190):
 
 
 @core_helper
-def icon_url(name):
+def icon_url(name: str) -> str:
     return url_for_static('/images/icons/%s.png' % name)
 
 
 @core_helper
-def icon_html(url, alt=None, inline=True):
+def icon_html(url: str, alt: Optional[str]=None, inline: bool=True) -> Markup:
     classes = ''
     if inline:
         classes += 'inline-icon '
@@ -1544,12 +1555,12 @@ def icon_html(url, alt=None, inline=True):
 
 
 @core_helper
-def icon(name, alt=None, inline=True):
+def icon(name: str, alt: Optional[str]=None, inline: bool=True) -> Markup:
     return icon_html(icon_url(name), alt, inline)
 
 
 @core_helper
-def resource_icon(res):
+def resource_icon(res: Dict) -> Markup:
     if False:
         icon_name = 'page_white'
         # if (res.is_404?): icon_name = 'page_white_error'
@@ -1561,7 +1572,7 @@ def resource_icon(res):
 
 
 @core_helper
-def format_icon(_format):
+def format_icon(_format: str) -> str:
     _format = _format.lower()
     if ('json' in _format):
         return 'page_white_cup'
@@ -1581,7 +1592,7 @@ def format_icon(_format):
 
 
 @core_helper
-def dict_list_reduce(list_, key, unique=True):
+def dict_list_reduce(list_: List[Dict[str, T]], key: str, unique: bool=True) -> List[T]:
     ''' Take a list of dicts and create a new one containing just the
     values for the key with unique values if requested. '''
     new_list = []
@@ -1598,7 +1609,7 @@ _VALID_GRAVATAR_DEFAULTS = ['404', 'mm', 'identicon', 'monsterid',
 
 
 @core_helper
-def gravatar(email_hash, size=100, default=None):
+def gravatar(email_hash: str, size: int=100, default: Optional[str]=None) -> Markup:
     if default is None:
         default = config.get('ckan.gravatar_default', 'identicon')
 
@@ -1613,7 +1624,7 @@ def gravatar(email_hash, size=100, default=None):
 
 
 @core_helper
-def user_image(user_id, size=100):
+def user_image(user_id: str, size: int=100) -> Union[Markup, str]:
     try:
         user_dict = logic.get_action('user_show')(
             {'ignore_auth': True},
@@ -1641,7 +1652,7 @@ def user_image(user_id, size=100):
 
 
 @core_helper
-def pager_url(page, partial=None, **kwargs):
+def pager_url(page: int, partial: Optional[str]=None, **kwargs: Any) -> str:
     pargs = []
     if is_flask_request():
         pargs.append(request.endpoint)
@@ -1657,7 +1668,7 @@ def pager_url(page, partial=None, **kwargs):
 
 
 @core_helper
-def get_page_number(params, key='page', default=1):
+def get_page_number(params: Dict, key: str='page', default: int=1) -> int:
     '''
     Return the page number from the provided params after verifying that it is
     an positive integer.
@@ -1679,7 +1690,7 @@ def get_page_number(params, key='page', default=1):
 
 
 @core_helper
-def get_display_timezone():
+def get_display_timezone() -> str:
     ''' Returns a pytz timezone for the display_timezone setting in the
     configuration file or UTC if not specified.
     :rtype: timezone
@@ -1693,8 +1704,8 @@ def get_display_timezone():
 
 
 @core_helper
-def render_datetime(datetime_, date_format=None, with_hours=False,
-                    with_seconds=False):
+def render_datetime(datetime_: datetime.datetime, date_format: Optional[str]=None, with_hours: bool=False,
+                    with_seconds: bool=False) -> str:
     '''Render a datetime object or timestamp string as a localised date or
     in the requested format.
     If timestamp is badly formatted, then a blank string is returned.
@@ -1742,7 +1753,7 @@ def render_datetime(datetime_, date_format=None, with_hours=False,
 
 
 @core_helper
-def date_str_to_datetime(date_str):
+def date_str_to_datetime(date_str: str) -> datetime.datetime:
     '''Convert ISO-like formatted datestring to datetime object.
 
     This function converts ISO format date- and datetime-strings into
@@ -1778,7 +1789,7 @@ def date_str_to_datetime(date_str):
 
 
 @core_helper
-def parse_rfc_2822_date(date_str, assume_utc=True):
+def parse_rfc_2822_date(date_str: str, assume_utc: bool=True) -> Optional[datetime.datetime]:
     '''Parse a date string of the form specified in RFC 2822, and return a
     datetime.
 
@@ -1850,7 +1861,7 @@ class _RFC2282TzInfo(datetime.tzinfo):
 
 
 @core_helper
-def time_ago_from_timestamp(timestamp):
+def time_ago_from_timestamp(timestamp: int) -> str:
     ''' Returns a string like `5 months ago` for a datetime relative to now
     :param timestamp: the timestamp or datetime
     :type timestamp: string or datetime
@@ -1866,14 +1877,14 @@ def time_ago_from_timestamp(timestamp):
 
 
 @core_helper
-def button_attr(enable, type='primary'):
+def button_attr(enable: bool, type: str='primary') -> str:
     if enable:
         return 'class="btn %s"' % type
     return 'disabled class="btn disabled"'
 
 
 @core_helper
-def dataset_display_name(package_or_package_dict):
+def dataset_display_name(package_or_package_dict: Union[Dict, model.Package]) -> str:
     if isinstance(package_or_package_dict, dict):
         return get_translated(package_or_package_dict, 'title') or \
             package_or_package_dict['name']
@@ -1884,7 +1895,7 @@ def dataset_display_name(package_or_package_dict):
 
 
 @core_helper
-def dataset_link(package_or_package_dict):
+def dataset_link(package_or_package_dict: Union[Dict, model.Package]) -> Markup:
     if isinstance(package_or_package_dict, dict):
         name = package_or_package_dict['name']
         type_ = package_or_package_dict.get('type', 'dataset')
@@ -1899,7 +1910,7 @@ def dataset_link(package_or_package_dict):
 
 
 @core_helper
-def resource_display_name(resource_dict):
+def resource_display_name(resource_dict: Dict) -> str:
     # TODO: (?) support resource objects as well
     name = get_translated(resource_dict, 'name')
     description = get_translated(resource_dict, 'description')
@@ -1916,7 +1927,7 @@ def resource_display_name(resource_dict):
 
 
 @core_helper
-def resource_link(resource_dict, package_id, package_type='dataset'):
+def resource_link(resource_dict: Dict, package_id: str, package_type: str='dataset') -> Markup:
     text = resource_display_name(resource_dict)
     url = url_for('{}_resource.read'.format(package_type),
                   id=package_id,
@@ -1925,31 +1936,31 @@ def resource_link(resource_dict, package_id, package_type='dataset'):
 
 
 @core_helper
-def tag_link(tag, package_type='dataset'):
+def tag_link(tag: Dict, package_type: str='dataset') -> Markup:
     url = url_for('{}.search'.format(package_type), tags=tag['name'])
     return link_to(tag.get('title', tag['name']), url)
 
 
 @core_helper
-def group_link(group):
+def group_link(group: Dict) -> Markup:
     url = url_for('group.read', id=group['name'])
     return link_to(group['title'], url)
 
 
 @core_helper
-def organization_link(organization):
+def organization_link(organization: Dict) -> Markup:
     url = url_for(controller='organization', action='read',
                   id=organization['name'])
     return link_to(organization['title'], url)
 
 
 @core_helper
-def dump_json(obj, **kw):
+def dump_json(obj: Any, **kw: Any) -> str:
     return json.dumps(obj, **kw)
 
 
 @core_helper
-def auto_log_message():
+def auto_log_message() -> str:
     if (c.action == 'new'):
         return _('Created new dataset.')
     elif (c.action == 'editresources'):
@@ -1960,7 +1971,7 @@ def auto_log_message():
 
 
 @core_helper
-def activity_div(template, activity, actor, object=None, target=None):
+def activity_div(template: str, activity: Dict, actor: str, object: Optional[str]=None, target: Optional[str]=None) -> Markup:
     actor = '<span class="actor">%s</span>' % actor
     if object:
         object = '<span class="object">%s</span>' % object
@@ -1975,7 +1986,7 @@ def activity_div(template, activity, actor, object=None, target=None):
 
 
 @core_helper
-def snippet(template_name, **kw):
+def snippet(template_name: str, **kw: Any) -> str:
     ''' This function is used to load html snippets into pages. keywords
     can be used to pass parameters into the snippet rendering '''
     import ckan.lib.base as base
@@ -1983,7 +1994,7 @@ def snippet(template_name, **kw):
 
 
 @core_helper
-def convert_to_dict(object_type, objs):
+def convert_to_dict(object_type: str, objs: List[Any]) -> List[Dict]:
     ''' This is a helper function for converting lists of objects into
     lists of dicts. It is for backwards compatability only. '''
 
@@ -2003,7 +2014,7 @@ _follow_objects = ['dataset', 'user', 'group']
 
 
 @core_helper
-def follow_button(obj_type, obj_id):
+def follow_button(obj_type: str, obj_id: str) -> str:
     '''Return a follow button for the given object type and id.
 
     If the user is not logged in return an empty string instead.
@@ -2034,7 +2045,7 @@ def follow_button(obj_type, obj_id):
 
 
 @core_helper
-def follow_count(obj_type, obj_id):
+def follow_count(obj_type: str, obj_id: str) -> int:
     '''Return the number of followers of an object.
 
     :param obj_type: the type of the object, e.g. 'user' or 'dataset'
@@ -2068,8 +2079,8 @@ def _create_url_with_params(params=None, controller=None, action=None,
 
 
 @core_helper
-def add_url_param(alternative_url=None, controller=None, action=None,
-                  extras=None, new_params=None):
+def add_url_param(alternative_url: Optional[str]=None, controller: Optional[str]=None, action: Optional[str]=None,
+                  extras: Optional[Dict]=None, new_params: Optional[Dict]=None) -> str:
     '''
     Adds extra parameters to existing ones
 
@@ -2096,8 +2107,8 @@ def add_url_param(alternative_url=None, controller=None, action=None,
 
 
 @core_helper
-def remove_url_param(key, value=None, replace=None, controller=None,
-                     action=None, extras=None, alternative_url=None):
+def remove_url_param(key: str, value: Optional[str]=None, replace: Optional[str]=None, controller: Optional[str]=None,
+                     action: Optional[str]=None, extras: Optional[Dict]=None, alternative_url: Optional[str]=None) -> str:
     ''' Remove one or multiple keys from the current parameters.
     The first parameter can be either a string with the name of the key to
     remove or a list of keys to remove.
@@ -2143,13 +2154,13 @@ def remove_url_param(key, value=None, replace=None, controller=None,
 
 
 @core_helper
-def debug_inspect(arg):
+def debug_inspect(arg: Any) -> Markup:
     ''' Output pprint.pformat view of supplied arg '''
     return literal('<pre>') + pprint.pformat(arg) + literal('</pre>')
 
 
 @core_helper
-def popular(type_, number, min=1, title=None):
+def popular(type_: str, number: int, min: int=1, title: Optional[str]=None) -> str:
     ''' display a popular icon. '''
     if type_ == 'views':
         title = ungettext('{number} view', '{number} views', number)
@@ -2163,7 +2174,7 @@ def popular(type_, number, min=1, title=None):
 
 
 @core_helper
-def groups_available(am_member=False):
+def groups_available(am_member: bool=False) -> List[Dict]:
     '''Return a list of the groups that the user is authorized to edit.
 
     :param am_member: if True return only the groups the logged-in user is a
@@ -2180,7 +2191,7 @@ def groups_available(am_member=False):
 
 @core_helper
 def organizations_available(
-        permission='manage_group', include_dataset_count=False):
+        permission: str='manage_group', include_dataset_count: bool=False) -> List[Dict]:
     '''Return a list of organizations that the current user has the specified
     permission for.
     '''
@@ -2192,13 +2203,13 @@ def organizations_available(
 
 
 @core_helper
-def roles_translated():
+def roles_translated() -> Dict[str, str]:
     '''Return a dict of available roles with their translations'''
     return authz.roles_trans()
 
 
 @core_helper
-def user_in_org_or_group(group_id):
+def user_in_org_or_group(group_id: str) -> bool:
     ''' Check if user is in a group or organization '''
     # we need a user
     if not c.userobj:
@@ -2215,8 +2226,8 @@ def user_in_org_or_group(group_id):
 
 
 @core_helper
-def dashboard_activity_stream(user_id, filter_type=None, filter_id=None,
-                              offset=0):
+def dashboard_activity_stream(user_id: str, filter_type: Optional[str]=None, filter_id: Optional[str]=None,
+                              offset: int=0) -> List[Dict]:
     '''Return the dashboard activity stream of the current user.
 
     :param user_id: the id of the user
@@ -2249,7 +2260,7 @@ def dashboard_activity_stream(user_id, filter_type=None, filter_id=None,
 
 
 @core_helper
-def recently_changed_packages_activity_stream(limit=None):
+def recently_changed_packages_activity_stream(limit: Optional[int]=None) -> List[Dict]:
     if limit:
         data_dict = {'limit': limit}
     else:
@@ -2260,7 +2271,7 @@ def recently_changed_packages_activity_stream(limit=None):
 
 
 @core_helper
-def escape_js(str_to_escape):
+def escape_js(str_to_escape: str) -> str:
     '''Escapes special characters from a JS string.
 
        Useful e.g. when you need to pass JSON to the templates
@@ -2274,7 +2285,7 @@ def escape_js(str_to_escape):
 
 
 @core_helper
-def get_pkg_dict_extra(pkg_dict, key, default=None):
+def get_pkg_dict_extra(pkg_dict: Dict, key: str, default: Optional[Any]=None) -> Any:
     '''Returns the value for the dataset extra with the provided key.
 
     If the key is not found, it returns a default value, which is None by
@@ -2295,7 +2306,7 @@ def get_pkg_dict_extra(pkg_dict, key, default=None):
 
 
 @core_helper
-def get_request_param(parameter_name, default=None):
+def get_request_param(parameter_name: str, default: Optional[Any]=None) -> Any:
     ''' This function allows templates to access query string parameters
     from the request. This is useful for things like sort order in
     searches. '''
@@ -2330,7 +2341,7 @@ RE_MD_HTML_TAGS = re.compile('<[^><]*>')
 
 
 @core_helper
-def html_auto_link(data):
+def html_auto_link(data: str) -> str:
     '''Linkifies HTML
 
     `tag` converted to a tag link
@@ -2370,7 +2381,7 @@ def html_auto_link(data):
 
 
 @core_helper
-def render_markdown(data, auto_link=True, allow_html=False):
+def render_markdown(data: str, auto_link: bool=True, allow_html: bool=False) -> Union[str, Markup]:
     ''' Returns the data as rendered markdown
 
     :param auto_link: Should ckan specific links be created e.g. `group:xxx`
@@ -2397,7 +2408,7 @@ def render_markdown(data, auto_link=True, allow_html=False):
 
 
 @core_helper
-def format_resource_items(items):
+def format_resource_items(items: List[Tuple[str, Any]]) -> List[Tuple[str, Any]]:
     ''' Take a resource item list and format nicely with blacklisting etc. '''
     blacklist = ['name', 'description', 'url', 'tracking_summary']
     output = []
@@ -2434,7 +2445,7 @@ def format_resource_items(items):
 
 
 @core_helper
-def resource_preview(resource, package):
+def resource_preview(resource: Dict, package: Dict) -> str:
     '''
     Returns a rendered snippet for a embedded resource preview.
 
@@ -2464,7 +2475,7 @@ def resource_preview(resource, package):
 
 
 @core_helper
-def get_allowed_view_types(resource, package):
+def get_allowed_view_types(resource: Dict, package: Dict) -> List[Dict]:
     data_dict = {'resource': resource, 'package': package}
     plugins = datapreview.get_allowed_view_plugins(data_dict)
 
@@ -2479,7 +2490,7 @@ def get_allowed_view_types(resource, package):
 
 
 @core_helper
-def rendered_resource_view(resource_view, resource, package, embed=False):
+def rendered_resource_view(resource_view: Dict, resource: Dict, package: Dict, embed: bool=False) -> Markup:
     '''
     Returns a rendered resource view snippet.
     '''
@@ -2500,7 +2511,7 @@ def rendered_resource_view(resource_view, resource, package, embed=False):
 
 
 @core_helper
-def view_resource_url(resource_view, resource, package, **kw):
+def view_resource_url(resource_view: Dict, resource: Dict, package: Dict, **kw: Any) -> str:
     '''
     Returns url for resource. made to be overridden by extensions. i.e
     by resource proxy.
@@ -2509,7 +2520,7 @@ def view_resource_url(resource_view, resource, package, **kw):
 
 
 @core_helper
-def resource_view_is_filterable(resource_view):
+def resource_view_is_filterable(resource_view: Dict) -> bool:
     '''
     Returns True if the given resource view support filters.
     '''
@@ -2518,7 +2529,7 @@ def resource_view_is_filterable(resource_view):
 
 
 @core_helper
-def resource_view_get_fields(resource):
+def resource_view_get_fields(resource: Dict) -> List["str"]:
     '''Returns sorted list of text and time fields of a datastore resource.'''
 
     if not resource.get('datastore_active'):
@@ -2540,7 +2551,7 @@ def resource_view_get_fields(resource):
 
 
 @core_helper
-def resource_view_is_iframed(resource_view):
+def resource_view_is_iframed(resource_view: Dict) -> bool:
     '''
     Returns true if the given resource view should be displayed in an iframe.
     '''
@@ -2549,7 +2560,7 @@ def resource_view_is_iframed(resource_view):
 
 
 @core_helper
-def resource_view_icon(resource_view):
+def resource_view_icon(resource_view: Dict) -> str:
     '''
     Returns the icon for a particular view type.
     '''
@@ -2558,7 +2569,7 @@ def resource_view_icon(resource_view):
 
 
 @core_helper
-def resource_view_display_preview(resource_view):
+def resource_view_display_preview(resource_view: Dict) -> bool:
     '''
     Returns if the view should display a preview.
     '''
@@ -2567,7 +2578,7 @@ def resource_view_display_preview(resource_view):
 
 
 @core_helper
-def resource_view_full_page(resource_view):
+def resource_view_full_page(resource_view: Dict) -> bool:
     '''
     Returns if the edit view page should be full page.
     '''
@@ -2576,13 +2587,13 @@ def resource_view_full_page(resource_view):
 
 
 @core_helper
-def remove_linebreaks(string):
+def remove_linebreaks(string: str) -> str:
     '''Remove linebreaks from string to make it usable in JavaScript'''
     return text_type(string).replace('\n', '')
 
 
 @core_helper
-def list_dict_filter(list_, search_field, output_field, value):
+def list_dict_filter(list_: List[Dict], search_field: str, output_field: str, value: Any) -> Any:
     ''' Takes a list of dicts and returns the value of a given key if the
     item has a matching value for a supplied key
 
@@ -2605,7 +2616,7 @@ def list_dict_filter(list_, search_field, output_field, value):
 
 
 @core_helper
-def SI_number_span(number):
+def SI_number_span(number: int) -> Markup:
     ''' outputs a span with the number in SI unit eg 14700 -> 14.7k '''
     number = int(number)
     if number < 1000:
@@ -2624,7 +2635,7 @@ localised_filesize = formatters.localised_filesize
 
 
 @core_helper
-def new_activities():
+def new_activities() -> Optional[int]:
     '''Return the number of activities for the current user.
 
     See :func:`logic.action.get.dashboard_new_activities_count` for more
@@ -2638,14 +2649,14 @@ def new_activities():
 
 
 @core_helper
-def uploads_enabled():
+def uploads_enabled() -> bool:
     if uploader.get_storage_path():
         return True
     return False
 
 
 @core_helper
-def get_featured_organizations(count=1):
+def get_featured_organizations(count: int=1) -> List[Dict]:
     '''Returns a list of favourite organization in the form
     of organization_list action function
     '''
@@ -2658,7 +2669,7 @@ def get_featured_organizations(count=1):
 
 
 @core_helper
-def get_featured_groups(count=1):
+def get_featured_groups(count: int=1) -> List[Dict]:
     '''Returns a list of favourite group the form
     of organization_list action function
     '''
@@ -2671,7 +2682,7 @@ def get_featured_groups(count=1):
 
 
 @core_helper
-def featured_group_org(items, get_action, list_action, count):
+def featured_group_org(items: List[str], get_action: str, list_action: str, count: int) -> List[Dict]:
     def get_group(id):
         context = {'ignore_auth': True,
                    'limits': {'packages': 2},
@@ -2707,7 +2718,7 @@ def featured_group_org(items, get_action, list_action, count):
 
 
 @core_helper
-def get_site_statistics():
+def get_site_statistics() -> Dict[str, int]:
     stats = {}
     stats['dataset_count'] = logic.get_action('package_search')(
         {}, {"rows": 1})['count']
@@ -2721,7 +2732,7 @@ _RESOURCE_FORMATS = None
 
 
 @core_helper
-def resource_formats():
+def resource_formats() -> Dict[str, List[str]]:
     ''' Returns the resource formats as a dict, sourced from the resource
     format JSON file.
 
@@ -2768,7 +2779,7 @@ def resource_formats():
 
 
 @core_helper
-def unified_resource_format(format):
+def unified_resource_format(format: str) -> str:
     formats = resource_formats()
     format_clean = format.lower()
     if format_clean in formats:
@@ -2779,12 +2790,12 @@ def unified_resource_format(format):
 
 
 @core_helper
-def check_config_permission(permission):
+def check_config_permission(permission: str) -> Union[List[str], bool]:
     return authz.check_config_permission(permission)
 
 
 @core_helper
-def get_organization(org=None, include_datasets=False):
+def get_organization(org: Optional[str]=None, include_datasets: bool=False) -> Dict:
     if org is None:
         return {}
     try:
@@ -2795,7 +2806,7 @@ def get_organization(org=None, include_datasets=False):
 
 
 @core_helper
-def license_options(existing_license_id=None):
+def license_options(existing_license_id: Optional[Tuple[str, str]]=None) -> List[Tuple[str, str]]:
     '''Returns [(l.title, l.id), ...] for the licenses configured to be
     offered. Always includes the existing_license_id, if supplied.
     '''
@@ -2811,7 +2822,7 @@ def license_options(existing_license_id=None):
 
 
 @core_helper
-def get_translated(data_dict, field):
+def get_translated(data_dict: Dict, field: str) -> Union[str, Any]:
     language = i18n.get_lang()
     try:
         return data_dict[field + u'_translated'][language]
@@ -2821,13 +2832,13 @@ def get_translated(data_dict, field):
 
 
 @core_helper
-def facets():
+def facets() -> List[str]:
     u'''Returns a list of the current facet names'''
     return config.get(u'search.facets', DEFAULT_FACET_NAMES).split()
 
 
 @core_helper
-def mail_to(email_address, name):
+def mail_to(email_address: str, name: str) -> Markup:
     email = escape(email_address)
     author = escape(name)
     html = Markup(u'<a href=mailto:{0}>{1}</a>'.format(email, author))
@@ -2835,7 +2846,7 @@ def mail_to(email_address, name):
 
 
 @core_helper
-def radio(selected, id, checked):
+def radio(selected: str, id: str, checked: bool) -> Markup:
     if checked:
         return literal((u'<input checked="checked" id="%s_%s" name="%s" \
             value="%s" type="radio">') % (selected, id, selected, id))
@@ -2844,7 +2855,7 @@ def radio(selected, id, checked):
 
 
 @core_helper
-def clean_html(html):
+def clean_html(html: str) -> str:
     return bleach_clean(text_type(html))
 
 
@@ -2865,7 +2876,7 @@ core_helper(include_asset)
 core_helper(render_assets)
 
 
-def load_plugin_helpers():
+def load_plugin_helpers() -> None:
     """
     (Re)loads the list of helpers provided by plugins.
     """
@@ -2895,7 +2906,7 @@ def load_plugin_helpers():
 
 
 @core_helper
-def sanitize_id(id_):
+def sanitize_id(id_: str) -> str:
     '''Given an id (uuid4), if it has any invalid characters it raises
     ValueError.
     '''
@@ -2903,7 +2914,7 @@ def sanitize_id(id_):
 
 
 @core_helper
-def compare_pkg_dicts(old, new, old_activity_id):
+def compare_pkg_dicts(old: Dict, new: Dict, old_activity_id: str) -> List[Dict]:
     '''
     Takes two package dictionaries that represent consecutive versions of
     the same dataset and returns a list of detailed & formatted summaries of
@@ -2934,7 +2945,7 @@ def compare_pkg_dicts(old, new, old_activity_id):
 
 
 @core_helper
-def activity_list_select(pkg_activity_list, current_activity_id):
+def activity_list_select(pkg_activity_list: List[Dict], current_activity_id: str) -> List[Markup]:
     '''
     Builds an HTML formatted list of options for the select lists
     on the "Changes" summary page.
@@ -2960,7 +2971,7 @@ def activity_list_select(pkg_activity_list, current_activity_id):
 
 
 @core_helper
-def get_collaborators(package_id):
+def get_collaborators(package_id: str) -> List[Tuple[str, str]]:
     '''Return the collaborators list for a dataset
 
     Returns a list of tuples with the user id and the capacity
@@ -2982,7 +2993,7 @@ def get_collaborators(package_id):
 
 
 @core_helper
-def can_update_owner_org(package_dict, user_orgs=None):
+def can_update_owner_org(package_dict: Dict, user_orgs: Optional[List[Dict]]=None) -> bool:
 
     if not package_dict.get('id') or not package_dict.get('owner_org'):
         # We are either creating a dataset or it is an unowned dataset.

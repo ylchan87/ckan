@@ -8,6 +8,8 @@ import simplejson
 
 from six import string_types
 from six.moves.urllib.parse import quote_plus
+from typing import Dict, Optional, Tuple
+from pysolr import Solr
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +36,7 @@ class SolrSettings(object):
     _password = None
 
     @classmethod
-    def init(cls, url, user=None, password=None):
+    def init(cls, url: str, user: Optional[str]=None, password: Optional[str]=None) -> None:
         if url is not None:
             cls._url = url
             cls._user = user
@@ -44,7 +46,7 @@ class SolrSettings(object):
         cls._is_initialised = True
 
     @classmethod
-    def get(cls):
+    def get(cls) -> Tuple[str, str, str]:
         if not cls._is_initialised:
             raise SearchIndexError('SOLR URL not initialised')
         if not cls._url:
@@ -52,7 +54,7 @@ class SolrSettings(object):
         return (cls._url, cls._user, cls._password)
 
 
-def is_available():
+def is_available() -> bool:
     """
     Return true if we can successfully connect to Solr.
     """
@@ -65,7 +67,7 @@ def is_available():
     return True
 
 
-def make_connection(decode_dates=True):
+def make_connection(decode_dates: bool=True) -> Solr:
     solr_url, solr_user, solr_password = SolrSettings.get()
 
     if solr_url and solr_user:
@@ -84,7 +86,7 @@ def make_connection(decode_dates=True):
         return pysolr.Solr(solr_url)
 
 
-def solr_datetime_decoder(d):
+def solr_datetime_decoder(d: Dict) -> Dict:
     for k, v in d.items():
         if isinstance(v, string_types):
             possible_datetime = re.search(pysolr.DATETIME_REGEX, v)

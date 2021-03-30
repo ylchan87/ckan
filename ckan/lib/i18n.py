@@ -54,6 +54,8 @@ from ckan.common import config, is_flask_request, aslist
 import ckan.i18n
 from ckan.plugins import PluginImplementations
 from ckan.plugins.interfaces import ITranslation
+from typing import Any, Dict, List, Set
+from flask.wrappers import Request
 
 if six.PY2:
     from pylons import i18n as pylons_i18n  # type: ignore
@@ -73,7 +75,7 @@ _CKAN_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), u'..'))
 _JS_TRANSLATIONS_DIR = os.path.join(_CKAN_DIR, u'public', u'base', u'i18n')
 
 
-def get_ckan_i18n_dir():
+def get_ckan_i18n_dir() -> str:
     path = config.get(
         u'ckan.i18n_directory', os.path.join(_CKAN_DIR, u'i18n'))
     if os.path.isdir(os.path.join(path, u'i18n')):
@@ -82,7 +84,7 @@ def get_ckan_i18n_dir():
     return path
 
 
-def get_locales_from_config():
+def get_locales_from_config() -> Set[str]:
     ''' despite the name of this function it gets the locales defined by
     the config AND also the locals available subject to the config. '''
     locales_offered = config.get('ckan.locales_offered', '').split()
@@ -160,7 +162,7 @@ locales_dict = None
 _non_translated_locals = None
 
 
-def get_locales():
+def get_locales() -> List[str]:
     ''' Get list of available locales
     e.g. [ 'en', 'de', ... ]
     '''
@@ -170,7 +172,7 @@ def get_locales():
     return locales
 
 
-def non_translated_locals():
+def non_translated_locals() -> List[str]:
     ''' These are the locales that are available but for which there are
     no translations. returns a list like ['en', 'de', ...] '''
     global _non_translated_locals
@@ -180,7 +182,7 @@ def non_translated_locals():
     return _non_translated_locals
 
 
-def get_locales_dict():
+def get_locales_dict() -> Dict[str, Locale]:
     ''' Get a dict of the available locales
     e.g.  { 'en' : Locale('en'), 'de' : Locale('de'), ... } '''
     global locales_dict
@@ -192,7 +194,7 @@ def get_locales_dict():
     return locales_dict
 
 
-def get_available_locales():
+def get_available_locales() -> List[Locale]:
     ''' Get a list of the available locales
     e.g.  [ Locale('en'), Locale('de'), ... ] '''
     global available_locales
@@ -215,7 +217,7 @@ def get_available_locales():
     return available_locales
 
 
-def get_identifier_from_locale_class(locale):
+def get_identifier_from_locale_class(locale: Locale) -> str:
     return get_locale_identifier(
         (locale.language,
          locale.territory,
@@ -240,7 +242,7 @@ def _set_lang(lang):
         pylons_i18n.set_lang(lang, class_=Translations)
 
 
-def handle_request(request, tmpl_context):
+def handle_request(request: Request, tmpl_context: Any) -> str:
     ''' Set the language for the request '''
     lang = request.environ.get('CKAN_LANG') or \
         config.get('ckan.locale_default', 'en')
@@ -280,7 +282,7 @@ def _add_extra_translations(dirname, locales, domain):
                                               translator)
 
 
-def get_lang():
+def get_lang() -> str:
     ''' Returns the current language. Based on babel.i18n.get_lang but
     works when set_lang has not been run (i.e. still in English). '''
     if is_flask_request():
@@ -289,7 +291,7 @@ def get_lang():
     return 'en'
 
 
-def set_lang(language_code):
+def set_lang(language_code: str) -> None:
     ''' Wrapper to pylons call '''
     if language_code in non_translated_locals():
         language_code = config.get('ckan.locale_default', 'en')
@@ -356,7 +358,7 @@ def _build_js_translation(lang, source_filenames, entries, dest_filename):
         f.write(six.ensure_str(s))
 
 
-def build_js_translations():
+def build_js_translations() -> None:
     '''
     Build JavaScript translation files.
 

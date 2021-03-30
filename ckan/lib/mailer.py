@@ -21,6 +21,8 @@ import ckan.lib.helpers as h
 from ckan.lib.base import render
 
 from ckan.common import _
+from ckan.model.user import User
+from typing import Dict, Optional
 
 log = logging.getLogger(__name__)
 
@@ -115,8 +117,8 @@ def _mail_recipient(recipient_name, recipient_email,
         smtp_connection.quit()
 
 
-def mail_recipient(recipient_name, recipient_email, subject,
-                   body, body_html=None, headers={}):
+def mail_recipient(recipient_name: str, recipient_email: str, subject: str,
+                   body: str, body_html: Optional[str]=None, headers: Dict={}) -> None:
     '''Sends an email'''
     site_title = config.get('ckan.site_title')
     site_url = config.get('ckan.site_url')
@@ -125,7 +127,7 @@ def mail_recipient(recipient_name, recipient_email, subject,
                            body_html=body_html, headers=headers)
 
 
-def mail_user(recipient, subject, body, body_html=None, headers={}):
+def mail_user(recipient: str, subject: str, body: str, body_html: Optional[str]=None, headers: Dict={}) -> None:
     '''Sends an email to a CKAN user'''
     if (recipient.email is None) or not len(recipient.email):
         raise MailerException(_("No recipient email address available!"))
@@ -133,7 +135,7 @@ def mail_user(recipient, subject, body, body_html=None, headers={}):
                    body, body_html=body_html, headers=headers)
 
 
-def get_reset_link_body(user):
+def get_reset_link_body(user: User) -> str:
     extra_vars = {
         'reset_link': get_reset_link(user),
         'site_title': config.get('ckan.site_title'),
@@ -144,7 +146,7 @@ def get_reset_link_body(user):
     return render('emails/reset_password.txt', extra_vars)
 
 
-def get_invite_body(user, group_dict=None, role=None):
+def get_invite_body(user: User, group_dict: Optional[Dict]=None, role: Optional[str]=None) -> str:
     if group_dict:
         group_type = (_('organization') if group_dict['is_organization']
                       else _('group'))
@@ -165,7 +167,7 @@ def get_invite_body(user, group_dict=None, role=None):
     return render('emails/invite_user.txt', extra_vars)
 
 
-def get_reset_link(user):
+def get_reset_link(user: User) -> str:
     return h.url_for(controller='user',
                      action='perform_reset',
                      id=user.id,
@@ -173,7 +175,7 @@ def get_reset_link(user):
                      qualified=True)
 
 
-def send_reset_link(user):
+def send_reset_link(user: User) -> None:
     create_reset_key(user)
     body = get_reset_link_body(user)
     extra_vars = {
@@ -187,7 +189,7 @@ def send_reset_link(user):
     mail_user(user, subject, body)
 
 
-def send_invite(user, group_dict=None, role=None):
+def send_invite(user: User, group_dict=None, role=None) -> None:
     create_reset_key(user)
     body = get_invite_body(user, group_dict, role)
     extra_vars = {
@@ -201,16 +203,16 @@ def send_invite(user, group_dict=None, role=None):
     mail_user(user, subject, body)
 
 
-def create_reset_key(user):
+def create_reset_key(user: User) -> None:
     user.reset_key = text_type(make_key())
     model.repo.commit_and_remove()
 
 
-def make_key():
+def make_key() -> str:
     return codecs.encode(os.urandom(16), 'hex')
 
 
-def verify_reset_link(user, key):
+def verify_reset_link(user: User, key: Optional[str]) -> bool:
     if not key:
         return False
     if not user.reset_key or len(user.reset_key) < 5:

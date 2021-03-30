@@ -19,13 +19,13 @@ dashboard_table = sqlalchemy.Table('dashboard', meta.metadata,
 class Dashboard(object):
     '''Saved data used for the user's dashboard.'''
 
-    def __init__(self, user_id):
+    def __init__(self, user_id: str) -> None:
         self.user_id = user_id
         self.activity_stream_last_viewed = datetime.datetime.utcnow()
         self.email_last_sent = datetime.datetime.utcnow()
 
     @classmethod
-    def get(cls, user_id):
+    def get(cls, user_id: str) -> "Dashboard":
         '''Return the Dashboard object for the given user_id.
 
         If there's no dashboard row in the database for this user_id, a fresh

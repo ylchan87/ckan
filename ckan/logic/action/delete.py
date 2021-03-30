@@ -17,6 +17,8 @@ import ckan.lib.api_token as api_token
 from ckan import authz
 
 from ckan.common import _
+from typing import List
+from ckan.types import Context, DataDict
 
 
 log = logging.getLogger('ckan.logic')
@@ -33,7 +35,7 @@ _get_or_bust = ckan.logic.get_or_bust
 _get_action = ckan.logic.get_action
 
 
-def user_delete(context, data_dict):
+def user_delete(context: Context, data_dict: DataDict) -> None:
     '''Delete a user.
 
     Only sysadmins can delete users.
@@ -67,7 +69,7 @@ def user_delete(context, data_dict):
     model.repo.commit()
 
 
-def package_delete(context, data_dict):
+def package_delete(context: Context, data_dict: DataDict) -> None:
     '''Delete a dataset (package).
 
     This makes the dataset disappear from all web & API views, apart from the
@@ -124,7 +126,7 @@ def package_delete(context, data_dict):
     model.repo.commit()
 
 
-def dataset_purge(context, data_dict):
+def dataset_purge(context: Context, data_dict: DataDict) -> None:
     '''Purge a dataset.
 
     .. warning:: Purging a dataset cannot be undone!
@@ -168,7 +170,7 @@ def dataset_purge(context, data_dict):
     model.repo.commit_and_remove()
 
 
-def resource_delete(context, data_dict):
+def resource_delete(context: Context, data_dict: DataDict) -> None:
     '''Delete a resource from a dataset.
 
     You must be a sysadmin or the owner of the resource to delete it.
@@ -212,7 +214,7 @@ def resource_delete(context, data_dict):
     model.repo.commit()
 
 
-def resource_view_delete(context, data_dict):
+def resource_view_delete(context: Context, data_dict: DataDict) -> None:
     '''Delete a resource_view.
 
     :param id: the id of the resource_view
@@ -234,7 +236,7 @@ def resource_view_delete(context, data_dict):
     model.repo.commit()
 
 
-def resource_view_clear(context, data_dict):
+def resource_view_clear(context: Context, data_dict: DataDict) -> None:
     '''Delete all resource views, or all of a particular type.
 
     :param view_types: specific types to delete (optional)
@@ -250,7 +252,7 @@ def resource_view_clear(context, data_dict):
     model.repo.commit()
 
 
-def package_relationship_delete(context, data_dict):
+def package_relationship_delete(context: Context, data_dict: DataDict) -> None:
     '''Delete a dataset (package) relationship.
 
     You must be authorised to delete dataset relationships, and to edit both
@@ -290,7 +292,7 @@ def package_relationship_delete(context, data_dict):
     relationship.delete()
     model.repo.commit()
 
-def member_delete(context, data_dict=None):
+def member_delete(context: Context, data_dict: DataDict=None) -> None:
     '''Remove an object (e.g. a user, dataset or group) from a group.
 
     You must be authorized to edit a group to remove objects from it.
@@ -329,7 +331,7 @@ def member_delete(context, data_dict=None):
         model.repo.commit()
 
 
-def package_collaborator_delete(context, data_dict):
+def package_collaborator_delete(context: Context, data_dict: DataDict) -> None:
     '''Remove a collaborator from a dataset.
 
     Currently you must be an Admin on the dataset owner organization to
@@ -469,7 +471,7 @@ def _group_or_org_delete(context, data_dict, is_org=False):
 
     model.repo.commit()
 
-def group_delete(context, data_dict):
+def group_delete(context: Context, data_dict: DataDict) -> None:
     '''Delete a group.
 
     You must be authorized to delete the group.
@@ -480,7 +482,7 @@ def group_delete(context, data_dict):
     '''
     return _group_or_org_delete(context, data_dict)
 
-def organization_delete(context, data_dict):
+def organization_delete(context: Context, data_dict: DataDict) -> None:
     '''Delete an organization.
 
     You must be authorized to delete the organization
@@ -557,7 +559,7 @@ def _group_or_org_purge(context, data_dict, is_org=False):
     group.purge()
     model.repo.commit_and_remove()
 
-def group_purge(context, data_dict):
+def group_purge(context: Context, data_dict: DataDict) -> None:
     '''Purge a group.
 
     .. warning:: Purging a group cannot be undone!
@@ -576,7 +578,7 @@ def group_purge(context, data_dict):
     '''
     return _group_or_org_purge(context, data_dict, is_org=False)
 
-def organization_purge(context, data_dict):
+def organization_purge(context: Context, data_dict: DataDict) -> None:
     '''Purge an organization.
 
     .. warning:: Purging an organization cannot be undone!
@@ -597,7 +599,7 @@ def organization_purge(context, data_dict):
     '''
     return _group_or_org_purge(context, data_dict, is_org=True)
 
-def task_status_delete(context, data_dict):
+def task_status_delete(context: Context, data_dict: DataDict) -> None:
     '''Delete a task status.
 
     You must be a sysadmin to delete task statuses.
@@ -619,7 +621,7 @@ def task_status_delete(context, data_dict):
     entity.delete()
     model.Session.commit()
 
-def vocabulary_delete(context, data_dict):
+def vocabulary_delete(context: Context, data_dict: DataDict) -> None:
     '''Delete a tag vocabulary.
 
     You must be a sysadmin to delete vocabularies.
@@ -643,7 +645,7 @@ def vocabulary_delete(context, data_dict):
     vocab_obj.delete()
     model.repo.commit()
 
-def tag_delete(context, data_dict):
+def tag_delete(context: Context, data_dict: DataDict) -> None:
     '''Delete a tag.
 
     You must be a sysadmin to delete tags.
@@ -699,7 +701,7 @@ def _unfollow(context, data_dict, schema, FollowerClass):
     follower_obj.delete()
     model.repo.commit()
 
-def unfollow_user(context, data_dict):
+def unfollow_user(context: Context, data_dict: DataDict) -> None:
     '''Stop following a user.
 
     :param id: the id or name of the user to stop following
@@ -710,7 +712,7 @@ def unfollow_user(context, data_dict):
             ckan.logic.schema.default_follow_user_schema())
     _unfollow(context, data_dict, schema, context['model'].UserFollowingUser)
 
-def unfollow_dataset(context, data_dict):
+def unfollow_dataset(context: Context, data_dict: DataDict) -> None:
     '''Stop following a dataset.
 
     :param id: the id or name of the dataset to stop following
@@ -723,7 +725,7 @@ def unfollow_dataset(context, data_dict):
             context['model'].UserFollowingDataset)
 
 
-def _group_or_org_member_delete(context, data_dict=None):
+def _group_or_org_member_delete(context: Context, data_dict: DataDict=None) -> None:
     model = context['model']
     user = context['user']
     session = context['session']
@@ -745,7 +747,7 @@ def _group_or_org_member_delete(context, data_dict=None):
     _get_action('member_delete')(member_context, member_dict)
 
 
-def group_member_delete(context, data_dict=None):
+def group_member_delete(context: Context, data_dict: DataDict=None) -> None:
     '''Remove a user from a group.
 
     You must be authorized to edit the group.
@@ -759,7 +761,7 @@ def group_member_delete(context, data_dict=None):
     _check_access('group_member_delete',context, data_dict)
     return _group_or_org_member_delete(context, data_dict)
 
-def organization_member_delete(context, data_dict=None):
+def organization_member_delete(context: Context, data_dict: DataDict=None) -> None:
     '''Remove a user from an organization.
 
     You must be authorized to edit the organization.
@@ -774,7 +776,7 @@ def organization_member_delete(context, data_dict=None):
     return _group_or_org_member_delete(context, data_dict)
 
 
-def unfollow_group(context, data_dict):
+def unfollow_group(context: Context, data_dict: DataDict) -> None:
     '''Stop following a group.
 
     :param id: the id or name of the group to stop following
@@ -788,7 +790,7 @@ def unfollow_group(context, data_dict):
 
 
 @ckan.logic.validate(ckan.logic.schema.job_clear_schema)
-def job_clear(context, data_dict):
+def job_clear(context: Context, data_dict: DataDict) -> List[str]:
     '''Clear background job queues.
 
     Does not affect jobs that are already being processed.
@@ -814,7 +816,7 @@ def job_clear(context, data_dict):
     return names
 
 
-def job_cancel(context, data_dict):
+def job_cancel(context: Context, data_dict: DataDict) -> None:
     '''Cancel a queued background job.
 
     Removes the job from the queue and deletes it.
@@ -832,7 +834,7 @@ def job_cancel(context, data_dict):
         raise NotFound
 
 
-def api_token_revoke(context, data_dict):
+def api_token_revoke(context: Context, data_dict: DataDict) -> None:
     """Delete API Token.
 
     :param string token: Token to remove(required if `jti` not specified).

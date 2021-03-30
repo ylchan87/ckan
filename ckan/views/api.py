@@ -18,6 +18,8 @@ from ckan.lib.base import render
 from ckan.lib.navl.dictization_functions import DataError
 from ckan.logic import get_action, ValidationError, NotFound, NotAuthorized
 from ckan.lib.search import SearchError, SearchIndexError, SearchQueryError
+from typing import Union
+from flask.wrappers import Response
 
 
 log = logging.getLogger(__name__)
@@ -201,7 +203,7 @@ def _get_request_data(try_url_params=False):
 
 # View functions
 
-def action(logic_function, ver=API_DEFAULT_VERSION):
+def action(logic_function: str, ver: int=API_DEFAULT_VERSION) -> Response:
     u'''Main endpoint for the action API (v3)
 
     Creates a dict with the incoming request data and calls the appropiate
@@ -325,7 +327,7 @@ def action(logic_function, ver=API_DEFAULT_VERSION):
     return _finish_ok(return_dict)
 
 
-def get_api(ver=1):
+def get_api(ver: int=1) -> Response:
     u'''Root endpoint for the API, returns the version number'''
 
     response_data = {
@@ -334,7 +336,7 @@ def get_api(ver=1):
     return _finish_ok(response_data)
 
 
-def dataset_autocomplete(ver=API_REST_DEFAULT_VERSION):
+def dataset_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'incomplete', u'')
     limit = request.args.get(u'limit', 10)
     package_dicts = []
@@ -351,7 +353,7 @@ def dataset_autocomplete(ver=API_REST_DEFAULT_VERSION):
     return _finish_ok(resultSet)
 
 
-def tag_autocomplete(ver=API_REST_DEFAULT_VERSION):
+def tag_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'incomplete', u'')
     limit = request.args.get(u'limit', 10)
     vocab = request.args.get(u'vocabulary_id', u'')
@@ -374,7 +376,7 @@ def tag_autocomplete(ver=API_REST_DEFAULT_VERSION):
     return _finish_ok(resultSet)
 
 
-def format_autocomplete(ver=API_REST_DEFAULT_VERSION):
+def format_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'incomplete', u'')
     limit = request.args.get(u'limit', 5)
     formats = []
@@ -392,7 +394,7 @@ def format_autocomplete(ver=API_REST_DEFAULT_VERSION):
     return _finish_ok(resultSet)
 
 
-def user_autocomplete(ver=API_REST_DEFAULT_VERSION):
+def user_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'q', u'')
     limit = request.args.get(u'limit', 20)
     ignore_self = request.args.get(u'ignore_self', False)
@@ -407,7 +409,7 @@ def user_autocomplete(ver=API_REST_DEFAULT_VERSION):
     return _finish_ok(user_list)
 
 
-def group_autocomplete(ver=API_REST_DEFAULT_VERSION):
+def group_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'q', u'')
     limit = request.args.get(u'limit', 20)
     group_list = []
@@ -419,7 +421,7 @@ def group_autocomplete(ver=API_REST_DEFAULT_VERSION):
     return _finish_ok(group_list)
 
 
-def organization_autocomplete(ver=API_REST_DEFAULT_VERSION):
+def organization_autocomplete(ver: int=API_REST_DEFAULT_VERSION) -> Response:
     q = request.args.get(u'q', u'')
     limit = request.args.get(u'limit', 20)
     organization_list = []
@@ -432,7 +434,7 @@ def organization_autocomplete(ver=API_REST_DEFAULT_VERSION):
     return _finish_ok(organization_list)
 
 
-def snippet(snippet_path, ver=API_REST_DEFAULT_VERSION):
+def snippet(snippet_path: str, ver: int=API_REST_DEFAULT_VERSION) -> str:
     u'''Renders and returns a snippet used by ajax calls
 
         We only allow snippets in templates/ajax_snippets and its subdirs
@@ -446,7 +448,7 @@ def snippet(snippet_path, ver=API_REST_DEFAULT_VERSION):
     return render(snippet_path, extra_vars=extra_vars)
 
 
-def i18n_js_translations(lang, ver=API_REST_DEFAULT_VERSION):
+def i18n_js_translations(lang: str, ver: int=API_REST_DEFAULT_VERSION) -> Union[str, Response]:
     ckan_path = os.path.join(os.path.dirname(__file__), u'..')
     source = os.path.abspath(os.path.join(ckan_path, u'public',
                              u'base', u'i18n', u'{0}.js'.format(lang)))

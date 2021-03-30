@@ -6,15 +6,16 @@ import logging
 
 from ckan.common import config
 from jinja2.exceptions import TemplateNotFound
+from typing import Optional, Tuple
 log = logging.getLogger(__name__)
 
 _template_info_cache = {}
 
-def reset_template_info_cache():
+def reset_template_info_cache() -> None:
     '''Reset the template cache'''
     _template_info_cache.clear()
 
-def find_template(template_name):
+def find_template(template_name: str) -> Optional[str]:
     ''' looks through the possible template paths to find a template
     returns the full path is it exists. '''
     template_paths = config['computed_template_paths']
@@ -22,11 +23,11 @@ def find_template(template_name):
         if os.path.exists(os.path.join(path, template_name.encode('utf-8'))):
             return os.path.join(path, template_name)
 
-def template_type(template_path):
+def template_type(template_path: str) -> str:
     return 'jinja2'
 
 
-def template_info(template_name):
+def template_info(template_name: str) -> Tuple[str, str]:
     ''' Returns the path and type for a template '''
 
     if template_name in _template_info_cache:

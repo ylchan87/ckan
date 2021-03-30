@@ -17,7 +17,7 @@ home = Blueprint(u'home', __name__)
 
 
 @home.before_request
-def before_request():
+def before_request() -> None:
     u'''set context and check authorization'''
     try:
         context = {
@@ -29,7 +29,7 @@ def before_request():
         abort(403)
 
 
-def index():
+def index() -> str:
     u'''display home page'''
     try:
         context = {u'model': model, u'session': model.Session,
@@ -77,7 +77,7 @@ def index():
     return base.render(u'home/index.html', extra_vars={})
 
 
-def about():
+def about() -> str:
     u''' display about page'''
     return base.render(u'home/about.html', extra_vars={})
 

@@ -19,6 +19,7 @@ from flask_babel import (gettext as flask_ugettext,
                          ngettext as flask_ungettext)
 
 import simplejson as json
+from typing import Any, Iterable, List, Optional
 
 if six.PY2:
     import pylons  # type: ignore
@@ -29,7 +30,7 @@ if six.PY2:
 current_app = flask.current_app
 
 
-def is_flask_request():
+def is_flask_request() -> bool:
     u'''
     A centralized way to determine whether we are in the context of a
     request being served by Flask or Pylons
@@ -48,7 +49,7 @@ def is_flask_request():
 
 
 def streaming_response(
-        data, mimetype=u'application/octet-stream', with_context=False):
+        data: Iterable, mimetype: str=u'application/octet-stream', with_context: bool=False) -> flask.wrappers.Response:
     iter_data = iter(data)
     if is_flask_request():
         # Removal of context variables for pylon's app is prevented
@@ -65,14 +66,14 @@ def streaming_response(
     return resp
 
 
-def ugettext(*args, **kwargs):
+def ugettext(*args, **kwargs) -> str:
     return flask_ugettext(*args, **kwargs)
 
 
 _ = ugettext
 
 
-def ungettext(*args, **kwargs):
+def ungettext(*args, **kwargs) -> str:
     if is_flask_request():
         return flask_ungettext(*args, **kwargs)
     else:
@@ -106,10 +107,10 @@ class CKANConfig(MutableMapping):
     def __repr__(self):
         return self.store.__repr__()
 
-    def copy(self):
+    def copy(self) -> dict:
         return self.store.copy()
 
-    def clear(self):
+    def clear(self) -> None:
         self.store.clear()
 
         try:
@@ -215,7 +216,7 @@ truthy = frozenset([u'true', u'yes', u'on', u'y', u't', u'1'])
 falsy = frozenset([u'false', u'no', u'off', u'n', u'f', u'0'])
 
 
-def asbool(obj):
+def asbool(obj: Any) -> bool:
     if isinstance(obj, six.string_types):
         obj = obj.strip().lower()
         if obj in truthy:
@@ -227,14 +228,14 @@ def asbool(obj):
     return bool(obj)
 
 
-def asint(obj):
+def asint(obj: Any) -> int:
     try:
         return int(obj)
     except (TypeError, ValueError):
         raise ValueError(u"Bad integer value: {}".format(obj))
 
 
-def aslist(obj, sep=None, strip=True):
+def aslist(obj: Any, sep: Optional[str]=None, strip: bool=True) -> List:
     if isinstance(obj, six.string_types):
         lst = obj.split(sep)
         if strip:

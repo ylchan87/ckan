@@ -16,7 +16,7 @@ dashboard = Blueprint(u'dashboard', __name__, url_prefix=u'/dashboard')
 
 
 @dashboard.before_request
-def before_request():
+def before_request() -> None:
     if not g.userobj:
         h.flash_error(_(u'Not authorized to see this page'))
         return h.redirect_to(u'user.login')
@@ -86,7 +86,7 @@ def _get_dashboard_context(filter_type=None, filter_id=None, q=None):
     }
 
 
-def index(offset=0):
+def index(offset: int=0) -> str:
     context = {
         u'model': model,
         u'session': model.Session,
@@ -118,21 +118,21 @@ def index(offset=0):
     return base.render(u'user/dashboard.html', extra_vars)
 
 
-def datasets():
+def datasets() -> str:
     context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
     data_dict = {u'user_obj': g.userobj, u'include_datasets': True}
     extra_vars = _extra_template_variables(context, data_dict)
     return base.render(u'user/dashboard_datasets.html', extra_vars)
 
 
-def organizations():
+def organizations() -> str:
     context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
     data_dict = {u'user_obj': g.userobj}
     extra_vars = _extra_template_variables(context, data_dict)
     return base.render(u'user/dashboard_organizations.html', extra_vars)
 
 
-def groups():
+def groups() -> str:
     context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
     data_dict = {u'user_obj': g.userobj}
     extra_vars = _extra_template_variables(context, data_dict)

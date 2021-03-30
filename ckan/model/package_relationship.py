@@ -7,6 +7,9 @@ from ckan.model import core
 from ckan.model import package as _package
 from ckan.model import types as _types
 from ckan.model import domain_object
+from ckan.types import Query
+from typing import Dict, List, Optional, Tuple
+from ckan.model import package as _package
 
 # i18n only works when this is run as part of pylons,
 # which isn't the case for paster commands.
@@ -64,7 +67,7 @@ class PackageRelationship(core.StatefulObjectMixin,
     def __repr__(self):
         return str(self)
 
-    def as_dict(self, package=None, ref_package_by='id'):
+    def as_dict(self, package: _package.Package=None, ref_package_by: str='id') -> Dict[str, str]:
         """Returns full relationship info as a dict from the point of view
         of the given package if specified.
         e.g. {'subject':u'annakarenina',
@@ -85,7 +88,7 @@ class PackageRelationship(core.StatefulObjectMixin,
                 'object':object_ref,
                 'comment':self.comment}
 
-    def as_tuple(self, package):
+    def as_tuple(self, package: _package.Package) -> Tuple[str, _package.Package]:
         '''Returns basic relationship info as a tuple from the point of view
         of the given package with the object package object.
         e.g. rel.as_tuple(warandpeace) gives (u'depends_on', annakarenina)
@@ -104,27 +107,27 @@ class PackageRelationship(core.StatefulObjectMixin,
         return (type_str, other_package)
 
     @classmethod
-    def by_subject(cls, package):
+    def by_subject(cls, package: _package.Package) -> Query[_package.Package]:
         return meta.Session.query(cls).filter(cls.subject_package_id==package.id)
 
     @classmethod
-    def by_object(cls, package):
+    def by_object(cls, package: _package.Package) -> Query[_package.Package]:
         return meta.Session.query(cls).filter(cls.object_package_id==package.id)
 
     @classmethod
-    def get_forward_types(cls):
+    def get_forward_types(cls) -> List[str]:
         if not hasattr(cls, 'fwd_types'):
             cls.fwd_types = [fwd for fwd, rev in cls.types]
         return cls.fwd_types
 
     @classmethod
-    def get_reverse_types(cls):
+    def get_reverse_types(cls) -> List[str]:
         if not hasattr(cls, 'rev_types'):
             cls.rev_types = [rev for fwd, rev in cls.types]
         return cls.rev_types
 
     @classmethod
-    def get_all_types(cls):
+    def get_all_types(cls) -> List[str]:
         if not hasattr(cls, 'all_types'):
             cls.all_types = []
             for fwd, rev in cls.types:
@@ -133,19 +136,19 @@ class PackageRelationship(core.StatefulObjectMixin,
         return cls.all_types
 
     @classmethod
-    def reverse_to_forward_type(cls, reverse_type):
+    def reverse_to_forward_type(cls, reverse_type: str) -> Optional[str]:
         for fwd, rev in cls.types:
             if rev == reverse_type:
                 return fwd
 
     @classmethod
-    def forward_to_reverse_type(cls, forward_type):
+    def forward_to_reverse_type(cls, forward_type: str) -> Optional[str]:
         for fwd, rev in cls.types:
             if fwd == forward_type:
                 return rev
 
     @classmethod
-    def reverse_type(cls, forward_or_reverse_type):
+    def reverse_type(cls, forward_or_reverse_type: str) -> Optional[str]:
         for fwd, rev in cls.types:
             if fwd == forward_or_reverse_type:
                 return rev
@@ -153,7 +156,7 @@ class PackageRelationship(core.StatefulObjectMixin,
                 return fwd
 
     @classmethod
-    def make_type_printable(cls, type_):
+    def make_type_printable(cls, type_: str) -> str:
         for i, types in enumerate(cls.types):
             for j in range(2):
                 if type_ == types[j]:

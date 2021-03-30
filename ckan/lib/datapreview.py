@@ -14,6 +14,7 @@ from ckan.common import config
 import ckan.plugins as p
 from ckan import logic
 from ckan.common import _
+from typing import Dict, Iterable, List, Optional
 
 
 log = logging.getLogger(__name__)
@@ -22,14 +23,14 @@ log = logging.getLogger(__name__)
 DEFAULT_RESOURCE_VIEW_TYPES = ['image_view', 'recline_view']
 
 
-def res_format(resource):
+def res_format(resource: Dict) -> Optional[str]:
     ''' The assumed resource format in lower case. '''
     if not resource['url']:
         return None
     return (resource['format'] or resource['url'].split('.')[-1]).lower()
 
 
-def compare_domains(urls):
+def compare_domains(urls: Iterable[str]) -> bool:
     ''' Return True if the domains of the provided urls are the same.
     '''
     first_domain = None
@@ -53,7 +54,7 @@ def compare_domains(urls):
     return True
 
 
-def on_same_domain(data_dict):
+def on_same_domain(data_dict: Dict) -> bool:
     # compare CKAN domain and resource URL
     ckan_url = config.get('ckan.site_url', '//localhost:5000')
     resource_url = data_dict['resource']['url']
@@ -61,7 +62,7 @@ def on_same_domain(data_dict):
     return compare_domains([ckan_url, resource_url])
 
 
-def get_preview_plugin(data_dict, return_first=False):
+def get_preview_plugin(data_dict: Dict, return_first: bool=False) -> Optional[p.IResourcePreview]:
     '''Determines whether there is an extension that can preview the resource.
 
     :param data_dict: contains a resource and package dict.
@@ -113,7 +114,7 @@ def get_preview_plugin(data_dict, return_first=False):
     return preview_plugin
 
 
-def get_view_plugin(view_type):
+def get_view_plugin(view_type: Optional[str]) -> Optional[p.IResourceView]:
     '''
     Returns the IResourceView plugin associated with the given view_type.
     '''
@@ -124,7 +125,7 @@ def get_view_plugin(view_type):
             return plugin
 
 
-def get_view_plugins(view_types):
+def get_view_plugins(view_types: Iterable[str]) -> List[p.IResourceView]:
     '''
     Returns a list of the view plugins associated with the given view_types.
     '''
@@ -137,7 +138,7 @@ def get_view_plugins(view_types):
     return view_plugins
 
 
-def get_allowed_view_plugins(data_dict):
+def get_allowed_view_plugins(data_dict: Dict) -> List[p.IResourceView]:
     '''
     Returns a list of view plugins that work against the resource provided
 
@@ -154,7 +155,7 @@ def get_allowed_view_plugins(data_dict):
     return can_view
 
 
-def get_default_view_plugins(get_datastore_views=False):
+def get_default_view_plugins(get_datastore_views: bool=False) -> List[p.IResourceView]:
     '''
     Returns the list of view plugins to be created by default on new resources
 
@@ -200,11 +201,11 @@ def get_default_view_plugins(get_datastore_views=False):
     return default_view_plugins
 
 
-def add_views_to_resource(context,
-                          resource_dict,
-                          dataset_dict=None,
-                          view_types=[],
-                          create_datastore_views=False):
+def add_views_to_resource(context: Dict,
+                          resource_dict: Dict,
+                          dataset_dict: Optional[Dict]=None,
+                          view_types: List[str]=[],
+                          create_datastore_views: bool=False) -> List[Dict]:
     '''
     Creates the provided views (if necessary) on the provided resource
 
@@ -273,10 +274,10 @@ def add_views_to_resource(context,
     return created_views
 
 
-def add_views_to_dataset_resources(context,
-                                   dataset_dict,
-                                   view_types=[],
-                                   create_datastore_views=False):
+def add_views_to_dataset_resources(context: Dict,
+                                   dataset_dict: Dict,
+                                   view_types: List[str]=[],
+                                   create_datastore_views: bool=False) -> List[Dict]:
     '''
     Creates the provided views on all resources of the provided dataset
 

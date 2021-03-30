@@ -17,6 +17,7 @@ from six import string_types
 from ckan.plugins import interfaces
 
 from ckan.common import config
+from typing import Generator, List, Union
 
 
 __all__ = [
@@ -53,7 +54,7 @@ _PLUGINS_SERVICE = {}
 
 
 @contextmanager
-def use_plugin(*plugins):
+def use_plugin(*plugins: str) -> Generator[Union[SingletonPlugin, List[SingletonPlugin]], None, None]:
     '''Load plugin(s) for testing purposes
 
     e.g.
@@ -111,14 +112,14 @@ class SingletonPlugin(_pca_SingletonPlugin):
     '''
 
 
-def get_plugin(plugin):
+def get_plugin(plugin) -> SingletonPlugin:
     ''' Get an instance of a active plugin by name.  This is helpful for
     testing. '''
     if plugin in _PLUGINS_SERVICE:
         return _PLUGINS_SERVICE[plugin]
 
 
-def plugins_update():
+def plugins_update() -> None:
     ''' This is run when plugins have been loaded or unloaded and allows us
     to run any specific code to ensure that the new plugin setting are
     correctly setup '''
@@ -137,7 +138,7 @@ def plugins_update():
     environment.update_config()
 
 
-def load_all():
+def load_all() -> None:
     '''
     Load all plugins listed in the 'ckan.plugins' config directive.
     '''
@@ -155,7 +156,7 @@ def load_all():
     load(*plugins)
 
 
-def load(*plugins):
+def load(*plugins) -> Union[SingletonPlugin, List[SingletonPlugin]]:
     '''
     Load named plugin(s).
     '''
@@ -190,7 +191,7 @@ def load(*plugins):
     return output
 
 
-def unload_all():
+def unload_all() -> None:
     '''
     Unload (deactivate) all loaded plugins in the reverse order that they
     were loaded.
@@ -198,7 +199,7 @@ def unload_all():
     unload(*reversed(_PLUGINS))
 
 
-def unload(*plugins):
+def unload(*plugins) -> None:
     '''
     Unload named plugin(s).
     '''
@@ -226,7 +227,7 @@ def unload(*plugins):
     plugins_update()
 
 
-def plugin_loaded(name):
+def plugin_loaded(name) -> bool:
     '''
     See if a particular plugin is loaded.
     '''
@@ -235,7 +236,7 @@ def plugin_loaded(name):
     return False
 
 
-def find_system_plugins():
+def find_system_plugins() -> List[SingletonPlugin]:
     '''
     Return all plugins in the ckan.system_plugins entry point group.
 

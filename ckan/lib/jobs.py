@@ -32,6 +32,7 @@ from ckan.common import config
 from ckan.config.environment import load_environment
 from ckan.model import meta
 import ckan.plugins as plugins
+from typing import Any, Callable, Dict, Iterable, List, NoReturn, Optional
 
 
 log = logging.getLogger(__name__)
@@ -62,7 +63,7 @@ def _get_queue_name_prefix():
     return u'ckan:{}:'.format(config[u'ckan.site_id'])
 
 
-def add_queue_name_prefix(name):
+def add_queue_name_prefix(name: str) -> str:
     u'''
     Prefix a queue name.
 
@@ -71,7 +72,7 @@ def add_queue_name_prefix(name):
     return _get_queue_name_prefix() + name
 
 
-def remove_queue_name_prefix(name):
+def remove_queue_name_prefix(name: str) -> str:
     u'''
     Remove a queue name's prefix.
 
@@ -85,7 +86,7 @@ def remove_queue_name_prefix(name):
     return name[len(prefix):]
 
 
-def get_all_queues():
+def get_all_queues() -> List[rq.Queue]:
     u'''
     Return all job queues currently in use.
 
@@ -100,7 +101,7 @@ def get_all_queues():
             q.name.startswith(prefix)]
 
 
-def get_queue(name=DEFAULT_QUEUE_NAME):
+def get_queue(name: str=DEFAULT_QUEUE_NAME) -> rq.Queue:
     u'''
     Get a job queue.
 
@@ -125,8 +126,8 @@ def get_queue(name=DEFAULT_QUEUE_NAME):
         return queue
 
 
-def enqueue(fn, args=None, kwargs=None, title=None, queue=DEFAULT_QUEUE_NAME,
-            rq_kwargs=None):
+def enqueue(fn: Callable, args: Optional[Iterable]=None, kwargs: Optional[Dict]=None, title: Optional[str]=None, queue: str=DEFAULT_QUEUE_NAME,
+            rq_kwargs: Optional[Dict]=None) -> Job:
     u'''
     Enqueue a job to be run in the background.
 
@@ -172,7 +173,7 @@ def enqueue(fn, args=None, kwargs=None, title=None, queue=DEFAULT_QUEUE_NAME,
     return job
 
 
-def job_from_id(id):
+def job_from_id(id: str) -> Job:
     u'''
     Look up an enqueued job by its ID.
 
@@ -189,7 +190,7 @@ def job_from_id(id):
         raise KeyError(u'There is no job with ID "{}".'.format(id))
 
 
-def dictize_job(job):
+def dictize_job(job: Job) -> Dict:
     u'''Convert a job to a dict.
 
     In contrast to ``rq.job.Job.to_dict`` this function includes only
@@ -209,7 +210,7 @@ def dictize_job(job):
     }
 
 
-def test_job(*args):
+def test_job(*args: Any) -> None:
     u'''Test job.
 
     A test job for debugging purposes. Prints out any arguments it
@@ -230,7 +231,7 @@ class Worker(rq.Worker):
     non-committed changes are rolled back and instance variables bound
     to the old session have to be re-fetched from the database.
     '''
-    def __init__(self, queues=None, *args, **kwargs):
+    def __init__(self, queues: List[str]=None, *args: Any, **kwargs: Any) -> None:
         u'''
         Constructor.
 
@@ -247,7 +248,7 @@ class Worker(rq.Worker):
         rq.worker.logger.setLevel(logging.INFO)
         super(Worker, self).__init__(queues, *args, **kwargs)
 
-    def register_birth(self, *args, **kwargs):
+    def register_birth(self, *args, **kwargs) -> None:
         result = super(Worker, self).register_birth(*args, **kwargs)
         names = [remove_queue_name_prefix(n) for n in self.queue_names()]
         names = u', '.join(u'"{}"'.format(n) for n in names)
@@ -255,7 +256,7 @@ class Worker(rq.Worker):
                  self.key, self.pid, names))
         return result
 
-    def execute_job(self, job, *args, **kwargs):
+    def execute_job(self, job, *args, **kwargs) -> None:
         # We shut down all database connections and the engine to make sure
         # that they are not shared with the child process and closed there
         # while still being in use in the main process, see
@@ -281,23 +282,23 @@ class Worker(rq.Worker):
 
         return result
 
-    def register_death(self, *args, **kwargs):
+    def register_death(self, *args, **kwargs) -> None:
         result = super(Worker, self).register_death(*args, **kwargs)
         log.info(u'Worker {} (PID {}) has stopped'.format(self.key, self.pid))
         return result
 
-    def handle_exception(self, job, *exc_info):
+    def handle_exception(self, job, *exc_info) -> None:
         log.exception(u'Job {} on worker {} raised an exception: {}'.format(
                       job.id, self.key, exc_info[1]))
         return super(Worker, self).handle_exception(job, *exc_info)
 
-    def main_work_horse(self, job, queue):
+    def main_work_horse(self, job, queue) -> NoReturn:
         # This method is called in a worker's work horse process right
         # after forking.
         load_environment(config)
         return super(Worker, self).main_work_horse(job, queue)
 
-    def perform_job(self, *args, **kwargs):
+    def perform_job(self, *args, **kwargs) -> bool:
         result = super(Worker, self).perform_job(*args, **kwargs)
         # rq.Worker.main_work_horse does a hard exit via os._exit directly
         # after its call to perform_job returns. Hence here is the correct

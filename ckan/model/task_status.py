@@ -24,7 +24,7 @@ task_status_table = Table('task_status', meta.metadata,
 
 class TaskStatus(domain_object.DomainObject):
     @classmethod
-    def get(cls, reference):
+    def get(cls, reference: str) -> "TaskStatus":
         '''Returns a task status object referenced by its id.'''
         if not reference:
             return None

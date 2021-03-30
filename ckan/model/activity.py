@@ -19,6 +19,7 @@ from ckan.common import config
 import ckan.model
 from ckan.model import meta
 from ckan.model import domain_object, types as _types
+from typing import Dict, List, Optional
 
 __all__ = ['Activity', 'activity_table',
            'ActivityDetail', 'activity_detail_table',
@@ -50,7 +51,7 @@ activity_detail_table = Table(
 class Activity(domain_object.DomainObject):
 
     def __init__(
-            self, user_id, object_id, activity_type, data=None):
+            self, user_id: str, object_id: str, activity_type: str, data: Optional[Dict]=None) -> None:
         self.id = _types.make_uuid()
         self.timestamp = datetime.datetime.utcnow()
         self.user_id = user_id
@@ -62,7 +63,7 @@ class Activity(domain_object.DomainObject):
             self.data = data
 
     @classmethod
-    def get(cls, id):
+    def get(cls, id: str) -> Optional["Activity"]:
         '''Returns an Activity object referenced by its id.'''
         if not id:
             return None
@@ -77,8 +78,8 @@ meta.mapper(Activity, activity_table)
 class ActivityDetail(domain_object.DomainObject):
 
     def __init__(
-            self, activity_id, object_id, object_type, activity_type,
-            data=None):
+            self, activity_id: str, object_id: str, object_type: str, activity_type: str,
+            data: Optional[Dict]=None) -> None:
         self.activity_id = activity_id
         self.object_id = object_id
         self.object_type = object_type
@@ -89,7 +90,7 @@ class ActivityDetail(domain_object.DomainObject):
             self.data = data
 
     @classmethod
-    def by_activity_id(cls, activity_id):
+    def by_activity_id(cls, activity_id: str) -> List["ActivityDetail"]:
         return ckan.model.Session.query(cls) \
             .filter_by(activity_id=activity_id).all()
 
@@ -153,7 +154,7 @@ def _user_activity_query(user_id, limit):
     return _activities_union_all(q1, q2)
 
 
-def user_activity_list(user_id, limit, offset):
+def user_activity_list(user_id: str, limit: int, offset: int) -> List[Activity]:
     '''Return user_id's public activity stream.
 
     Return a list of all activities from or about the given user, i.e. where
@@ -182,7 +183,7 @@ def _package_activity_query(package_id):
 
 
 def package_activity_list(
-        package_id, limit, offset, include_hidden_activity=False):
+        package_id: str, limit: int, offset: int, include_hidden_activity: bool=False) -> List[Activity]:
     '''Return the given dataset (package)'s public activity stream.
 
     Returns all activities about the given dataset, i.e. where the given
@@ -296,7 +297,7 @@ def _organization_activity_query(org_id, include_hidden_activity=False):
     return q
 
 
-def group_activity_list(group_id, limit, offset, include_hidden_activity=False):
+def group_activity_list(group_id: str, limit: int, offset: int, include_hidden_activity: bool=False) -> List[Activity]:
 
     '''Return the given group's public activity stream.
 
@@ -313,7 +314,7 @@ def group_activity_list(group_id, limit, offset, include_hidden_activity=False):
 
 
 def organization_activity_list(
-        group_id, limit, offset, include_hidden_activity=False):
+        group_id: str, limit: int, offset: int, include_hidden_activity: bool=False) -> List[Activity]:
     '''Return the given org's public activity stream.
 
     Returns activities where the given org or one of its datasets is the
@@ -387,7 +388,7 @@ def _activities_from_everything_followed_by_user_query(user_id, limit):
     return _activities_union_all(q1, q2, q3)
 
 
-def activities_from_everything_followed_by_user(user_id, limit, offset):
+def activities_from_everything_followed_by_user(user_id: str, limit: int, offset: int) -> List[Activity]:
     '''Return activities from everything that the given user is following.
 
     Returns all activities where the object of the activity is anything
@@ -407,7 +408,7 @@ def _dashboard_activity_query(user_id, limit):
     return _activities_union_all(q1, q2)
 
 
-def dashboard_activity_list(user_id, limit, offset):
+def dashboard_activity_list(user_id: str, limit: int, offset: int) -> List[Activity]:
     '''Return the given user's dashboard activity stream.
 
     Returns activities from the user's public activity stream, plus
@@ -437,7 +438,7 @@ def _changed_packages_activity_query():
     return q
 
 
-def recently_changed_packages_activity_list(limit, offset):
+def recently_changed_packages_activity_list(limit: int, offset: int) -> List[Activity]:
     '''Return the site-wide stream of recently changed package activities.
 
     This activity stream includes recent 'new package', 'changed package' and

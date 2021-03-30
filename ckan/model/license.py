@@ -12,6 +12,7 @@ from six import text_type, string_types
 
 from ckan.common import _, json
 import ckan.lib.maintain as maintain
+from typing import Any, Dict, List, Optional, Tuple
 
 log = __import__('logging').getLogger(__name__)
 
@@ -19,7 +20,7 @@ log = __import__('logging').getLogger(__name__)
 class License(object):
     """Domain object for a license."""
 
-    def __init__(self, data):
+    def __init__(self, data: Dict) -> None:
         # convert old keys if necessary
         if 'is_okd_compliant' in data:
             data['od_conformance'] = 'approved' \
@@ -69,7 +70,7 @@ class License(object):
         '''
         return self.__getattr__(key)
 
-    def isopen(self):
+    def isopen(self) -> bool:
         if not hasattr(self, '_isopen'):
             self._isopen = self.od_conformance == 'approved' or \
                 self.osd_conformance == 'approved'
@@ -100,7 +101,7 @@ class License(object):
 class LicenseRegister(object):
     """Dictionary-like interface to a group of licenses."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         group_url = config.get('licenses_group_url', None)
         if group_url:
             self.load_licenses(group_url)
@@ -124,7 +125,7 @@ class LicenseRegister(object):
                 ]
             self._create_license_list(default_license_list)
 
-    def load_licenses(self, license_url):
+    def load_licenses(self, license_url: str) -> None:
         try:
             if license_url.startswith('file://'):
                 with open(license_url.replace('file://', ''), 'r') as f:
@@ -163,16 +164,16 @@ class LicenseRegister(object):
         else:
             raise KeyError("License not found: %s" % key)
 
-    def get(self, key, default=None):
+    def get(self, key: str, default: Optional[Any]=None):
         return self.__getitem__(key, default=default)
 
-    def keys(self):
+    def keys(self) -> List[str]:
         return [license.id for license in self.licenses]
 
-    def values(self):
+    def values(self) -> List[License]:
         return self.licenses
 
-    def items(self):
+    def items(self) -> List[Tuple[str, License]]:
         return [(license.id, license) for license in self.licenses]
 
     def __iter__(self):
@@ -224,7 +225,7 @@ class DefaultLicense(dict):
         else:
             raise KeyError(key)
 
-    def copy(self):
+    def copy(self) -> Dict:
         ''' create a dict of the license used by the licenses api '''
         out = {}
         for key in self.keys:

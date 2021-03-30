@@ -9,12 +9,13 @@ from sqlalchemy import types
 from six import string_types, text_type
 
 from ckan.model import meta
+from typing import Union
 
 __all__ = ['iso_date_to_datetime_for_sqlite', 'make_uuid', 'UuidType',
            'JsonType', 'JsonDictType']
 
 
-def make_uuid():
+def make_uuid() -> str:
     return text_type(uuid.uuid4())
 
 
@@ -86,7 +87,7 @@ class JsonDictType(JsonType):
         return JsonDictType(self.impl.length)
 
 
-def iso_date_to_datetime_for_sqlite(datetime_or_iso_date_if_sqlite):
+def iso_date_to_datetime_for_sqlite(datetime_or_iso_date_if_sqlite: Union[datetime, str]) -> datetime:
     # Because sqlite cannot store dates properly (see this:
     # http://www.sqlalchemy.org/docs/dialects/sqlite.html#date-and-time-types )
     # when you get a result from a date field in the database, you need

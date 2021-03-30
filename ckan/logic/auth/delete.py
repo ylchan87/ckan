@@ -5,25 +5,26 @@ import ckan.authz as authz
 from ckan.logic.auth import get_group_object
 from ckan.logic.auth import get_resource_object
 from ckan.common import _
+from ckan.types import Context, DataDict, AuthResult
 
 
-def user_delete(context, data_dict):
+def user_delete(context: Context, data_dict: DataDict) -> AuthResult:
     # sysadmins only
     return {'success': False}
 
 
-def package_delete(context, data_dict):
+def package_delete(context: Context, data_dict: DataDict) -> AuthResult:
     # Defer authorization for package_delete to package_update, as deletions
     # are essentially changing the state field
     return authz.is_authorized('package_update', context, data_dict)
 
 
-def dataset_purge(context, data_dict):
+def dataset_purge(context: Context, data_dict: DataDict) -> AuthResult:
     # Only sysadmins are authorized to purge datasets
     return {'success': False}
 
 
-def resource_delete(context, data_dict):
+def resource_delete(context: Context, data_dict: DataDict) -> AuthResult:
     model = context['model']
     user = context.get('user')
     resource = get_resource_object(context, data_dict)
@@ -42,7 +43,7 @@ def resource_delete(context, data_dict):
         return {'success': True}
 
 
-def resource_view_delete(context, data_dict):
+def resource_view_delete(context: Context, data_dict: DataDict) -> AuthResult:
 
     if context.get('resource'):
         return authz.is_authorized('resource_delete', context, {})
@@ -59,11 +60,11 @@ def resource_view_delete(context, data_dict):
     return authz.is_authorized('resource_delete', context, {'id': resource_id})
 
 
-def resource_view_clear(context, data_dict):
+def resource_view_clear(context: Context, data_dict: DataDict) -> AuthResult:
     # sysadmins only
     return {'success': False}
 
-def package_relationship_delete(context, data_dict):
+def package_relationship_delete(context: Context, data_dict: DataDict) -> AuthResult:
     user = context['user']
     relationship = context['relationship']
 
@@ -74,7 +75,7 @@ def package_relationship_delete(context, data_dict):
     else:
         return {'success': True}
 
-def group_delete(context, data_dict):
+def group_delete(context: Context, data_dict: DataDict) -> AuthResult:
     group = get_group_object(context, data_dict)
     user = context['user']
     if not authz.check_config_permission('user_delete_groups'):
@@ -87,15 +88,15 @@ def group_delete(context, data_dict):
     else:
         return {'success': True}
 
-def group_purge(context, data_dict):
+def group_purge(context: Context, data_dict: DataDict) -> AuthResult:
     # Only sysadmins are authorized to purge groups.
     return {'success': False}
 
-def organization_purge(context, data_dict):
+def organization_purge(context: Context, data_dict: DataDict) -> AuthResult:
     # Only sysadmins are authorized to purge organizations.
     return {'success': False}
 
-def organization_delete(context, data_dict):
+def organization_delete(context: Context, data_dict: DataDict) -> AuthResult:
     group = get_group_object(context, data_dict)
     user = context['user']
     if not authz.check_config_permission('user_delete_organizations'):
@@ -108,38 +109,38 @@ def organization_delete(context, data_dict):
     else:
         return {'success': True}
 
-def revision_undelete(context, data_dict):
+def revision_undelete(context: Context, data_dict: DataDict) -> AuthResult:
     return {'success': False, 'msg': 'Not implemented yet in the auth refactor'}
 
-def revision_delete(context, data_dict):
+def revision_delete(context: Context, data_dict: DataDict) -> AuthResult:
     return {'success': False, 'msg': 'Not implemented yet in the auth refactor'}
 
-def task_status_delete(context, data_dict):
+def task_status_delete(context: Context, data_dict: DataDict) -> AuthResult:
     # sysadmins only
     user = context['user']
     return {'success': False, 'msg': _('User %s not authorized to delete task_status') % user}
 
-def vocabulary_delete(context, data_dict):
+def vocabulary_delete(context: Context, data_dict: DataDict) -> AuthResult:
     # sysadmins only
     return {'success': False}
 
-def tag_delete(context, data_dict):
+def tag_delete(context: Context, data_dict: DataDict) -> AuthResult:
     # sysadmins only
     return {'success': False}
 
-def group_member_delete(context, data_dict):
+def group_member_delete(context: Context, data_dict: DataDict) -> AuthResult:
     ## just return true as logic runs through member_delete
     return {'success': True}
 
-def organization_member_delete(context, data_dict):
+def organization_member_delete(context: Context, data_dict: DataDict) -> AuthResult:
     ## just return true as logic runs through member_delete
     return {'success': True}
 
-def member_delete(context, data_dict):
+def member_delete(context: Context, data_dict: DataDict) -> AuthResult:
     return authz.is_authorized('member_create', context, data_dict)
 
 
-def package_collaborator_delete(context, data_dict):
+def package_collaborator_delete(context: Context, data_dict: DataDict) -> AuthResult:
     '''Checks if a user is allowed to remove collaborators from a dataset
 
     See :py:func:`~ckan.authz.can_manage_collaborators` for details
@@ -158,17 +159,17 @@ def package_collaborator_delete(context, data_dict):
     return {'success': True}
 
 
-def job_clear(context, data_dict):
+def job_clear(context: Context, data_dict: DataDict) -> AuthResult:
     '''Clear background jobs. Only sysadmins.'''
     return {'success': False}
 
 
-def job_cancel(context, data_dict):
+def job_cancel(context: Context, data_dict: DataDict) -> AuthResult:
     '''Cancel a background job. Only sysadmins.'''
     return {'success': False}
 
 
-def api_token_revoke(context, data_dict):
+def api_token_revoke(context: Context, data_dict: DataDict) -> AuthResult:
     """Delete token.
     """
     if authz.auth_is_anon_user(context):

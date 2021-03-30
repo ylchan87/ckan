@@ -14,9 +14,10 @@ import ckan.logic as logic
 import ckan.lib.base as base
 
 from ckan.common import ungettext, config
+from typing import Dict, List
 
 
-def string_to_timedelta(s):
+def string_to_timedelta(s: str) -> datetime.timedelta:
     '''Parse a string s and return a standard datetime.timedelta object.
 
     Handles days, hours, minutes, seconds, and microseconds.
@@ -146,7 +147,7 @@ _notifications_functions = [
     ]
 
 
-def get_notifications(user_dict, since):
+def get_notifications(user_dict: dict, since: datetime.datetime) -> List[Dict]:
     '''Return any email notifications for the given user since `since`.
 
     For example email notifications about activity streams will be returned for
@@ -169,7 +170,7 @@ def get_notifications(user_dict, since):
     return notifications
 
 
-def send_notification(user, email_dict):
+def send_notification(user: Dict, email_dict: Dict) -> None:
     '''Email `email_dict` to `user`.'''
     import ckan.lib.mailer
 
@@ -184,7 +185,7 @@ def send_notification(user, email_dict):
         raise
 
 
-def get_and_send_notifications_for_user(user):
+def get_and_send_notifications_for_user(user: Dict) -> None:
 
     # Parse the email_notifications_since config setting, email notifications
     # from longer ago than this time will not be sent.
@@ -218,7 +219,7 @@ def get_and_send_notifications_for_user(user):
     model.repo.commit()
 
 
-def get_and_send_notifications_for_all_users():
+def get_and_send_notifications_for_all_users() -> None:
     context = {'model': model, 'session': model.Session, 'ignore_auth': True,
             'keep_email': True}
     users = logic.get_action('user_list')(context, {})

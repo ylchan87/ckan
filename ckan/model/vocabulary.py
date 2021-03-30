@@ -3,6 +3,8 @@
 from sqlalchemy import types, Column, Table
 
 from ckan.model import meta, types as _types, domain_object
+from ckan.types import Query
+from ckan.model import Tag
 
 VOCABULARY_NAME_MIN_LENGTH = 2
 VOCABULARY_NAME_MAX_LENGTH = 100
@@ -18,12 +20,12 @@ vocabulary_table = Table(
 
 class Vocabulary(domain_object.DomainObject):
 
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         self.id = _types.make_uuid()
         self.name = name
 
     @classmethod
-    def get(cls, id_or_name):
+    def get(cls, id_or_name: str) -> "Vocabulary":
         '''Return a Vocabulary object referenced by its id or name, or
         None if there is no vocabulary with the given id or name. '''
         query = meta.Session.query(Vocabulary)
@@ -34,7 +36,7 @@ class Vocabulary(domain_object.DomainObject):
         return vocab
 
     @property
-    def tags(self):
+    def tags(self) -> Query[Tag]:
         from ckan.model import tag
         query = meta.Session.query(tag.Tag)
         return query.filter(tag.Tag.vocabulary_id == self.id)

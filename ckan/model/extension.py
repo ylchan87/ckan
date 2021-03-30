@@ -10,6 +10,7 @@ from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.orm.session import SessionExtension
 
 import ckan.plugins as plugins
+from typing import Any, Callable
 
 
 log = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ class PluginMapperExtension(MapperExtension):
     MapperExtension events
     """
 
-    def notify_observers(self, func):
+    def notify_observers(self, func: Callable[[Any], None]) -> None:
         """
         Call func(observer) for all registered observers.
 
@@ -40,32 +41,32 @@ class PluginMapperExtension(MapperExtension):
         for observer in plugins.PluginImplementations(plugins.IMapper):
             func(observer)
 
-    def before_insert(self, mapper, connection, instance):
+    def before_insert(self, mapper: Any, connection: Any, instance: Any) -> None:
         return self.notify_observers(
             methodcaller('before_insert', mapper, connection, instance)
         )
 
-    def before_update(self, mapper, connection, instance):
+    def before_update(self, mapper: Any, connection: Any, instance: Any) -> None:
         return self.notify_observers(
             methodcaller('before_update', mapper, connection, instance)
         )
 
-    def before_delete(self, mapper, connection, instance):
+    def before_delete(self, mapper: Any, connection: Any, instance: Any) -> None:
         return self.notify_observers(
             methodcaller('before_delete', mapper, connection, instance)
         )
 
-    def after_insert(self, mapper, connection, instance):
+    def after_insert(self, mapper: Any, connection: Any, instance: Any) -> None:
         return self.notify_observers(
             methodcaller('after_insert', mapper, connection, instance)
         )
 
-    def after_update(self, mapper, connection, instance):
+    def after_update(self, mapper: Any, connection: Any, instance: Any) -> None:
         return self.notify_observers(
             methodcaller('after_update', mapper, connection, instance)
         )
 
-    def after_delete(self, mapper, connection, instance):
+    def after_delete(self, mapper: Any, connection: Any, instance: Any) -> None:
         return self.notify_observers(
             methodcaller('after_delete', mapper, connection, instance)
         )
@@ -77,7 +78,7 @@ class PluginSessionExtension(SessionExtension):
     SessionExtension events
     """
 
-    def notify_observers(self, func):
+    def notify_observers(self, func: Callable[[Any], None]) -> None:
         """
         Call func(observer) for all registered observers.
 
@@ -87,32 +88,32 @@ class PluginSessionExtension(SessionExtension):
         for observer in plugins.PluginImplementations(plugins.ISession):
             func(observer)
 
-    def after_begin(self, session, transaction, connection):
+    def after_begin(self, session: Any, transaction: Any, connection: Any) -> None:
         return self.notify_observers(
             methodcaller('after_begin', session, transaction, connection)
         )
 
-    def before_flush(self, session, flush_context, instances):
+    def before_flush(self, session: Any, flush_context: Any, instances: Any) -> None:
         return self.notify_observers(
             methodcaller('before_flush', session, flush_context, instances)
         )
 
-    def after_flush(self, session, flush_context):
+    def after_flush(self, session: Any, flush_context: Any) -> None:
         return self.notify_observers(
             methodcaller('after_flush', session, flush_context)
         )
 
-    def before_commit(self, session):
+    def before_commit(self, session: Any) -> None:
         return self.notify_observers(
             methodcaller('before_commit', session)
         )
 
-    def after_commit(self, session):
+    def after_commit(self, session: Any) -> None:
         return self.notify_observers(
             methodcaller('after_commit', session)
         )
 
-    def after_rollback(self, session):
+    def after_rollback(self, session: Any) -> None:
         return self.notify_observers(
             methodcaller('after_rollback', session)
         )

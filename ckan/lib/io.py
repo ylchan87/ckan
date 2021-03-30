@@ -13,7 +13,7 @@ _FILESYSTEM_ENCODING = six.text_type(
 )
 
 
-def encode_path(p):
+def encode_path(p: str) -> bytes:
     u'''
     Convert a Unicode path string to a byte string.
 
@@ -35,7 +35,7 @@ def encode_path(p):
     return six.ensure_text(p).encode(_FILESYSTEM_ENCODING)
 
 
-def decode_path(p):
+def decode_path(p: bytes) -> str:
     u'''
     Convert a byte path string to a Unicode string.
 

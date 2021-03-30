@@ -6,6 +6,8 @@ Helper functions to be used in the auth check functions
 
 import ckan.logic as logic
 import ckan.authz as authz
+from ckan.types import Context, AuthResult
+from ckan import model
 
 
 def _get_object(context, data_dict, name, class_name):
@@ -28,27 +30,27 @@ def _get_object(context, data_dict, name, class_name):
         return obj
 
 
-def get_package_object(context, data_dict=None):
+def get_package_object(context: Context, data_dict=None) -> model.Package:
     return _get_object(context, data_dict, 'package', 'Package')
 
 
-def get_resource_object(context, data_dict=None):
+def get_resource_object(context: Context, data_dict=None) -> model.Resource:
     return _get_object(context, data_dict, 'resource', 'Resource')
 
 
-def get_group_object(context, data_dict=None):
+def get_group_object(context: Context, data_dict=None) -> model.Group:
     return _get_object(context, data_dict, 'group', 'Group')
 
 
-def get_user_object(context, data_dict=None):
+def get_user_object(context: Context, data_dict=None) -> model.User:
     return _get_object(context, data_dict, 'user_obj', 'User')
 
 
-def get_activity_object(context, data_dict=None):
+def get_activity_object(context: Context, data_dict=None) -> model.Activity:
     return _get_object(context, data_dict, 'activity', 'Activity')
 
 
-def restrict_anon(context):
+def restrict_anon(context: Context) -> AuthResult:
     if authz.auth_is_anon_user(context):
         return {'success': False}
     else:

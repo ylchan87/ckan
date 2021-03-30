@@ -3,12 +3,13 @@
 from __future__ import print_function
 import six
 import re
+from typing import Any, Dict, List, Literal, Optional
 
 INSERT_NEW_SECTIONS_BEFORE_SECTION = 'app:main'
 
 
-def config_edit_using_option_strings(config_filepath, desired_option_strings,
-                                     section, edit=False):
+def config_edit_using_option_strings(config_filepath: str, desired_option_strings: List[str],
+                                     section: str, edit: bool=False) -> None:
     '''Writes the desired_option_strings to the config file.'''
     # Parse the desired_options
     desired_options = [parse_option_string(section, desired_option_string,
@@ -18,7 +19,7 @@ def config_edit_using_option_strings(config_filepath, desired_option_strings,
     config_edit(config_filepath, desired_options, edit=edit)
 
 
-def config_edit_using_merge_file(config_filepath, merge_config_filepath):
+def config_edit_using_merge_file(config_filepath: str, merge_config_filepath: str) -> None:
     '''Merges options found in a config file (merge_config_filepath) into the
     main config file (config_filepath).
     '''
@@ -31,7 +32,7 @@ def config_edit_using_merge_file(config_filepath, merge_config_filepath):
     config_edit(config_filepath, desired_options)
 
 
-def config_edit(config_filepath, desired_options, edit=False):
+def config_edit(config_filepath: str, desired_options: List[Option], edit: bool=False) -> None:
     '''Writes the desired_options to the config file.'''
     # Read and parse the existing config file
     with open(config_filepath, 'rb') as f:
@@ -49,7 +50,7 @@ def config_edit(config_filepath, desired_options, edit=False):
         f.write(six.ensure_binary('\n'.join(output) + '\n'))
 
 
-def parse_option_string(section, option_string, raise_on_error=False):
+def parse_option_string(section: str, option_string: str, raise_on_error: bool=False) -> Optional[Option]:
     option_match = OPTION_RE.match(option_string)
     if not option_match:
         if raise_on_error:
@@ -65,7 +66,7 @@ def parse_option_string(section, option_string, raise_on_error=False):
 
 
 class Option(object):
-    def __init__(self, section, key, value, is_commented_out, original=None):
+    def __init__(self, section: str, key: str, value: str, is_commented_out: Any, original: Optional[str]=None) -> None:
         self.section = section
         self.key = key
         self.value = value
@@ -85,12 +86,12 @@ class Option(object):
     def id(self):
         return '%s-%s' % (self.section, self.key)
 
-    def comment_out(self):
+    def comment_out(self) -> None:
         self.is_commented_out = True
         self.original = None  # it is no longer accurate
 
 
-def calculate_new_sections(existing_options, desired_options):
+def calculate_new_sections(existing_options: List[Option], desired_options: List[Option]) -> set:
     existing_sections = {option.section for option in existing_options}
     desired_sections = {option.section for option in desired_options}
     new_sections = desired_sections - existing_sections
@@ -100,7 +101,7 @@ def calculate_new_sections(existing_options, desired_options):
 class Changes(dict):
     '''A store of Options that are to "edit" or "add" to existing sections of a
        config file. (Excludes options that go into new sections.)'''
-    def add(self, action, option):
+    def add(self, action: Literal["edit", "add"], option: Option) -> None:
         assert action in ('edit', 'add')
         assert isinstance(option, Option)
         if option.section not in self:
@@ -109,14 +110,14 @@ class Changes(dict):
             self[option.section][action] = []
         self[option.section][action].append(option)
 
-    def get(self, section, action):
+    def get(self, section, action) -> List:
         try:
             return self[section][action]
         except KeyError:
             return []
 
 
-def calculate_changes(existing_options_dict, desired_options, edit):
+def calculate_changes(existing_options_dict: Dict, desired_options: List[Option], edit: bool) -> Changes:
     changes = Changes()
 
     for desired_option in desired_options:
@@ -130,7 +131,7 @@ def calculate_changes(existing_options_dict, desired_options, edit):
     return changes
 
 
-def parse_config(input_lines):
+def parse_config(input_lines: List[str]) -> Dict[str, Option]:
     '''
     Returns a dict of Option objects, keyed by Option.id, given the lines in a
     config file.
@@ -155,7 +156,7 @@ def parse_config(input_lines):
     return options
 
 
-def make_changes(input_lines, new_sections, changes):
+def make_changes(input_lines: List[str], new_sections: List[str], changes: Dict[str, List[Option]]) -> list:
     '''Makes changes to the config file (returned as lines).'''
     output = []
     section = None

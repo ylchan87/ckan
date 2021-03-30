@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 from ckan.model import domain_object
+from typing import Any
 
 
 class System(domain_object.DomainObject):
@@ -10,9 +11,9 @@ class System(domain_object.DomainObject):
     def __unicode__(self):
         return u'<%s>' % self.__class__.__name__
 
-    def purge(self):
+    def purge(self) -> None:
         pass
 
     @classmethod
-    def by_name(cls, name):
+    def by_name(cls, name: Any) -> "System":
         return System()

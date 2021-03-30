@@ -12,6 +12,7 @@ from ckan.common import config
 import ckan
 import ckan.model as model
 from ckan.logic.schema import update_configuration_schema
+from typing import Tuple
 
 
 log = logging.getLogger(__name__)
@@ -74,7 +75,7 @@ app_globals_from_config_details = {
 # A place to store the origional config options of we override them
 _CONFIG_CACHE = {}
 
-def set_main_css(css_file):
+def set_main_css(css_file: str) -> None:
     ''' Sets the main_css.  The css_file must be of the form file.css '''
     assert css_file.endswith('.css')
     new_css = css_file
@@ -82,7 +83,7 @@ def set_main_css(css_file):
     app_globals.main_css = str(new_css)
 
 
-def set_app_global(key, value):
+def set_app_global(key: str, value: str) -> None:
     '''
     Set a new key on the app_globals (g) object
 
@@ -93,7 +94,7 @@ def set_app_global(key, value):
     setattr(app_globals, key, value)
 
 
-def process_app_global(key, value):
+def process_app_global(key: str, value: str) -> Tuple[str, str]:
     '''
     Tweak a key, value pair meant to be set on the app_globals (g) object
 
@@ -117,7 +118,7 @@ def process_app_global(key, value):
     return key, value
 
 
-def get_globals_key(key):
+def get_globals_key(key: str) -> str:
     # create our globals key
     # these can be specified in mappings or else we remove
     # the `ckan.` part this is to keep the existing namings
@@ -130,7 +131,7 @@ def get_globals_key(key):
         return key
 
 
-def reset():
+def reset() -> None:
     ''' set updatable values from config '''
     def get_config_value(key, default=''):
         if model.meta.engine.has_table('system_info'):

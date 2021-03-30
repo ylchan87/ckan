@@ -7,6 +7,8 @@ import sqlalchemy
 import six
 from six import text_type
 from ckan.model.core import State
+from typing import Any, Callable, Dict, Iterable, List
+from sqlalchemy import Table
 
 try:
     RowProxy = sqlalchemy.engine.result.RowProxy
@@ -26,7 +28,7 @@ except NameError:
 
 legacy_dict_sort = lambda x: (len(x), dict.items(x))
 
-def table_dictize(obj, context, **kw):
+def table_dictize(obj: Any, context: Dict, **kw) -> Dict[str, Any]:
     '''Get any model object and represent it as a dict'''
 
     result_dict = {}
@@ -73,7 +75,7 @@ def table_dictize(obj, context, **kw):
     return result_dict
 
 
-def obj_list_dictize(obj_list, context, sort_key=legacy_dict_sort):
+def obj_list_dictize(obj_list: List[Any], context: Dict, sort_key: Callable=legacy_dict_sort) -> List[dict]:
     '''Get a list of model object and represent it as a list of dicts'''
 
     result_list = []
@@ -91,7 +93,7 @@ def obj_list_dictize(obj_list, context, sort_key=legacy_dict_sort):
 
     return sorted(result_list, key=sort_key)
 
-def obj_dict_dictize(obj_dict, context, sort_key=lambda x:x):
+def obj_dict_dictize(obj_dict: Dict, context: Dict, sort_key: Callable=lambda x:x) -> List[dict]:
     '''Get a dict whose values are model objects
     and represent it as a list of dicts'''
 
@@ -103,7 +105,7 @@ def obj_dict_dictize(obj_dict, context, sort_key=lambda x:x):
     return sorted(result_list, key=sort_key)
 
 
-def get_unique_constraints(table, context):
+def get_unique_constraints(table: Table, context: Dict) -> List[list]:
     '''Get a list of unique constraints for a sqlalchemy table'''
 
     list_of_constraints = []
@@ -115,7 +117,7 @@ def get_unique_constraints(table, context):
 
     return list_of_constraints
 
-def table_dict_save(table_dict, ModelClass, context, extra_attrs=()):
+def table_dict_save(table_dict: Dict, ModelClass: Any, context: Dict, extra_attrs: Iterable[str]=()) -> Any:
     '''Given a dict and a model class, update or create a sqlalchemy object.
     This will use an existing object if "id" is supplied OR if any unique
     constraints are met. e.g supplying just a tag name will get out that tag obj.

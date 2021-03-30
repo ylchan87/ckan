@@ -19,6 +19,8 @@ import ckan.model as model
 import ckan.plugins as plugins
 from ckan import authz
 from ckan.common import _, config, g, request
+from typing import Dict, Optional, Union
+from flask.wrappers import Response
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +38,7 @@ def _get_repoze_handler(handler_name):
                    handler_name)
 
 
-def set_repoze_user(user_id, resp):
+def set_repoze_user(user_id: str, resp: Response) -> None:
     u'''Set the repoze.who cookie to match a given user_id'''
     if u'repoze.who.plugins' in request.environ:
         rememberer = request.environ[u'repoze.who.plugins'][u'friendlyform']
@@ -52,7 +54,7 @@ def _new_form_to_db_schema():
     return schema.user_new_form_schema()
 
 
-def _extra_template_variables(context, data_dict):
+def _extra_template_variables(context: Dict, data_dict: Dict) -> Dict:
     is_sysadmin = authz.is_sysadmin(g.user)
     try:
         user_dict = logic.get_action(u'user_show')(context, data_dict)
@@ -73,7 +75,7 @@ def _extra_template_variables(context, data_dict):
 
 
 @user.before_request
-def before_request():
+def before_request() -> None:
     try:
         context = {
             "model": model,
@@ -91,7 +93,7 @@ def before_request():
             base.abort(403, _(u'Not authorized to see this page'))
 
 
-def index():
+def index() -> str:
     page_number = h.get_page_number(request.params)
     q = request.params.get(u'q', u'')
     order_by = request.params.get(u'order_by', u'name')
@@ -126,12 +128,12 @@ def index():
     return base.render(u'user/list.html', extra_vars)
 
 
-def me():
+def me() -> Response:
     return h.redirect_to(
         config.get(u'ckan.route_after_login', u'dashboard.index'))
 
 
-def read(id):
+def read(id: str) -> Union[Response, str]:
     context = {
         u'model': model,
         u'session': model.Session,
@@ -156,7 +158,7 @@ def read(id):
 
 
 class ApiTokenView(MethodView):
-    def get(self, id, data=None, errors=None, error_summary=None):
+    def get(self, id: str, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> Union[Response, str]:
         context = {
             u'model': model,
             u'session': model.Session,
@@ -190,7 +192,7 @@ class ApiTokenView(MethodView):
         })
         return base.render(u'user/api_tokens.html', extra_vars)
 
-    def post(self, id):
+    def post(self, id: str) -> Union[Response, str]:
         context = {u'model': model}
 
         data_dict = logic.clean_dict(
@@ -230,7 +232,7 @@ class ApiTokenView(MethodView):
         return h.redirect_to(u'user.api_tokens', id=id)
 
 
-def api_token_revoke(id, jti):
+def api_token_revoke(id, jti: str) -> Response:
     context = {u'model': model}
     try:
         logic.get_action(u'api_token_revoke')(context, {u'jti': jti})
@@ -262,7 +264,7 @@ class EditView(MethodView):
             base.abort(403, _(u'Unauthorized to edit a user.'))
         return context, id
 
-    def post(self, id=None):
+    def post(self, id: Optional[str]=None) -> Union[Response, str]:
         context, id = self._prepare(id)
         if not context[u'save']:
             return self.get(id)
@@ -324,7 +326,7 @@ class EditView(MethodView):
             set_repoze_user(data_dict[u'name'], resp)
         return resp
 
-    def get(self, id=None, data=None, errors=None, error_summary=None):
+    def get(self, id: Optional[str]=None, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> str:
         context, id = self._prepare(id)
         data_dict = {u'id': id}
         try:
@@ -377,7 +379,7 @@ class RegisterView(MethodView):
             base.abort(403, _(u'Unauthorized to register as a user.'))
         return context
 
-    def post(self):
+    def post(self) -> Union[Response, str]:
         context = self._prepare()
         try:
             data_dict = logic.clean_dict(
@@ -429,7 +431,7 @@ class RegisterView(MethodView):
         set_repoze_user(data_dict[u'name'], resp)
         return resp
 
-    def get(self, data=None, errors=None, error_summary=None):
+    def get(self, data: Optional[Dict]=None, errors: Optional[Dict]=None, error_summary: Optional[Dict]=None) -> str:
         self._prepare()
 
         if g.user and not data and not authz.is_sysadmin(g.user):
@@ -449,7 +451,7 @@ class RegisterView(MethodView):
         return base.render(u'user/new.html', extra_vars)
 
 
-def login():
+def login() -> Union[Response, str]:
     # Do any plugin login stuff
     for item in plugins.PluginImplementations(plugins.IAuthenticator):
         response = item.login()
@@ -468,7 +470,7 @@ def login():
     return base.render(u'user/login.html', extra_vars)
 
 
-def logged_in():
+def logged_in() -> Union[Response, str]:
     # redirect if needed
     came_from = request.params.get(u'came_from', u'')
     if h.url_is_local(came_from):
@@ -482,7 +484,7 @@ def logged_in():
         return login()
 
 
-def logout():
+def logout() -> Response:
     # Do any plugin logout stuff
     for item in plugins.PluginImplementations(plugins.IAuthenticator):
         response = item.logout()
@@ -495,7 +497,7 @@ def logout():
         parse_url=True)
 
 
-def logged_out():
+def logged_out() -> Response:
     # redirect if needed
     came_from = request.params.get(u'came_from', u'')
     if h.url_is_local(came_from):
@@ -503,11 +505,11 @@ def logged_out():
     return h.redirect_to(u'user.logged_out_page')
 
 
-def logged_out_page():
+def logged_out_page() -> str:
     return base.render(u'user/logout.html', {})
 
 
-def delete(id):
+def delete(id: str) -> Response:
     u'''Delete user with id passed as parameter'''
     context = {
         u'model': model,
@@ -530,7 +532,7 @@ def delete(id):
         return h.redirect_to(user_index)
 
 
-def generate_apikey(id=None):
+def generate_apikey(id: Optional[str]=None) -> Response:
     u'''Cycle the API key of a user'''
     context = {
         u'model': model,
@@ -556,7 +558,7 @@ def generate_apikey(id=None):
     return h.redirect_to(u'user.read', id=result[u'name'])
 
 
-def activity(id, offset=0):
+def activity(id: str, offset: int=0) -> str:
     u'''Render this user's public activity stream page.'''
 
     context = {
@@ -605,7 +607,7 @@ class RequestResetView(MethodView):
         except logic.NotAuthorized:
             base.abort(403, _(u'Unauthorized to request reset password.'))
 
-    def post(self):
+    def post(self) -> Response:
         self._prepare()
         id = request.form.get(u'user')
         if id in (None, u''):
@@ -673,7 +675,7 @@ class RequestResetView(MethodView):
               '(unless the account specified does not exist)'))
         return h.redirect_to(u'home.index')
 
-    def get(self):
+    def get(self) -> str:
         self._prepare()
         return base.render(u'user/request_reset.html', {})
 
@@ -721,7 +723,7 @@ class PerformResetView(MethodView):
         msg = _(u'You must provide a password')
         raise ValueError(msg)
 
-    def post(self, id):
+    def post(self, id: str) -> Union[Response, str]:
         context, user_dict = self._prepare(id)
         context[u'reset_password'] = True
         user_state = user_dict[u'state']
@@ -753,14 +755,14 @@ class PerformResetView(MethodView):
             u'user_dict': user_dict
         })
 
-    def get(self, id):
+    def get(self, id: str) -> str:
         user_dict = self._prepare(id)[1]
         return base.render(u'user/perform_reset.html', {
             u'user_dict': user_dict
         })
 
 
-def follow(id):
+def follow(id: str) -> Response:
     u'''Start following this user.'''
     context = {
         u'model': model,
@@ -782,7 +784,7 @@ def follow(id):
     return h.redirect_to(u'user.read', id=id)
 
 
-def unfollow(id):
+def unfollow(id: str) -> Response:
     u'''Stop following this user.'''
     context = {
         u'model': model,
@@ -805,7 +807,7 @@ def unfollow(id):
     return h.redirect_to(u'user.read', id=id)
 
 
-def followers(id):
+def followers(id: str) -> str:
     context = {u'for_view': True, u'user': g.user, u'auth_user_obj': g.userobj}
     data_dict = {
         u'id': id,
@@ -823,7 +825,7 @@ def followers(id):
     return base.render(u'user/followers.html', extra_vars)
 
 
-def sysadmin():
+def sysadmin() -> Response:
     username = request.form.get(u'username')
     status = asbool(request.form.get(u'status'))
 

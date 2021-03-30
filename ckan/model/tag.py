@@ -15,6 +15,9 @@ import ckan  # this import is needed
 import ckan.model
 import ckan.lib.dictization
 import ckan.lib.maintain as maintain
+from ckan.types import Query
+from typing import List, Optional, Any
+from ckan.model import Vocabulary, Package
 
 __all__ = ['tag_table', 'package_tag_table', 'Tag', 'PackageTag',
            'MAX_TAG_LENGTH', 'MIN_TAG_LENGTH']
@@ -40,16 +43,16 @@ package_tag_table = Table('package_tag', meta.metadata,
 
 
 class Tag(domain_object.DomainObject):
-    def __init__(self, name='', vocabulary_id=None):
+    def __init__(self, name: str='', vocabulary_id: Optional[str]=None) -> None:
         self.name = name
         self.vocabulary_id = vocabulary_id
 
     # not stateful so same as purge
-    def delete(self):
+    def delete(self) -> None:
         self.purge()
 
     @classmethod
-    def by_id(cls, tag_id, autoflush=True):
+    def by_id(cls, tag_id: str, autoflush: bool=True) -> Optional["Tag"]:
         '''Return the tag with the given id, or None.
 
         :param tag_id: the id of the tag to return
@@ -66,7 +69,7 @@ class Tag(domain_object.DomainObject):
         return tag
 
     @classmethod
-    def by_name(cls, name, vocab=None, autoflush=True):
+    def by_name(cls, name: str, vocab: Optional[Vocabulary]=None, autoflush: bool=True) -> Optional["Tag"]:
         '''Return the tag with the given name, or None.
 
         By default only free tags (tags which do not belong to any vocabulary)
@@ -97,7 +100,7 @@ class Tag(domain_object.DomainObject):
         return tag
 
     @classmethod
-    def get(cls, tag_id_or_name, vocab_id_or_name=None):
+    def get(cls, tag_id_or_name: str, vocab_id_or_name: Optional[str]=None) -> Optional["Tag"]:
         '''Return the tag with the given id or name, or None.
 
         By default only free tags (tags which do not belong to any vocabulary)
@@ -172,7 +175,7 @@ class Tag(domain_object.DomainObject):
         return query
 
     @classmethod
-    def all(cls, vocab_id_or_name=None):
+    def all(cls, vocab_id_or_name: Optional[str]=None) -> Query["Tag"]:
         '''Return all tags that are currently applied to any dataset.
 
         By default only free tags (tags which do not belong to any vocabulary)
@@ -201,7 +204,7 @@ class Tag(domain_object.DomainObject):
         return query
 
     @property
-    def packages(self):
+    def packages(self) -> List[Package]:
         '''Return a list of all packages that have this tag, sorted by name.
 
         :rtype: list of ckan.model.package.Package objects
@@ -220,7 +223,7 @@ class Tag(domain_object.DomainObject):
 
 class PackageTag(core.StatefulObjectMixin,
                  domain_object.DomainObject):
-    def __init__(self, package=None, tag=None, state=None, **kwargs):
+    def __init__(self, package: Optional[Package]=None, tag: Optional[Tag]=None, state: Optional[str]=None, **kwargs: Any) -> None:
         self.package = package
         self.tag = tag
         self.state = state
@@ -273,7 +276,7 @@ class PackageTag(core.StatefulObjectMixin,
         query = query.autoflush(autoflush)
         return query.one()[0]
 
-    def related_packages(self):
+    def related_packages(self) -> List[Package]:
         return [self.package]
 
 meta.mapper(Tag, tag_table, properties={

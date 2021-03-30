@@ -75,17 +75,17 @@ class Package(core.StatefulObjectMixin,
 
     text_search_fields = ['name', 'title']
 
-    def __init__(self, **kw):
+    def __init__(self, **kw: Any) -> None:
         from ckan import model
         super(Package, self).__init__(**kw)
 
     @classmethod
-    def search_by_name(cls, text_query):
+    def search_by_name(cls, text_query: str) -> Query["Package"]:
         text_query = text_query
         return meta.Session.query(cls).filter(cls.name.contains(text_query.lower()))
 
     @classmethod
-    def get(cls, reference, for_update=False):
+    def get(cls, reference: str, for_update: bool=False) -> Optional["Package"]:
         '''Returns a package object referenced by its id or name.'''
         if not reference:
             return None
@@ -100,15 +100,15 @@ class Package(core.StatefulObjectMixin,
     # Todo: Make sure package names can't be changed to look like package IDs?
 
     @property
-    def resources(self):
+    def resources(self) -> List["Resource"]:
         return [resource for resource in
                 self.resources_all
                 if resource.state != 'deleted']
 
-    def related_packages(self):
+    def related_packages(self) -> List["Package"]:
         return [self]
 
-    def add_resource(self, url, format=u'', description=u'', hash=u'', **kw):
+    def add_resource(self, url: str, format: str=u'', description: str=u'', hash: str=u'', **kw: Any) -> None:
         from ckan.model import resource
         self.resources_all.append(resource.Resource(
             package_id=self.id,
@@ -119,7 +119,7 @@ class Package(core.StatefulObjectMixin,
             **kw)
         )
 
-    def add_tag(self, tag):
+    def add_tag(self, tag: "PackageTag") -> None:
         import ckan.model as model
         if tag in self.get_tags(tag.vocabulary):
             return
@@ -128,11 +128,11 @@ class Package(core.StatefulObjectMixin,
             meta.Session.add(package_tag)
 
 
-    def add_tags(self, tags):
+    def add_tags(self, tags: List["PackageTag"]) -> None:
         for tag in tags:
             self.add_tag(tag)
 
-    def add_tag_by_name(self, tag_name, vocab=None, autoflush=True):
+    def add_tag_by_name(self, tag_name: str, vocab: Optional["Vocabulary"]=None, autoflush: bool=True):
         """Add a tag with the given name to this package's tags.
 
         By default the given tag_name will be searched for among the free tags
@@ -160,7 +160,7 @@ class Package(core.StatefulObjectMixin,
         assert tag is not None
         self.add_tag(tag)
 
-    def get_tags(self, vocab=None):
+    def get_tags(self, vocab: "Vocabulary"=None) -> List["PackageTag"]:
         """Return a sorted list of this package's tags
 
         Tags are sorted by their names.
@@ -180,7 +180,7 @@ class Package(core.StatefulObjectMixin,
         tags = query.all()
         return tags
 
-    def remove_tag(self, tag):
+    def remove_tag(self, tag: "PackageTag"):
         import ckan.model as model
         query = meta.Session.query(model.PackageTag)
         query = query.filter(model.PackageTag.package_id == self.id)
@@ -189,12 +189,12 @@ class Package(core.StatefulObjectMixin,
         package_tag.delete()
         meta.Session.commit()
 
-    def isopen(self):
+    def isopen(self) -> bool:
         if self.license and self.license.isopen():
             return True
         return False
 
-    def get_average_rating(self):
+    def get_average_rating(self) -> Optional[float]:
         total = 0
         for rating in self.ratings:
             total += rating.rating
@@ -203,7 +203,7 @@ class Package(core.StatefulObjectMixin,
         else:
             return total / len(self.ratings)
 
-    def as_dict(self, ref_package_by='name', ref_group_by='name'):
+    def as_dict(self, ref_package_by: str='name', ref_group_by: str='name') -> Dict:
         _dict = domain_object.DomainObject.as_dict(self)
         # Set 'license' in _dict to cater for old clients.
         # Todo: Remove from Version 2?
@@ -233,7 +233,7 @@ class Package(core.StatefulObjectMixin,
         _dict['type'] = self.type or u'dataset'
         return _dict
 
-    def add_relationship(self, type_, related_package, comment=u''):
+    def add_relationship(self, type_: str, related_package: "Package", comment: str=u''):
         '''Creates a new relationship between this package and a
         related_package. It leaves the caller to commit the change.
 
@@ -270,8 +270,8 @@ class Package(core.StatefulObjectMixin,
         meta.Session.add(rel)
         return rel
 
-    def get_relationships(self, with_package=None, type=None, active=True,
-                          direction='both'):
+    def get_relationships(self, with_package: Optional["Package"]=None, type: Optional[str]=None, active: bool=True,
+                          direction: str='both') -> "PackageRelationship":
         '''Returns relationships this package has.
         Keeps stored type/ordering (not from pov of self).'''
         assert direction in ('both', 'forward', 'reverse')
@@ -302,12 +302,12 @@ class Package(core.StatefulObjectMixin,
             q = q.filter(and_(*reverse_filters))
         return q.all()
 
-    def get_relationships_with(self, other_package, type=None, active=True):
+    def get_relationships_with(self, other_package: "Package", type: Optional[str]=None, active: bool=True) -> "PackageRelationship":
         return self.get_relationships(with_package=other_package,
                                       type=type,
                                       active=active)
 
-    def get_relationships_printable(self):
+    def get_relationships_printable(self) -> List[Tuple["Package", str, Optional[str]]]:
         '''Returns a list of tuples describing related packages, including
         non-direct relationships (such as siblings).
         @return: e.g. [(annakarenina, u"is a parent"), ...]
@@ -348,17 +348,17 @@ class Package(core.StatefulObjectMixin,
     ## Licenses are currently integrated into the domain model here.
 
     @classmethod
-    def get_license_register(cls):
+    def get_license_register(cls) -> "LicenseRegister":
         if not hasattr(cls, '_license_register'):
             cls._license_register = _license.LicenseRegister()
         return cls._license_register
 
     @classmethod
-    def get_license_options(cls):
+    def get_license_options(cls) -> List[Tuple[str, str]]:
         register = cls.get_license_register()
         return [(l.title, l.id) for l in register.values()]
 
-    def get_license(self):
+    def get_license(self) -> Optional["License"]:
         if self.license_id:
             try:
                 license = self.get_license_register()[self.license_id]
@@ -368,7 +368,7 @@ class Package(core.StatefulObjectMixin,
             license = None
         return license
 
-    def set_license(self, license):
+    def set_license(self, license: Union["License", Dict]) -> None:
         if type(license) == _license.License:
             self.license_id = license.id
         elif type(license) == dict:
@@ -390,10 +390,10 @@ class Package(core.StatefulObjectMixin,
         """
         return self.private
 
-    def is_in_group(self, group):
+    def is_in_group(self, group: "Group") -> bool:
         return group in self.get_groups()
 
-    def get_groups(self, group_type=None, capacity=None):
+    def get_groups(self, group_type: Optional[str]=None, capacity: Optional[str]=None) -> List["Group"]:
         import ckan.model as model
 
         # Gets [ (group, capacity,) ...]
@@ -413,7 +413,7 @@ class Package(core.StatefulObjectMixin,
             groups = [g[0] for g in groupcaps if g[1] == capacity]
         return groups
 
-    def activity_stream_item(self, activity_type, user_id):
+    def activity_stream_item(self, activity_type: str, user_id: str) -> "Activity":
         import ckan.model
         import ckan.logic
 
@@ -468,7 +468,7 @@ class Package(core.StatefulObjectMixin,
             }
         )
 
-    def set_rating(self, user_or_ip, rating):
+    def set_rating(self, user_or_ip: Union["User", str], rating: Union[int, str]) -> None:
         '''Record a user's rating of this package.
 
         The caller function is responsible for doing the commit.
@@ -536,6 +536,8 @@ class RatingValueException(Exception):
 
 # import here to prevent circular import
 from ckan.model import tag
+from ckan.types import Query
+from typing import Dict, List, Optional, Tuple, Union, Any
 
 meta.mapper(Package, package_table, properties={
     # delete-orphan on cascade does NOT work!

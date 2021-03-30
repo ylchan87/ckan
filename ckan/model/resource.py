@@ -19,6 +19,8 @@ from ckan.model import (
 import ckan.lib.dictization
 from .package import Package
 import ckan.model
+from typing import Any, Dict, List, Optional
+from .package import Package
 
 __all__ = ['Resource', 'resource_table']
 
@@ -62,8 +64,8 @@ class Resource(core.StatefulObjectMixin,
                domain_object.DomainObject):
     extra_columns = None
 
-    def __init__(self, url=u'', format=u'', description=u'', hash=u'',
-                 extras=None, package_id=None, **kwargs):
+    def __init__(self, url: str=u'', format: str=u'', description: str=u'', hash: str=u'',
+                 extras: Optional[Dict]=None, package_id: Optional[str]=None, **kwargs: Any) -> None:
         self.id = _types.make_uuid()
         self.url = url
         self.format = format
@@ -84,7 +86,7 @@ class Resource(core.StatefulObjectMixin,
         if kwargs:
             raise TypeError('unexpected keywords %s' % kwargs)
 
-    def as_dict(self, core_columns_only=False):
+    def as_dict(self, core_columns_only: bool=False) -> Dict:
         _dict = OrderedDict()
         cols = self.get_columns()
         if not core_columns_only:
@@ -100,12 +102,12 @@ class Resource(core.StatefulObjectMixin,
             _dict["package_id"] = self.package_id
         return _dict
 
-    def get_package_id(self):
+    def get_package_id(self) -> str:
         '''Returns the package id for a resource. '''
         return self.package_id
 
     @classmethod
-    def get(cls, reference):
+    def get(cls, reference: str) -> Optional["Resource"]:
         '''Returns a resource object referenced by its name or id.'''
         if not reference:
             return None
@@ -116,7 +118,7 @@ class Resource(core.StatefulObjectMixin,
         return resource
 
     @classmethod
-    def get_columns(cls, extra_columns=True):
+    def get_columns(cls, extra_columns: bool=True) -> List[str]:
         '''Returns the core editable columns of the resource.'''
         if extra_columns:
             return CORE_RESOURCE_COLUMNS + cls.get_extra_columns()
@@ -124,7 +126,7 @@ class Resource(core.StatefulObjectMixin,
             return CORE_RESOURCE_COLUMNS
 
     @classmethod
-    def get_extra_columns(cls):
+    def get_extra_columns(cls) -> List[str]:
         if cls.extra_columns is None:
             cls.extra_columns = config.get(
                 'ckan.extra_resource_fields', '').split()
@@ -133,7 +135,7 @@ class Resource(core.StatefulObjectMixin,
         return cls.extra_columns
 
     @classmethod
-    def get_all_without_views(cls, formats=[]):
+    def get_all_without_views(cls, formats: List[str]=[]) -> List["Resource"]:
         '''Returns all resources that have no resource views
 
         :param formats: if given, returns only resources that have no resource
@@ -151,7 +153,7 @@ class Resource(core.StatefulObjectMixin,
 
         return query.all()
 
-    def related_packages(self):
+    def related_packages(self) -> List[Package]:
         return [self.package]
 
 
@@ -173,7 +175,7 @@ extension=[extension.PluginMapperExtension()],
 )
 
 
-def resource_identifier(obj):
+def resource_identifier(obj: Resource) -> str:
     return obj.id
 
 
