@@ -1,10 +1,13 @@
 # encoding: utf-8
 
+from typing import TYPE_CHECKING
 from sqlalchemy import types, Column, Table
 
 from ckan.model import meta, types as _types, domain_object
 from sqlalchemy.orm import Query
-from ckan.model import Tag
+
+if TYPE_CHECKING:
+    from ckan.model import Tag
 
 VOCABULARY_NAME_MIN_LENGTH = 2
 VOCABULARY_NAME_MAX_LENGTH = 100
@@ -36,7 +39,7 @@ class Vocabulary(domain_object.DomainObject):
         return vocab
 
     @property
-    def tags(self) -> Query[Tag]:
+    def tags(self) -> 'Query[Tag]':
         from ckan.model import tag
         query = meta.Session.query(tag.Tag)
         return query.filter(tag.Tag.vocabulary_id == self.id)

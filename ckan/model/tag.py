@@ -16,8 +16,10 @@ import ckan.model
 import ckan.lib.dictization
 import ckan.lib.maintain as maintain
 from sqlalchemy.orm import Query
-from typing import List, Optional, Any
-from ckan.model import Vocabulary, Package
+from typing import List, Optional, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ckan.model import Vocabulary, Package
 
 __all__ = ['tag_table', 'package_tag_table', 'Tag', 'PackageTag',
            'MAX_TAG_LENGTH', 'MIN_TAG_LENGTH']
@@ -69,7 +71,10 @@ class Tag(domain_object.DomainObject):
         return tag
 
     @classmethod
-    def by_name(cls, name: str, vocab: Optional[Vocabulary]=None, autoflush: bool=True) -> Optional["Tag"]:
+    def by_name(
+            cls, name: str, vocab: Optional['Vocabulary']=None,
+            autoflush: bool=True
+    ) -> Optional["Tag"]:
         '''Return the tag with the given name, or None.
 
         By default only free tags (tags which do not belong to any vocabulary)
@@ -175,7 +180,7 @@ class Tag(domain_object.DomainObject):
         return query
 
     @classmethod
-    def all(cls, vocab_id_or_name: Optional[str]=None) -> Query["Tag"]:
+    def all(cls, vocab_id_or_name: Optional[str]=None) -> 'Query[Tag]':
         '''Return all tags that are currently applied to any dataset.
 
         By default only free tags (tags which do not belong to any vocabulary)
@@ -204,7 +209,7 @@ class Tag(domain_object.DomainObject):
         return query
 
     @property
-    def packages(self) -> List[Package]:
+    def packages(self) -> List['Package']:
         '''Return a list of all packages that have this tag, sorted by name.
 
         :rtype: list of ckan.model.package.Package objects
@@ -223,7 +228,7 @@ class Tag(domain_object.DomainObject):
 
 class PackageTag(core.StatefulObjectMixin,
                  domain_object.DomainObject):
-    def __init__(self, package: Optional[Package]=None, tag: Optional[Tag]=None, state: Optional[str]=None, **kwargs: Any) -> None:
+    def __init__(self, package: Optional['Package']=None, tag: Optional[Tag]=None, state: Optional[str]=None, **kwargs: Any) -> None:
         self.package = package
         self.tag = tag
         self.state = state
@@ -276,7 +281,7 @@ class PackageTag(core.StatefulObjectMixin,
         query = query.autoflush(autoflush)
         return query.one()[0]
 
-    def related_packages(self) -> List[Package]:
+    def related_packages(self) -> List['Package']:
         return [self.package]
 
 meta.mapper(Tag, tag_table, properties={

@@ -130,7 +130,7 @@ class Package(core.StatefulObjectMixin,
         super(Package, self).__init__(**kw)
 
     @classmethod
-    def search_by_name(cls, text_query: str) -> Query['Package']:
+    def search_by_name(cls, text_query: str) -> 'Query[Package]':
         text_query = text_query
         return meta.Session.query(cls).filter(
             cls.name.contains(text_query.lower())  # type: ignore
@@ -219,7 +219,7 @@ class Package(core.StatefulObjectMixin,
 
         """
         import ckan.model as model
-        query: Query[model.Tag] = meta.Session.query(model.Tag)
+        query: 'Query[model.Tag]' = meta.Session.query(model.Tag)
         query = query.join(model.PackageTag)
         query = query.filter(model.PackageTag.tag_id == model.Tag.id)
         query = query.filter(model.PackageTag.package_id == self.id)
