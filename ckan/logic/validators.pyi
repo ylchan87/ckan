@@ -1,6 +1,5 @@
-from ckan.logic import Context, ErrorDict
-from typing import Any, Container, Dict, TypeVar, overload, Pattern
-from typing_extensions import Protocol
+from ckan.types import TuplizedKey, Validator, Context, ErrorDict
+from typing import Any, Container, Dict, Pattern
 import ckan.lib.navl.dictization_functions as df
 
 Invalid = df.Invalid
@@ -8,20 +7,6 @@ StopOnError = df.StopOnError
 Missing = df.Missing
 missing = df.missing
 
-TuplizedKey = TypeVar("TuplizedKey")
-
-class Validator(Protocol):
-    @overload
-    def __call__(
-        self,
-        key: TuplizedKey,
-        data: Dict[TuplizedKey, Any],
-        errors: ErrorDict,
-        context: Context,
-    ) -> Any: ...
-    @overload
-    def __call__(self, value: Any, context: Context) -> Any: ...
-    def __call__(self, value) -> Any: ...
 
 def owner_org_validator(
     key: TuplizedKey,

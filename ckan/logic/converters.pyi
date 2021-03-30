@@ -1,6 +1,6 @@
 from typing import Any, Dict
-from ckan.logic import Context, ErrorDict
-from ckan.logic.validators import TuplizedKey
+from ckan.types import Context, ErrorDict, TuplizedKey
+
 
 def convert_to_extras(
     key: TuplizedKey,

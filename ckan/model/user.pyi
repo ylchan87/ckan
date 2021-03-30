@@ -1,8 +1,7 @@
+from ckan.types import Query
 import datetime
 from typing import (
     Any,
-    ClassVar,
-    Collection,
     Dict,
     Iterable,
     List,
@@ -11,7 +10,6 @@ from typing import (
 )
 from sqlalchemy import Table
 from ckan.model import core, domain_object, Group
-from sqlalchemy.sql.schema import Column
 
 def set_api_key() -> Optional[str]: ...
 
@@ -73,7 +71,7 @@ class User(core.StatefulObjectMixin, domain_object.DomainObject):
         querystr: str,
         sqlalchemy_query: Optional[Any] = ...,
         user_name: Optional[str] = ...,
-    ) -> Collection["User"]: ...
+    ) -> Query["User"]: ...
     @classmethod
     def user_ids_for_name_or_id(
         cls, user_list: List[str] = ...

@@ -8,10 +8,7 @@ from typing import (
     Tuple,
     Union,
 )
-from typing_extensions import TypedDict
-
-class AuthResult(TypedDict):
-    success: bool
+from ckan.types import AuthResult
 
 class AuthFunctions:
     def clear(self) -> None: ...

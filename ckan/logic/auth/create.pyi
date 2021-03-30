@@ -1,5 +1,5 @@
 from typing import Optional
-from ckan.logic import Context, DataDict, AuthResult
+from ckan.types import Context, DataDict, AuthResult
 
 def package_create(
     context: Context, data_dict: Optional[DataDict]

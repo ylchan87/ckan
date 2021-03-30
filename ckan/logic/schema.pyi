@@ -1,15 +1,5 @@
-from ckan.logic.validators import Validator
-from typing import (
-    Callable,
-    Dict,
-    Iterable,
-)
+from ckan.types import ComplexSchemaFunc, PlainSchemaFunc, Schema
 
-Schema = Dict[str, Iterable[Validator]]
-
-ComplexSchemaFunc = Callable[..., Schema]
-
-PlainSchemaFunc = Callable[[], Schema]
 
 def validator_args(fn: ComplexSchemaFunc) -> PlainSchemaFunc: ...
 def default_resource_schema() -> Schema: ...

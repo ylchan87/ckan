@@ -1,4 +1,4 @@
-from ckan.logic import ErrorDict
+from ckan.types import ErrorDict
 from ckan import model
 from ckan.model.domain_object import DomainObject
 from typing import Dict, Mapping

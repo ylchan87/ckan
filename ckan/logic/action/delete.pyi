@@ -1,5 +1,5 @@
 from typing import List
-from ckan.logic import Context, DataDict
+from ckan.types import Context, DataDict
 
 def user_delete(context: Context, data_dict: DataDict) -> None: ...
 def package_delete(context: Context, data_dict: DataDict) -> None: ...

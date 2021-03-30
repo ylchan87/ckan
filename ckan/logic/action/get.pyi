@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional, Tuple, Union, Any
-from ckan.logic import Context, DataDict
+from ckan.types import Context, DataDict
 
 def site_read(context: Context, data_dict: Optional[DataDict]) -> bool: ...
 def package_list(context: Context, data_dict: DataDict) -> List[str]: ...

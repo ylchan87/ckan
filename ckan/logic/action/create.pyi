@@ -1,5 +1,5 @@
 from typing import Dict
-from ckan.logic import Context, DataDict
+from ckan.types import Context, DataDict
 
 def package_create(context: Context, data_dict: DataDict) -> Dict: ...
 def resource_create(context: Context, data_dict: DataDict) -> Dict: ...

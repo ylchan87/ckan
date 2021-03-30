@@ -1,5 +1,4 @@
-from ckan.logic import Context
-from ckan.authz import AuthResult
+from ckan.types import Context, AuthResult
 from ckan import model
 
 def get_package_object(context: Context, data_dict=None) -> model.Package: ...

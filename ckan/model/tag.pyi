@@ -1,4 +1,5 @@
-from typing import Collection, List, Optional, Any
+from ckan.types import Query
+from typing import List, Optional, Any
 import ckan.lib.maintain as maintain
 from sqlalchemy import Table
 from ckan.model import core, domain_object, Vocabulary, Package
@@ -12,7 +13,7 @@ class Tag(domain_object.DomainObject):
     name: str
     vocabulary_id: str
 
-    package_tags: Collection["PackageTag"]
+    package_tags: Query["PackageTag"]
     vacabulary: Optional[Vocabulary]
     def __init__(
         self, name: str = ..., vocabulary_id: Optional[str] = ...
@@ -34,7 +35,7 @@ class Tag(domain_object.DomainObject):
     @classmethod
     def all(
         cls, vocab_id_or_name: Optional[str] = ...
-    ) -> Collection["Tag"]: ...
+    ) -> Query["Tag"]: ...
     @property
     def packages(self) -> List[Package]: ...
 

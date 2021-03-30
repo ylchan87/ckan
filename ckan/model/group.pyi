@@ -1,6 +1,7 @@
+from ckan.types import Query
 from ckan.model import package as _package
 from datetime import datetime
-from typing import Collection, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 from sqlalchemy import Table
 from ckan.model import core, domain_object
 
@@ -56,7 +57,7 @@ class Group(core.StatefulObjectMixin, domain_object.DomainObject):
     @classmethod
     def all(
         cls, group_type: Optional[str] = ..., state: Tuple[str] = ...
-    ) -> Collection["Group"]: ...
+    ) -> Query["Group"]: ...
     def set_approval_status(self, status: str) -> None: ...
     def get_children_groups(self, type: str = ...) -> List["Group"]: ...
     def get_children_group_hierarchy(
@@ -75,7 +76,7 @@ class Group(core.StatefulObjectMixin, domain_object.DomainObject):
         limit: Optional[int] = ...,
         return_query: bool = ...,
         context: Optional[Dict] = ...,
-    ) -> Collection[_package.Package]: ...
+    ) -> Query[_package.Package]: ...
     @classmethod
     def search_by_name_or_title(
         cls,
@@ -83,7 +84,7 @@ class Group(core.StatefulObjectMixin, domain_object.DomainObject):
         group_type: Optional[str] = ...,
         is_org: bool = ...,
         limit: int = ...,
-    ) -> Collection["Group"]: ...
+    ) -> Query["Group"]: ...
     def add_package_by_name(self, package_name: str) -> None: ...
 
 MAX_RECURSES: int

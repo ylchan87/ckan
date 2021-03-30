@@ -1,5 +1,5 @@
 from typing import Dict, Union
-from ckan.logic import Context, DataDict
+from ckan.types import Context, DataDict
 
 def resource_update(context: Context, data_dict: DataDict) -> Dict: ...
 def resource_view_update(context: Context, data_dict: DataDict) -> Dict: ...

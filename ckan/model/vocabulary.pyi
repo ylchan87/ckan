@@ -1,4 +1,4 @@
-from typing import Collection
+from ckan.types import Query
 from sqlalchemy import Table
 from ckan.model import domain_object, Tag
 
@@ -13,4 +13,4 @@ class Vocabulary(domain_object.DomainObject):
     @classmethod
     def get(cls, id_or_name: str) -> "Vocabulary": ...
     @property
-    def tags(self) -> Collection[Tag]: ...
+    def tags(self) -> Query[Tag]: ...

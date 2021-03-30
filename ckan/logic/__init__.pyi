@@ -12,10 +12,9 @@ from typing import (
     Optional,
     Tuple,
     TypeVar,
-    TypedDict,
     Union,
 )
-from typing_extensions import TypedDict
+from ckan.types import ErrorDict, Context
 import ckan.model as model
 import ckan.authz as authz
 import ckan.lib.navl.dictization_functions as df
@@ -23,13 +22,8 @@ from werkzeug.datastructures import MultiDict
 import ckan.plugins as p
 from ckan.common import _
 
-DataDict = Dict[str, Any]
-Context = Dict[str, Any]
 Decorated = TypeVar("Decorated")
 
-class AuthResult(TypedDict):
-    success: bool
-    msg: Optional[str]
 
 class NameConflict(Exception): ...
 class UsernamePasswordError(Exception): ...
@@ -40,8 +34,6 @@ class ActionError(Exception):
 
 class NotFound(ActionError): ...
 class NotAuthorized(ActionError): ...
-
-ErrorDict = Dict[str, Union[List[Union[str, Dict[str, Any]]], str]]
 
 class ValidationError(ActionError):
     error_dict: ErrorDict
