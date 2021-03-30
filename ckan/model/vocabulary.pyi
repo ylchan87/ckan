@@ -1,4 +1,4 @@
-from ckan.types import Query
+from sqlalchemy.orm import Query
 from sqlalchemy import Table
 from ckan.model import domain_object, Tag
 

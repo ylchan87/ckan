@@ -15,7 +15,7 @@ import ckan  # this import is needed
 import ckan.model
 import ckan.lib.dictization
 import ckan.lib.maintain as maintain
-from ckan.types import Query
+from sqlalchemy.orm import Query
 from typing import List, Optional, Any
 from ckan.model import Vocabulary, Package
 

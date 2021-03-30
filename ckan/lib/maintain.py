@@ -5,15 +5,12 @@ import inspect
 import time
 import logging
 import re
-from typing import Callable, List, TypeVar, Union
+from typing import Callable, List, Optional, TypeVar, Union
 
-F = TypeVar("F")
-
-
+RT = TypeVar("RT")
 log = logging.getLogger(__name__)
 
-
-def deprecated(message: str='') -> Callable[[F], F]:
+def deprecated(message: Optional[str]='') -> Callable[[Callable[..., RT]], Callable[..., RT]]:
     ''' This is a decorator used to mark functions as deprecated.
 
     It logs a warning when the function is called. If a message is
@@ -48,7 +45,7 @@ def timer(params: Union[Callable, List[str]]) -> Callable:
     the logging will include the value of the parameter if it is passed to the
     function. '''
 
-    if hasattr(params, '__call__'):
+    if callable(params):
         # this is being used as a simple decorator
         fn = params
         fn_name = '%s.%s' % (fn.__module__, fn.__name__)
@@ -59,9 +56,8 @@ def timer(params: Union[Callable, List[str]]) -> Callable:
             return result
         return wrapped
 
-    assert isinstance(params, list)
-
     def decorator(fn):
+        assert isinstance(params, list)
         # we have a list of parameter names so we want to find if the parameter
         # is a named one and if so store its position
         args_info = inspect.getargspec(fn)

@@ -94,7 +94,7 @@ class DomainObject(object):
         self.Session().autoflush = False
         self.Session.delete(self)
 
-    def as_dict(self) -> Dict:
+    def as_dict(self) -> Dict[str, Any]:
         """
         returns: ordered dict with fields from table. Date/time values
         are converted to strings for json compatibilty

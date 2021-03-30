@@ -1,4 +1,4 @@
-from ckan.types import Query
+from sqlalchemy.orm import Query
 from typing import Dict, List, Optional, Tuple
 from sqlalchemy import Table
 from ckan.model import core, domain_object

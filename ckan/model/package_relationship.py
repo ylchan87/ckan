@@ -7,7 +7,7 @@ from ckan.model import core
 from ckan.model import package as _package
 from ckan.model import types as _types
 from ckan.model import domain_object
-from ckan.types import Query
+from sqlalchemy.orm import Query
 from typing import Dict, List, Optional, Tuple
 from ckan.model import package as _package
 

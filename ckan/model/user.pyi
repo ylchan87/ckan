@@ -1,4 +1,4 @@
-from ckan.types import Query
+from sqlalchemy.orm import Query
 import datetime
 from typing import (
     Any,

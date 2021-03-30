@@ -1,4 +1,4 @@
-from ckan.types import Query
+from sqlalchemy.orm import Query
 from typing import List, Optional, Any
 import ckan.lib.maintain as maintain
 from sqlalchemy import Table
@@ -7,6 +7,7 @@ from ckan.model import core, domain_object, Vocabulary, Package
 MAX_TAG_LENGTH: int
 MIN_TAG_LENGTH: int
 tag_table: Table
+package_tag_table: Table
 
 class Tag(domain_object.DomainObject):
     id: str
@@ -14,7 +15,8 @@ class Tag(domain_object.DomainObject):
     vocabulary_id: str
 
     package_tags: Query["PackageTag"]
-    vacabulary: Optional[Vocabulary]
+    vocabulary: Optional[Vocabulary]
+
     def __init__(
         self, name: str = ..., vocabulary_id: Optional[str] = ...
     ) -> None: ...
@@ -44,6 +46,9 @@ class PackageTag(core.StatefulObjectMixin, domain_object.DomainObject):
     package_id: str
     tag_id: str
     state: str
+
+    pkg: Package
+
     def __init__(
         self,
         package: Optional[Package] = ...,

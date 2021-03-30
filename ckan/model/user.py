@@ -20,7 +20,7 @@ from ckan.model import core
 from ckan.model import types as _types
 from ckan.model import domain_object
 from ckan.common import config, asbool
-from ckan.types import Query
+from sqlalchemy.orm import Query
 from typing import Any, Dict, Iterable, List, Optional
 from ckan.model import Group
 

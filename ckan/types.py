@@ -6,13 +6,12 @@ from typing import (
 )
 from typing_extensions import Protocol, TypedDict
 
-from sqlalchemy.orm import Session, Query as _Query
+from sqlalchemy.orm import Session
 
 if TYPE_CHECKING:
     from ckan.model import User
 
 AlchemySession = Session
-Query = _Query
 
 Config = Dict[str, Union[str, Mapping[str, str]]]
 

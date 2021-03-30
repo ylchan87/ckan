@@ -1,4 +1,4 @@
-from ckan.types import Query
+from sqlalchemy.orm import Query
 from ckan.model import package as _package
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple

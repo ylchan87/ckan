@@ -1,7 +1,19 @@
 # encoding: utf-8
 
+from typing import (
+    ClassVar, Dict,
+    List,
+    Optional,
+    TYPE_CHECKING,
+    Tuple,
+    Union,
+    Any,
+)
+
 import datetime
 import logging
+from sqlalchemy.ext.associationproxy import AssociationProxy
+from sqlalchemy.orm import Query
 
 from sqlalchemy.sql import and_, or_
 from sqlalchemy import orm, types, Column, Table, ForeignKey
@@ -18,6 +30,19 @@ from ckan.model import (
 )
 import ckan.lib.maintain as maintain
 
+if TYPE_CHECKING:
+    from .activity import Activity
+    from .group import Group
+    from .license import LicenseRegister, License
+    from .package_extra import PackageExtra
+    from .package_relationship import PackageRelationship
+    from .rating import Rating
+    from .resource import Resource
+    from .tag import PackageTag, Tag
+    from .user import User
+    from .vocabulary import Vocabulary
+
+PrintableRelationship = Tuple["Package", str, Optional[str]]
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +52,9 @@ __all__ = ['Package', 'package_table', 'PackageMember', 'package_member_table',
            ]
 
 
-PACKAGE_NAME_MAX_LENGTH = 100
-PACKAGE_NAME_MIN_LENGTH = 2
-PACKAGE_VERSION_MAX_LENGTH = 100
+PACKAGE_NAME_MAX_LENGTH: int = 100
+PACKAGE_NAME_MIN_LENGTH: int = 2
+PACKAGE_VERSION_MAX_LENGTH: int = 100
 
 
 # Our Domain Object Tables
@@ -72,17 +97,44 @@ package_member_table = Table(
 
 class Package(core.StatefulObjectMixin,
               domain_object.DomainObject):
+    id: str
+    name: str
+    title: str
+    version: str
+    url: str
+    author: str
+    author_email: str
+    maintainer: str
+    maintainer_email: str
+    notes: str
+    licensce_id: str
+    type: str
+    owner_org: str
+    creator_user_id: str
+    metadata_created: datetime.datetime
+    metadata_modified: datetime.datetime
+    private: bool
+    state: str
 
-    text_search_fields = ['name', 'title']
+    package_tags: List["PackageTag"]
+    resources_all: List["Resource"]
+    ratings: List["Rating"]
+    extras: AssociationProxy
+
+    _license_register: ClassVar['LicenseRegister']
+
+    text_search_fields: List[str] = ['name', 'title']
 
     def __init__(self, **kw: Any) -> None:
         from ckan import model
         super(Package, self).__init__(**kw)
 
     @classmethod
-    def search_by_name(cls, text_query: str) -> Query["Package"]:
+    def search_by_name(cls, text_query: str) -> Query['Package']:
         text_query = text_query
-        return meta.Session.query(cls).filter(cls.name.contains(text_query.lower()))
+        return meta.Session.query(cls).filter(
+            cls.name.contains(text_query.lower())  # type: ignore
+        )
 
     @classmethod
     def get(cls, reference: str, for_update: bool=False) -> Optional["Package"]:
@@ -119,7 +171,7 @@ class Package(core.StatefulObjectMixin,
             **kw)
         )
 
-    def add_tag(self, tag: "PackageTag") -> None:
+    def add_tag(self, tag: "Tag") -> None:
         import ckan.model as model
         if tag in self.get_tags(tag.vocabulary):
             return
@@ -128,7 +180,7 @@ class Package(core.StatefulObjectMixin,
             meta.Session.add(package_tag)
 
 
-    def add_tags(self, tags: List["PackageTag"]) -> None:
+    def add_tags(self, tags: List["Tag"]) -> None:
         for tag in tags:
             self.add_tag(tag)
 
@@ -160,14 +212,14 @@ class Package(core.StatefulObjectMixin,
         assert tag is not None
         self.add_tag(tag)
 
-    def get_tags(self, vocab: "Vocabulary"=None) -> List["PackageTag"]:
+    def get_tags(self, vocab: "Vocabulary"=None) -> List["Tag"]:
         """Return a sorted list of this package's tags
 
         Tags are sorted by their names.
 
         """
         import ckan.model as model
-        query = meta.Session.query(model.Tag)
+        query: Query[model.Tag] = meta.Session.query(model.Tag)
         query = query.join(model.PackageTag)
         query = query.filter(model.PackageTag.tag_id == model.Tag.id)
         query = query.filter(model.PackageTag.package_id == self.id)
@@ -180,7 +232,7 @@ class Package(core.StatefulObjectMixin,
         tags = query.all()
         return tags
 
-    def remove_tag(self, tag: "PackageTag"):
+    def remove_tag(self, tag: "Tag") -> None:
         import ckan.model as model
         query = meta.Session.query(model.PackageTag)
         query = query.filter(model.PackageTag.package_id == self.id)
@@ -194,16 +246,15 @@ class Package(core.StatefulObjectMixin,
             return True
         return False
 
-    def get_average_rating(self) -> Optional[float]:
-        total = 0
+    def get_average_rating(self) -> float:
+        total = 0.0
+        if not len(self.ratings):
+            return total
         for rating in self.ratings:
             total += rating.rating
-        if total == 0:
-            return None
-        else:
-            return total / len(self.ratings)
+        return total / len(self.ratings)
 
-    def as_dict(self, ref_package_by: str='name', ref_group_by: str='name') -> Dict:
+    def as_dict(self, ref_package_by: str='name', ref_group_by: str='name') -> Dict[str, Any]:
         _dict = domain_object.DomainObject.as_dict(self)
         # Set 'license' in _dict to cater for old clients.
         # Todo: Remove from Version 2?
@@ -245,8 +296,9 @@ class Package(core.StatefulObjectMixin,
             object_ = related_package
             direction = "forward"
         elif type_ in package_relationship.PackageRelationship.get_reverse_types():
-            type_ = package_relationship.PackageRelationship.reverse_to_forward_type(type_)
-            assert type_
+            rev_type = package_relationship.PackageRelationship.reverse_to_forward_type(type_)
+            assert rev_type
+            type_ = rev_type
             subject = related_package
             object_ = self
             direction = "reverse"
@@ -271,7 +323,7 @@ class Package(core.StatefulObjectMixin,
         return rel
 
     def get_relationships(self, with_package: Optional["Package"]=None, type: Optional[str]=None, active: bool=True,
-                          direction: str='both') -> "PackageRelationship":
+                          direction: str='both') -> List["PackageRelationship"]:
         '''Returns relationships this package has.
         Keeps stored type/ordering (not from pov of self).'''
         assert direction in ('both', 'forward', 'reverse')
@@ -302,27 +354,26 @@ class Package(core.StatefulObjectMixin,
             q = q.filter(and_(*reverse_filters))
         return q.all()
 
-    def get_relationships_with(self, other_package: "Package", type: Optional[str]=None, active: bool=True) -> "PackageRelationship":
+    def get_relationships_with(self, other_package: "Package", type: Optional[str]=None, active: bool=True) -> List["PackageRelationship"]:
         return self.get_relationships(with_package=other_package,
                                       type=type,
                                       active=active)
 
-    def get_relationships_printable(self) -> List[Tuple["Package", str, Optional[str]]]:
+    def get_relationships_printable(self) -> List[PrintableRelationship]:
         '''Returns a list of tuples describing related packages, including
         non-direct relationships (such as siblings).
         @return: e.g. [(annakarenina, u"is a parent"), ...]
         '''
         from ckan.model.package_relationship import PackageRelationship
-        rel_list = []
+        rel_list: List[PrintableRelationship] = []
         for rel in self.get_relationships():
             if rel.subject == self:
                 type_printable = PackageRelationship.make_type_printable(rel.type)
                 rel_list.append((rel.object, type_printable, rel.comment))
             else:
-                type_printable = PackageRelationship.make_type_printable(\
-                    PackageRelationship.forward_to_reverse_type(
-                        rel.type)
-                    )
+                type_ = PackageRelationship.forward_to_reverse_type(rel.type)
+                assert type_
+                type_printable = PackageRelationship.make_type_printable(type_)
                 rel_list.append((rel.subject, type_printable, rel.comment))
         # sibling types
         # e.g. 'gary' is a child of 'mum', looking for 'bert' is a child of 'mum'
@@ -358,37 +409,39 @@ class Package(core.StatefulObjectMixin,
         register = cls.get_license_register()
         return [(l.title, l.id) for l in register.values()]
 
+    license = property()
+
     def get_license(self) -> Optional["License"]:
         if self.license_id:
             try:
-                license = self.get_license_register()[self.license_id]
+                license: Optional['License'] = self.get_license_register()[self.license_id]
             except KeyError:
                 license = None
         else:
             license = None
         return license
 
-    def set_license(self, license: Union["License", Dict]) -> None:
-        if type(license) == _license.License:
+    @license.setter
+    def set_license(self, license: Any) -> None:
+        if isinstance(license, _license.License):
             self.license_id = license.id
-        elif type(license) == dict:
+        elif isinstance(license, dict):
             self.license_id = license['id']
         else:
             msg = "Value not a license object or entity: %s" % repr(license)
             raise Exception(msg)
 
-    license = property(get_license, set_license)
-
-    @property
     @maintain.deprecated('`is_private` attriute of model.Package is ' +
                          'deprecated and should not be used.  Use `private`')
-    def is_private(self):
+    def _is_private(self):
         """
         DEPRECATED in 2.1
 
         A package is private if belongs to any private groups
         """
         return self.private
+
+    is_private = property(_is_private)
 
     def is_in_group(self, group: "Group") -> bool:
         return group in self.get_groups()
@@ -397,23 +450,24 @@ class Package(core.StatefulObjectMixin,
         import ckan.model as model
 
         # Gets [ (group, capacity,) ...]
-        groups = model.Session.query(model.Group,model.Member.capacity).\
-           join(model.Member, model.Member.group_id == model.Group.id and \
-                model.Member.table_name == 'package' ).\
-           join(model.Package, model.Package.id == model.Member.table_id).\
-           filter(model.Member.state == 'active').\
-           filter(model.Member.table_id == self.id).all()
+        pairs: List[Tuple[model.Group, str]] = model.Session.query(
+            model.Group,model.Member.capacity
+        ). join(
+            model.Member, model.Member.group_id == model.Group.id and
+            model.Member.table_name == 'package'
+        ).join(
+            model.Package, model.Package.id == model.Member.table_id
+        ).filter(model.Member.state == 'active').filter(
+            model.Member.table_id == self.id
+        ).all()
 
-        caps   = [g[1] for g in groups]
-        groups = [g[0] for g in groups ]
         if group_type:
-            groups = [g for g in groups if g.type == group_type]
-        if capacity:
-            groupcaps = zip( groups,caps )
-            groups = [g[0] for g in groupcaps if g[1] == capacity]
+            pairs = [pair for pair in pairs if pair[0].type == group_type]
+
+        groups = [group for (group, cap) in pairs if not capacity or cap == capacity]
         return groups
 
-    def activity_stream_item(self, activity_type: str, user_id: str) -> "Activity":
+    def activity_stream_item(self, activity_type: str, user_id: str) -> Optional["Activity"]:
         import ckan.model
         import ckan.logic
 
@@ -468,7 +522,7 @@ class Package(core.StatefulObjectMixin,
             }
         )
 
-    def set_rating(self, user_or_ip: Union["User", str], rating: Union[int, str]) -> None:
+    def set_rating(self, user_or_ip: Union["User", str], rating: float) -> None:
         '''Record a user's rating of this package.
 
         The caller function is responsible for doing the commit.
@@ -479,16 +533,9 @@ class Package(core.StatefulObjectMixin,
         @param user_or_ip - user object or an IP address string
         '''
         user = None
+        ip = None
         from ckan.model.user import User
         from ckan.model.rating import Rating, MAX_RATING, MIN_RATING
-        if isinstance(user_or_ip, User):
-            user = user_or_ip
-            rating_query = meta.Session.query(Rating)\
-                               .filter_by(package=self, user=user)
-        else:
-            ip = user_or_ip
-            rating_query = meta.Session.query(Rating)\
-                               .filter_by(package=self, user_ip_address=ip)
 
         try:
             rating = float(rating)
@@ -499,23 +546,30 @@ class Package(core.StatefulObjectMixin,
         if rating > MAX_RATING or rating < MIN_RATING:
             raise RatingValueException
 
-        if rating_query.count():
-            rating_obj = rating_query.first()
+        if isinstance(user_or_ip, User):
+            user = user_or_ip
+            rating_obj = meta.Session.query(Rating)\
+                               .filter_by(package=self, user=user).first()
+        else:
+            ip = user_or_ip
+            rating_obj = meta.Session.query(Rating)\
+                               .filter_by(package=self, user_ip_address=ip)\
+                               .first()
+        if rating_obj:
             rating_obj.rating = rating
         elif user:
-            rating = Rating(package=self,
+            rating_obj = Rating(package=self,
                             user=user,
                             rating=rating)
-            meta.Session.add(rating)
+            meta.Session.add(rating_obj)
         else:
-            rating = Rating(package=self,
+            rating_obj = Rating(package=self,
                             user_ip_address=ip,
                             rating=rating)
-            meta.Session.add(rating)
+            meta.Session.add(rating_obj)
 
-    @property
     @maintain.deprecated()
-    def extras_list(self):
+    def _extras_list(self) -> List['PackageExtra']:
         '''DEPRECATED in 2.9
 
         Returns a list of the dataset's extras, as PackageExtra object
@@ -526,9 +580,14 @@ class Package(core.StatefulObjectMixin,
             .filter_by(package_id=self.id) \
             .all()
 
+    extras_list = property(_extras_list)
+
 
 class PackageMember(domain_object.DomainObject):
-    pass
+    package_id: str
+    user_id: str
+    capacity: str
+    modified: datetime.datetime
 
 
 class RatingValueException(Exception):
@@ -536,8 +595,6 @@ class RatingValueException(Exception):
 
 # import here to prevent circular import
 from ckan.model import tag
-from ckan.types import Query
-from typing import Dict, List, Optional, Tuple, Union, Any
 
 meta.mapper(Package, package_table, properties={
     # delete-orphan on cascade does NOT work!
@@ -551,7 +608,7 @@ meta.mapper(Package, package_table, properties={
         cascade='all, delete', #, delete-orphan',
         ),
     },
-    order_by=package_table.c.name,
+    order_by=package_table.c.name,  # type: ignore
     extension=[extension.PluginMapperExtension()],
     )
 
@@ -560,7 +617,7 @@ meta.mapper(tag.PackageTag, tag.package_tag_table, properties={
         cascade='none',
         )
     },
-    order_by=tag.package_tag_table.c.id,
+    order_by=tag.package_tag_table.c.id,  # type: ignore
     extension=[extension.PluginMapperExtension()],
     )
 

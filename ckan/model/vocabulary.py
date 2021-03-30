@@ -3,7 +3,7 @@
 from sqlalchemy import types, Column, Table
 
 from ckan.model import meta, types as _types, domain_object
-from ckan.types import Query
+from sqlalchemy.orm import Query
 from ckan.model import Tag
 
 VOCABULARY_NAME_MIN_LENGTH = 2

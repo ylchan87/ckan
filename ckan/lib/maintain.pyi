@@ -1,6 +1,0 @@
-from typing import Callable, List, TypeVar, Union
-
-F = TypeVar("F")
-
-def deprecated(message: str) -> Callable[[F], F]: ...
-def timer(params: Union[Callable, List[str]]) -> Callable: ...
