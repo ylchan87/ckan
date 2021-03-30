@@ -19,4 +19,4 @@ Check https://ckan.org to know more.
 __license__ = 'AGPL'
 
 # The packaging system relies on this import, please do not remove it
-import sys; sys.path.insert(0, __path__[0]) # type: ignore
+import sys; sys.path.insert(0, __path__[0])  # type: ignore

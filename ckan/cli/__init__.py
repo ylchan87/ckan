@@ -1,12 +1,13 @@
 # encoding: utf-8
 
+from ckan.types import Config
 import sys
 import os
 
 import click
 import logging
 from logging.config import fileConfig as loggingFileConfig
-from six.moves.configparser import ConfigParser
+from six.moves.configparser import ConfigParser  # type: ignore
 
 from ckan.exceptions import CkanConfigurationException
 from typing import Any, Optional
@@ -15,6 +16,11 @@ log = logging.getLogger(__name__)
 
 
 class CKANConfigLoader(object):
+    config: Config
+    config_file: str
+    parser: ConfigParser
+    section: str
+
     def __init__(self, filename: str) -> None:
         self.config_file = filename.strip()
         self.config = dict()
@@ -24,16 +30,16 @@ class CKANConfigLoader(object):
         self._update_defaults(defaults)
         self._create_config_object()
 
-    def _update_defaults(self, new_defaults):
+    def _update_defaults(self, new_defaults) -> None:
         for key, value in new_defaults.items():
             self.parser._defaults[key] = value
 
-    def _read_config_file(self, filename):
+    def _read_config_file(self, filename) -> None:
         defaults = {u'here': os.path.dirname(os.path.abspath(filename))}
         self._update_defaults(defaults)
         self.parser.read(filename)
 
-    def _update_config(self):
+    def _update_config(self) -> None:
         options = self.parser.options(self.section)
         for option in options:
             if option not in self.config or option in self.parser.defaults():
@@ -42,7 +48,7 @@ class CKANConfigLoader(object):
                 if option in self.parser.defaults():
                     self.config[u'global_conf'][option] = value
 
-    def _create_config_object(self):
+    def _create_config_object(self) -> None:
         self._read_config_file(self.config_file)
 
         # # The global_config key is to keep compatibility with Pylons.
@@ -78,6 +84,7 @@ def load_config(ini_path: Optional[str]=None) -> Config:
     else:
         # deprecated method since CKAN 2.9
         default_filenames = [u'ckan.ini', u'development.ini']
+        config_source = default_filenames
         filename = None
         for default_filename in default_filenames:
             check_file = os.path.join(os.getcwd(), default_filename)
@@ -94,7 +101,7 @@ or have one of {} in the current directory.'''
             msg = msg.format(u', '.join(default_filenames))
             raise CkanConfigurationException(msg)
 
-    if not os.path.exists(filename):
+    if not filename or not os.path.exists(filename):
         msg = u'Config file not found: %s' % filename
         msg += u'\n(Given by: %s)' % config_source
         raise CkanConfigurationException(msg)

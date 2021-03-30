@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from ckan.types import AlchemySession
 import warnings
 import logging
 import os
@@ -131,13 +132,13 @@ from ckan.model.api_token import (
 
 import ckan.migration
 from ckan.common import config
-from typing import Any, Dict, List
+from typing import Any, Callable, Collection, Dict, List, Optional, Tuple
 from sqlalchemy.engine import Engine
 
 
 log = logging.getLogger(__name__)
 
-DB_CONNECT_RETRIES = 10
+DB_CONNECT_RETRIES: int = 10
 
 
 def init_model(engine: Engine) -> None:
@@ -163,7 +164,11 @@ def init_model(engine: Engine) -> None:
 
 
 class Repository():
-    _alembic_ini = os.path.join(
+    metadata: MetaData
+    session: Session
+    commit: Callable[[], None]
+
+    _alembic_ini: str = os.path.join(
         os.path.dirname(ckan.migration.__file__),
         u"alembic.ini"
     )
@@ -171,9 +176,9 @@ class Repository():
     # note: tables_created value is not sustained between instantiations
     #       so only useful for tests. The alternative is to use
     #       are_tables_created().
-    tables_created_and_initialised = False
+    tables_created_and_initialised: bool = False
 
-    def __init__(self, metadata: Any, session: Any) -> None:
+    def __init__(self, metadata: MetaData, session: AlchemySession) -> None:
         self.metadata = metadata
         self.session = session
         self.commit = session.commit
@@ -259,9 +264,10 @@ class Repository():
     def add_alembic_output(self, *args: str) -> None:
         self._alembic_output.append(args)
 
-    def take_alembic_output(self, with_reset: bool=True) -> List[str]:
+    def take_alembic_output(self, with_reset: bool=True) -> List[Tuple[str, ...]]:
         output = self._alembic_output
-        self._alembic_config = []
+        if with_reset:
+            self.reset_alembic_output()
         return output
 
     def setup_migration_version_control(self) -> None:
@@ -343,7 +349,7 @@ def is_id(id_string: str) -> bool:
     return bool(re.match(reg_ex, id_string))
 
 
-def parse_db_config(config_key: str=u'sqlalchemy.url') -> Dict[str, str]:
+def parse_db_config(config_key: str=u'sqlalchemy.url') -> Optional[Dict[str, str]]:
     u''' Takes a config key for a database connection url and parses it into
     a dictionary. Expects a url like:
 

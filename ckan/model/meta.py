@@ -10,6 +10,7 @@ import sqlalchemy.orm as orm
 from sqlalchemy.orm.session import SessionExtension
 
 from ckan.model import extension
+from ckan.types import AlchemySession
 from typing import Optional
 from sqlalchemy.engine import Engine
 
@@ -70,9 +71,9 @@ class CkanSessionExtension(SessionExtension):
 # __all__ = ['Session', 'engine', 'metadata', 'mapper']
 
 # SQLAlchemy database engine. Updated by model.init_model()
-engine = None
+engine: Optional[Engine] = None
 
-Session = orm.scoped_session(orm.sessionmaker(
+Session: AlchemySession = orm.scoped_session(orm.sessionmaker(
     autoflush=False,
     autocommit=False,
     expire_on_commit=False,

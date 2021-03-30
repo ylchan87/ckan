@@ -12,6 +12,7 @@ from collections import MutableMapping
 
 import flask
 import six
+from werkzeug.datastructures import ImmutableMultiDict
 
 from werkzeug.local import Local, LocalProxy
 
@@ -19,7 +20,7 @@ from flask_babel import (gettext as flask_ugettext,
                          ngettext as flask_ungettext)
 
 import simplejson as json
-from typing import Any, Iterable, List, Optional
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, TypeVar, Union, overload
 
 if six.PY2:
     import pylons  # type: ignore
@@ -38,7 +39,7 @@ def is_flask_request() -> bool:
     if six.PY3:
         return True
     try:
-        pylons.request.environ
+        pylons.request.environ  # type: ignore
         pylons_request_available = True
     except TypeError:
         pylons_request_available = False
@@ -49,7 +50,9 @@ def is_flask_request() -> bool:
 
 
 def streaming_response(
-        data: Iterable, mimetype: str=u'application/octet-stream', with_context: bool=False) -> flask.wrappers.Response:
+        data: Iterable[Any],
+        mimetype: str=u'application/octet-stream',
+        with_context: bool=False) -> flask.Response:
     iter_data = iter(data)
     if is_flask_request():
         # Removal of context variables for pylon's app is prevented
@@ -61,8 +64,9 @@ def streaming_response(
             iter_data = flask.stream_with_context(iter_data)
         resp = flask.Response(iter_data, mimetype=mimetype)
     else:
-        response.app_iter = iter_data
-        resp = response.headers['Content-type'] = mimetype
+        response.app_iter = iter_data  # type: ignore
+        resp = response.headers['Content-type'] = mimetype  # type: ignore
+        assert False
     return resp
 
 
@@ -77,7 +81,7 @@ def ungettext(*args, **kwargs) -> str:
     if is_flask_request():
         return flask_ungettext(*args, **kwargs)
     else:
-        return pylons_ungettext(*args, **kwargs)
+        return pylons_ungettext(*args, **kwargs)  # type: ignore
 
 
 class CKANConfig(MutableMapping):
@@ -90,6 +94,7 @@ class CKANConfig(MutableMapping):
     `load_environment` method with the values of the ini file or env vars.
 
     '''
+    store: Dict[str, Any]
 
     def __init__(self, *args, **kwargs):
         self.store = dict()
@@ -107,7 +112,7 @@ class CKANConfig(MutableMapping):
     def __repr__(self):
         return self.store.__repr__()
 
-    def copy(self) -> dict:
+    def copy(self) -> Dict[str, Any]:
         return self.store.copy()
 
     def clear(self) -> None:
@@ -126,7 +131,7 @@ class CKANConfig(MutableMapping):
             except TypeError:
                 pass
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any):
         self.store[key] = value
         try:
             flask.current_app.config[key] = value
@@ -139,7 +144,7 @@ class CKANConfig(MutableMapping):
             except TypeError:
                 pass
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str):
         del self.store[key]
         try:
             del flask.current_app.config[key]
@@ -153,7 +158,7 @@ class CKANConfig(MutableMapping):
                 pass
 
 
-def _get_request():
+def _get_request() -> flask.Request:
     if is_flask_request():
         return flask.request
     else:
@@ -173,7 +178,7 @@ class CKANRequest(LocalProxy):
     '''
 
     @property
-    def params(self):
+    def params(self) -> ImmutableMultiDict[Any, Any]:
         u''' Special case as Pylons' request.params is used all over the place.
         All new code meant to be run just in Flask (eg views) should always
         use request.args
@@ -184,14 +189,14 @@ class CKANRequest(LocalProxy):
             return self.args
 
 
-def _get_c():
+def _get_c() -> Any:
     if is_flask_request():
         return flask.g
     else:
         return pylons.c
 
 
-def _get_session():
+def _get_session() -> Any:
     if is_flask_request():
         return flask.session
     else:
@@ -235,7 +240,26 @@ def asint(obj: Any) -> int:
         raise ValueError(u"Bad integer value: {}".format(obj))
 
 
-def aslist(obj: Any, sep: Optional[str]=None, strip: bool=True) -> List:
+T = TypeVar('T')
+SequenceT = TypeVar('SequenceT', list, tuple)
+
+@overload
+def aslist(obj: str, sep: Optional[str]=None, strip: bool=True) -> List[str]: ...
+
+
+@overload
+def aslist(obj: List[T], sep: Optional[str]=None, strip: bool=True) -> List[T]: ...
+
+
+@overload
+def aslist(obj: Tuple[T], sep: Optional[str]=None, strip: bool=True) -> Tuple[T]: ...
+
+
+@overload
+def aslist(obj: SequenceT, sep: Optional[str]=None, strip: bool=True) -> SequenceT: ...
+
+
+def aslist(obj, sep=None, strip=True):
     if isinstance(obj, six.string_types):
         lst = obj.split(sep)
         if strip:
