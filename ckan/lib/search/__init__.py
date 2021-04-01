@@ -9,6 +9,7 @@ import xml.dom.minidom
 
 import requests
 
+from ckan.common import asbool, config
 import ckan.model as model
 import ckan.plugins as p
 import ckan.logic as logic
@@ -119,7 +120,8 @@ class SynchronousSearchPlugin(p.SingletonPlugin):
     p.implements(p.IDomainObjectModification, inherit=True)
 
     def notify(self, entity: Any, operation: str) -> None:
-        if not isinstance(entity, model.Package):
+        if (not isinstance(entity, model.Package) or
+                not asbool(config.get('ckan.search.automatic_indexing', True))):
             return
         if operation != model.domain_object.DomainObjectOperation.deleted:
             dispatch_by_operation(

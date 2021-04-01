@@ -68,16 +68,11 @@ entry_points = {
         'solr = ckan.lib.search.solr_backend:SolrSearchBackend',
     ],
     'ckan.plugins': [
-        'synchronous_search = ckan.lib.search:SynchronousSearchPlugin',
         'stats = ckanext.stats.plugin:StatsPlugin',
-        'publisher_form = ckanext.publisher_form.forms:PublisherForm',
-        'publisher_dataset_form = ckanext.publisher_form.forms:PublisherDatasetForm',
         'multilingual_dataset = ckanext.multilingual.plugin:MultilingualDataset',
         'multilingual_group = ckanext.multilingual.plugin:MultilingualGroup',
         'multilingual_tag = ckanext.multilingual.plugin:MultilingualTag',
         'multilingual_resource = ckanext.multilingual.plugin:MultilingualResource',
-        'organizations = ckanext.organizations.forms:OrganizationForm',
-        'organizations_dataset = ckanext.organizations.forms:OrganizationDatasetForm',
         'expire_api_token = ckanext.expire_api_token.plugin:ExpireApiTokenPlugin',
         'chained_functions = ckanext.chained_functions.plugin:ChainedFunctionsPlugin',
         'datastore = ckanext.datastore.plugin:DatastorePlugin',
@@ -163,6 +158,7 @@ entry_points = {
         'example_humanizer = ckanext.example_humanizer.plugin:ExampleHumanizerPlugin',
     ],
     'ckan.system_plugins': [
+        'synchronous_search = ckan.lib.search:SynchronousSearchPlugin',
         'domain_object_mods = ckan.model.modification:DomainObjectModificationExtension',
     ],
     'ckan.test_plugins': [
@@ -240,6 +236,7 @@ setup(
     entry_points=entry_points,
     # setup.py test command needs a TestSuite so does not work with py.test
     # tests_require=[ 'py >= 0.8.0-alpha2' ]
+    python_requires=">=3.6",
     extras_require=extras_require,
     classifiers=[
         # https://pypi.python.org/pypi?%3Aaction=list_classifiers
