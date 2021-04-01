@@ -13,7 +13,6 @@ from typing import (
 import datetime
 import logging
 from sqlalchemy.ext.associationproxy import AssociationProxy
-from sqlalchemy.orm import Query
 
 from sqlalchemy.sql import and_, or_
 from sqlalchemy import orm, types, Column, Table, ForeignKey
@@ -29,6 +28,7 @@ from ckan.model import (
     extension,
 )
 import ckan.lib.maintain as maintain
+from ckan.types import Query
 
 if TYPE_CHECKING:
     from .activity import Activity

@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import datetime
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy import (
     orm,
@@ -19,7 +20,8 @@ from ckan.common import config
 import ckan.model
 from ckan.model import meta
 from ckan.model import domain_object, types as _types
-from typing import Any, Dict, List, Optional
+from ckan.types import Query
+
 
 __all__ = ['Activity', 'activity_table',
            'ActivityDetail', 'activity_detail_table',
@@ -116,7 +118,7 @@ meta.mapper(ActivityDetail, activity_detail_table, properties={
     })
 
 
-def _activities_limit(q: orm.Query[Activity], limit: int, offset: Optional[int]=None) -> orm.Query[Activity]:
+def _activities_limit(q: 'Query[Activity]', limit: int, offset: Optional[int]=None) -> 'Query[Activity]':
     '''
     Return an SQLAlchemy query for all activities at an offset with a limit.
     '''
@@ -129,7 +131,7 @@ def _activities_limit(q: orm.Query[Activity], limit: int, offset: Optional[int]=
     return q
 
 
-def _activities_union_all(*qlist: orm.Query[Activity]) -> orm.Query[Activity]:
+def _activities_union_all(*qlist: 'Query[Activity]') -> 'Query[Activity]':
     '''
     Return union of two or more activity queries sorted by timestamp,
     and remove duplicates
@@ -140,14 +142,14 @@ def _activities_union_all(*qlist: orm.Query[Activity]) -> orm.Query[Activity]:
         ).distinct(model.Activity.timestamp)
 
 
-def _activities_at_offset(q: orm.Query[Activity], limit: int, offset: int) -> List[Activity]:
+def _activities_at_offset(q: 'Query[Activity]', limit: int, offset: int) -> List[Activity]:
     '''
     Return a list of all activities at an offset with a limit.
     '''
     return _activities_limit(q, limit, offset).all()
 
 
-def _activities_from_user_query(user_id: str) -> orm.Query[Activity]:
+def _activities_from_user_query(user_id: str) -> 'Query[Activity]':
     '''Return an SQLAlchemy query for all activities from user_id.'''
     import ckan.model as model
     q = model.Session.query(model.Activity)
@@ -155,7 +157,7 @@ def _activities_from_user_query(user_id: str) -> orm.Query[Activity]:
     return q
 
 
-def _activities_about_user_query(user_id: str) -> orm.Query[Activity]:
+def _activities_about_user_query(user_id: str) -> 'Query[Activity]':
     '''Return an SQLAlchemy query for all activities about user_id.'''
     import ckan.model as model
     q = model.Session.query(model.Activity)
@@ -163,7 +165,7 @@ def _activities_about_user_query(user_id: str) -> orm.Query[Activity]:
     return q
 
 
-def _user_activity_query(user_id: str, limit: int) -> orm.Query[Activity]:
+def _user_activity_query(user_id: str, limit: int) -> 'Query[Activity]':
     '''Return an SQLAlchemy query for all activities from or about user_id.'''
     q1 = _activities_limit(_activities_from_user_query(user_id), limit)
     q2 = _activities_limit(_activities_about_user_query(user_id), limit)
@@ -188,7 +190,7 @@ def user_activity_list(user_id: str, limit: int, offset: int) -> List[Activity]:
     return _activities_at_offset(q, limit, offset)
 
 
-def _package_activity_query(package_id: str) -> orm.Query[Activity]:
+def _package_activity_query(package_id: str) -> 'Query[Activity]':
     '''Return an SQLAlchemy query for all activities about package_id.
 
     '''
@@ -218,7 +220,7 @@ def package_activity_list(
     return _activities_at_offset(q, limit, offset)
 
 
-def _group_activity_query(group_id: str, include_hidden_activity: bool=False) -> orm.Query[Activity]:
+def _group_activity_query(group_id: str, include_hidden_activity: bool=False) -> 'Query[Activity]':
     '''Return an SQLAlchemy query for all activities about group_id.
 
     Returns a query for all activities whose object is either the group itself
@@ -274,7 +276,7 @@ def _group_activity_query(group_id: str, include_hidden_activity: bool=False) ->
     return q
 
 
-def _organization_activity_query(org_id: str, include_hidden_activity: bool=False) -> orm.Query[Activity]:
+def _organization_activity_query(org_id: str, include_hidden_activity: bool=False) -> 'Query[Activity]':
     '''Return an SQLAlchemy query for all activities about org_id.
 
     Returns a query for all activities whose object is either the org itself
@@ -288,7 +290,7 @@ def _organization_activity_query(org_id: str, include_hidden_activity: bool=Fals
         # Return a query with no results.
         return model.Session.query(model.Activity).filter(text('0=1'))
 
-    q: orm.Query[Activity] = model.Session.query(
+    q: 'Query[Activity]' = model.Session.query(
         model.Activity
     ).outerjoin(
         model.Package,
@@ -345,7 +347,7 @@ def organization_activity_list(
     return _activities_at_offset(q, limit, offset)
 
 
-def _activities_from_users_followed_by_user_query(user_id: str, limit: int) -> orm.Query[Activity]:
+def _activities_from_users_followed_by_user_query(user_id: str, limit: int) -> 'Query[Activity]':
     '''Return a query for all activities from users that user_id follows.'''
     import ckan.model as model
 
@@ -375,7 +377,7 @@ def _activities_from_datasets_followed_by_user_query(user_id, limit):
         for follower in follower_objects])
 
 
-def _activities_from_groups_followed_by_user_query(user_id: str, limit: int) -> orm.Query[Activity]:
+def _activities_from_groups_followed_by_user_query(user_id: str, limit: int) -> 'Query[Activity]':
     '''Return a query for all activities about groups the given user follows.
 
     Return a query for all activities about the groups the given user follows,
@@ -396,7 +398,7 @@ def _activities_from_groups_followed_by_user_query(user_id: str, limit: int) -> 
         for follower in follower_objects])
 
 
-def _activities_from_everything_followed_by_user_query(user_id: str, limit: int) -> orm.Query[Activity]:
+def _activities_from_everything_followed_by_user_query(user_id: str, limit: int) -> 'Query[Activity]':
     '''Return a query for all activities from everything user_id follows.'''
     q1 = _activities_from_users_followed_by_user_query(user_id, limit)
     q2 = _activities_from_datasets_followed_by_user_query(user_id, limit)
@@ -417,7 +419,7 @@ def activities_from_everything_followed_by_user(user_id: str, limit: int, offset
     return _activities_at_offset(q, limit, offset)
 
 
-def _dashboard_activity_query(user_id: str, limit: int) -> orm.Query[Activity]:
+def _dashboard_activity_query(user_id: str, limit: int) -> 'Query[Activity]':
     '''Return an SQLAlchemy query for user_id's dashboard activity stream.'''
     q1 = _user_activity_query(user_id, limit)
     q2 = _activities_from_everything_followed_by_user_query(user_id, limit)
@@ -441,7 +443,7 @@ def dashboard_activity_list(user_id: str, limit: int, offset: int) -> List[Activ
     return _activities_at_offset(q, limit, offset)
 
 
-def _changed_packages_activity_query() -> orm.Query[Activity]:
+def _changed_packages_activity_query() -> 'Query[Activity]':
     '''Return an SQLAlchemy query for all changed package activities.
 
     Return a query for all activities with activity_type '*package', e.g.
@@ -468,7 +470,7 @@ def recently_changed_packages_activity_list(limit: int, offset: int) -> List[Act
     return _activities_at_offset(q, limit, offset)
 
 
-def _filter_activitites_from_users(q: orm.Query[Activity]) -> orm.Query[Activity]:
+def _filter_activitites_from_users(q: 'Query[Activity]') -> 'Query[Activity]':
     '''
     Adds a filter to an existing query object ot avoid activities from users
     defined in :ref:`ckan.hide_activity_from_users` (defaults to the site user)

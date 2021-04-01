@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import types, Column, Table
 
 from ckan.model import meta, types as _types, domain_object
-from sqlalchemy.orm import Query
+from ckan.types import Query
 
 if TYPE_CHECKING:
     from ckan.model import Tag

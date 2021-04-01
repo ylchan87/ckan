@@ -10,7 +10,7 @@ from ckan.model import package as _package
 from ckan.model import types as _types
 from ckan.model import domain_object
 from ckan.model import user as _user
-from sqlalchemy.orm import Query
+from ckan.types import Query
 from ckan.model import package as _package
 from typing import Dict, List,  Optional, Tuple, Union, overload
 from typing_extensions import Literal
@@ -168,7 +168,7 @@ class Group(core.StatefulObjectMixin,
     # Todo: Make sure group names can't be changed to look like group IDs?
 
     @classmethod
-    def all(cls, group_type: Optional[str]=None, state: Tuple[str]=('active',)) -> Query["Group"]:
+    def all(cls, group_type: Optional[str]=None, state: Tuple[str]=('active',)) -> 'Query[Group]':
         """
         Returns all groups.
         """
@@ -282,17 +282,17 @@ class Group(core.StatefulObjectMixin,
 
     @overload
     def packages(self, *,
-                 return_query: Literal[True], context: Optional[Dict]=...) -> Query[_package.Package]: ...
+                 return_query: Literal[True], context: Optional[Dict]=...) -> 'Query[_package.Package]': ...
     @overload
     def packages(self, with_private: bool, limit: Optional[int],
-                 return_query: Literal[True], context: Optional[Dict]=...) -> Query[_package.Package]: ...
+                 return_query: Literal[True], context: Optional[Dict]=...) -> 'Query[_package.Package]': ...
     @overload
     def packages(self, with_private: bool=..., limit: Optional[int]=...,
                  return_query: Literal[False]=..., context: Optional[Dict]=...) -> List[_package.Package]: ...
 
     @overload
     def packages(self, with_private: bool=..., limit: Optional[int]=...,
-                 return_query: bool=..., context: Optional[Dict]=...) -> Union[List[_package.Package], Query[_package.Package]]: ...
+                 return_query: bool=..., context: Optional[Dict]=...) -> Union[List[_package.Package], 'Query[_package.Package]']: ...
 
 
     def packages(self, with_private=False, limit=None,
@@ -357,7 +357,7 @@ class Group(core.StatefulObjectMixin,
 
     @classmethod
     def search_by_name_or_title(cls, text_query: str, group_type: Optional[str]=None,
-                                is_org: bool=False, limit: int=20) -> Query["Group"]:
+                                is_org: bool=False, limit: int=20) -> 'Query[Group]':
         text_query = text_query.strip().lower()
         q = meta.Session.query(cls) \
             .filter(or_(cls.name.contains(text_query),  # type: ignore

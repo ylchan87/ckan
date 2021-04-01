@@ -6,7 +6,7 @@ from typing import (
 )
 from typing_extensions import Protocol, TypedDict
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query
 
 if TYPE_CHECKING:
     from ckan.model import User

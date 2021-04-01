@@ -7,9 +7,9 @@ from ckan.model import core
 from ckan.model import package as _package
 from ckan.model import types as _types
 from ckan.model import domain_object
-from sqlalchemy.orm import Query
 from typing import Dict, List, Optional, Tuple
 from ckan.model import package as _package
+from ckan.types import Query
 
 # i18n only works when this is run as part of pylons,
 # which isn't the case for paster commands.
@@ -107,11 +107,11 @@ class PackageRelationship(core.StatefulObjectMixin,
         return (type_str, other_package)
 
     @classmethod
-    def by_subject(cls, package: _package.Package) -> Query[_package.Package]:
+    def by_subject(cls, package: _package.Package) -> 'Query[_package.Package]':
         return meta.Session.query(cls).filter(cls.subject_package_id==package.id)
 
     @classmethod
-    def by_object(cls, package: _package.Package) -> Query[_package.Package]:
+    def by_object(cls, package: _package.Package) -> 'Query[_package.Package]':
         return meta.Session.query(cls).filter(cls.object_package_id==package.id)
 
     @classmethod

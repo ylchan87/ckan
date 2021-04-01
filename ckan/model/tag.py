@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+from typing import List, Optional, Any, TYPE_CHECKING
+
 from sqlalchemy.orm import relation
 from sqlalchemy import types, Column, Table, ForeignKey, and_, UniqueConstraint
 
@@ -15,8 +17,7 @@ import ckan  # this import is needed
 import ckan.model
 import ckan.lib.dictization
 import ckan.lib.maintain as maintain
-from sqlalchemy.orm import Query
-from typing import List, Optional, Any, TYPE_CHECKING
+from ckan.types import Query
 
 if TYPE_CHECKING:
     from ckan.model import Vocabulary, Package

@@ -17,7 +17,7 @@ from six import string_types
 from ckan.plugins import interfaces
 
 from ckan.common import config
-from typing import Generator, List, Union
+from typing import Generator, List, Optional, Union
 
 
 __all__ = [
@@ -54,7 +54,7 @@ _PLUGINS_SERVICE = {}
 
 
 @contextmanager
-def use_plugin(*plugins: str) -> Generator[Union[SingletonPlugin, List[SingletonPlugin]], None, None]:
+def use_plugin(*plugins: str) -> Generator[Union['SingletonPlugin', List['SingletonPlugin']], None, None]:
     '''Load plugin(s) for testing purposes
 
     e.g.
@@ -128,7 +128,7 @@ class SingletonPlugin(_pca_SingletonPlugin):
     '''
 
 
-def get_plugin(plugin) -> SingletonPlugin:
+def get_plugin(plugin) -> Optional[SingletonPlugin]:
     ''' Get an instance of a active plugin by name.  This is helpful for
     testing. '''
     if plugin in _PLUGINS_SERVICE:

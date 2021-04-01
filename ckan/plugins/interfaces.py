@@ -6,16 +6,16 @@ extend CKAN.
 '''
 from inspect import isclass
 from pyutilib.component.core import Interface as _pca_Interface
-from typing import Callable, Dict, Iterable, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, TypeVar, Union
 import click
 from flask.blueprints import Blueprint
 from flask.wrappers import Response
-import ckan.model as model
 from ckan.common import CKANConfig
+if TYPE_CHECKING:
+    import ckan.model as model
 
 CKANApp = TypeVar("CKANApp")
 FeedClass = TypeVar("FeedClass")
-ResourceDict = TypeVar("ResourceDict", dict)
 Uploader = TypeVar("Uploader")
 ResourceUploader = TypeVar("ResourceUploader")
 
@@ -317,7 +317,7 @@ class IResourceUrlChange(Interface):
     Receives notification of changed URL on a resource.
     '''
 
-    def notify(self, resource: ResourceDict) -> None:
+    def notify(self, resource: Dict[str, Any]) -> None:
         u'''
         Called when a resource url has changed.
 
@@ -539,22 +539,22 @@ class IGroupController(Interface):
     and authorization setup are complete.
     '''
 
-    def read(self, entity: model.Group) -> None:
+    def read(self, entity: 'model.Group') -> None:
         u'''Called after IGroupController.before_view inside group_read.
         '''
         pass
 
-    def create(self, entity: model.Group) -> None:
+    def create(self, entity: 'model.Group') -> None:
         u'''Called after group has been created inside group_create.
         '''
         pass
 
-    def edit(self, entity: model.Group) -> None:
+    def edit(self, entity: 'model.Group') -> None:
         u'''Called after group has been updated inside group_update.
         '''
         pass
 
-    def delete(self, entity: model.Group) -> None:
+    def delete(self, entity: 'model.Group') -> None:
         u'''Called before commit inside group_delete.
         '''
         pass
@@ -576,25 +576,25 @@ class IOrganizationController(Interface):
     and authorization setup are complete.
     '''
 
-    def read(self, entity: model.Group) -> None:
+    def read(self, entity: 'model.Group') -> None:
         u'''Called after IOrganizationController.before_view inside
         organization_read.
         '''
         pass
 
-    def create(self, entity: model.Group) -> None:
+    def create(self, entity: 'model.Group') -> None:
         u'''Called after organization had been created inside
         organization_create.
         '''
         pass
 
-    def edit(self, entity: model.Group) -> None:
+    def edit(self, entity: 'model.Group') -> None:
         u'''Called after organization had been updated inside
         organization_update.
         '''
         pass
 
-    def delete(self, entity: model.Group) -> None:
+    def delete(self, entity: 'model.Group') -> None:
         u'''Called before commit inside organization_delete.
         '''
         pass
@@ -613,22 +613,22 @@ class IPackageController(Interface):
     Hook into the dataset view.
     '''
 
-    def read(self, entity: model.Package) -> None:
+    def read(self, entity: 'model.Package') -> None:
         u'''Called after IPackageController.before_view inside package_show.
         '''
         pass
 
-    def create(self, entity: model.Package) -> None:
+    def create(self, entity: 'model.Package') -> None:
         u'''Called after the dataset had been created inside package_create.
         '''
         pass
 
-    def edit(self, entity: model.Package) -> None:
+    def edit(self, entity: 'model.Package') -> None:
         u'''Called after the dataset had been updated inside package_update.
         '''
         pass
 
-    def delete(self, entity: model.Package) -> None:
+    def delete(self, entity: 'model.Package') -> None:
         u'''Called before commit inside package_delete.
         '''
         pass
@@ -1853,7 +1853,7 @@ class IBlueprint(Interface):
 
     u'''Register an extension as a Flask Blueprint.'''
 
-    def get_blueprint(self) -> Union[List[Blueprint] | Blueprint]:
+    def get_blueprint(self) -> Union[List[Blueprint], Blueprint]:
         u'''
         Return either a single Flask Blueprint object or a list of Flask
         Blueprint objects to be registered by the app.
@@ -1873,7 +1873,7 @@ class IPermissionLabels(Interface):
     See ``ckanext/example_ipermissionlabels`` for an example plugin.
     '''
 
-    def get_dataset_labels(self, dataset_obj: model.Package) -> List[str]:
+    def get_dataset_labels(self, dataset_obj: 'model.Package') -> List[str]:
         u'''
         Return a list of unicode strings to be stored in the search index
         as the permission lables for a dataset dict.
@@ -1885,7 +1885,7 @@ class IPermissionLabels(Interface):
         :rtype: list of unicode strings
         '''
 
-    def get_user_dataset_labels(self, user_obj: Optional[model.User]) -> List[str]:
+    def get_user_dataset_labels(self, user_obj: Optional['model.User']) -> List[str]:
         u'''
         Return the permission labels that give a user permission to view
         a dataset. If any of the labels returned from this method match

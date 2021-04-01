@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Query
+from ckan.types import Query
+
 from typing import Dict, List, Optional, Tuple
 from sqlalchemy import Table
 from ckan.model import core, domain_object
@@ -31,11 +32,11 @@ class PackageRelationship(
     @classmethod
     def by_subject(
         cls, package: _package.Package
-    ) -> Query[_package.Package]: ...
+    ) -> 'Query[_package.Package]': ...
     @classmethod
     def by_object(
         cls, package: _package.Package
-    ) -> Query[_package.Package]: ...
+    ) -> 'Query[_package.Package]': ...
     @classmethod
     def get_forward_types(cls) -> List[str]: ...
     @classmethod

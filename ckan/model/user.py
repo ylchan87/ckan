@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING
+
 import datetime
 import re
 import os
@@ -20,11 +22,10 @@ from ckan.model import core
 from ckan.model import types as _types
 from ckan.model import domain_object
 from ckan.common import config, asbool
-from sqlalchemy.orm import Query
-from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING
-from ckan.model import Group
+from ckan.types import Query
 
 if TYPE_CHECKING:
+    from ckan.model import Group
     from .api_token import ApiToken
 
 
@@ -265,7 +266,7 @@ class User(core.StatefulObjectMixin,
         return [g.id for g in
                 self.get_groups(group_type=group_type, capacity=capacity)]
 
-    def get_groups(self, group_type: Optional[str]=None, capacity: Optional[str]=None) -> List[Group]:
+    def get_groups(self, group_type: Optional[str]=None, capacity: Optional[str]=None) -> List['Group']:
         import ckan.model as model
 
         q = meta.Session.query(model.Group)\
@@ -287,7 +288,7 @@ class User(core.StatefulObjectMixin,
         return groups
 
     @classmethod
-    def search(cls, querystr: str, sqlalchemy_query: Optional[Any]=None, user_name: Optional[str]=None) -> Query["User"]:
+    def search(cls, querystr: str, sqlalchemy_query: Optional[Any]=None, user_name: Optional[str]=None) -> 'Query[User]':
         '''Search name, fullname, email. '''
         if sqlalchemy_query is None:
             query = meta.Session.query(cls)

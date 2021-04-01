@@ -1,12 +1,13 @@
 # encoding: utf-8
 
+from typing import Collection, Dict, KeysView, List, Optional, Tuple
+
 import sqlalchemy as sa
-from sqlalchemy.orm import Query
 
 from ckan.model import meta
 from ckan.model import types as _types
 from ckan.model import domain_object
-from typing import Collection, Dict, KeysView, List, Optional, Tuple
+from ckan.types import Query
 
 __all__ = ['ResourceView', 'resource_view_table']
 
@@ -51,7 +52,7 @@ class ResourceView(domain_object.DomainObject):
     def get_count_not_in_view_types(cls, view_types: Collection[str]) -> List[Tuple[str, int]]:
         '''Returns the count of ResourceView not in the view types list'''
         view_type = cls.view_type  # type: ignore
-        query: Query[Tuple[str, int]] = meta.Session.query(view_type,
+        query: 'Query[Tuple[str, int]]' = meta.Session.query(view_type,
                                    sa.func.count(cls.id)) \
                     .group_by(view_type) \
                     .filter(sa.not_(view_type.in_(view_types)))

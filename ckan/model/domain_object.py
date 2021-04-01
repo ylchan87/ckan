@@ -3,13 +3,15 @@
 import datetime
 import six
 from collections import OrderedDict
+from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar
 
 import sqlalchemy as sa
 from sqlalchemy import orm
 from six import string_types
 
 from ckan.model import meta, core
-from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar
+from ckan.types import Query
+
 
 T = TypeVar("T")
 
@@ -63,7 +65,7 @@ class DomainObject(object):
         return query.filter(q)
 
     @classmethod
-    def active(cls: Type[T]) -> orm.Query[T]:
+    def active(cls: Type[T]) -> 'Query[T]':
         return meta.Session.query(cls).filter_by(state=core.State.ACTIVE)
 
     def save(self) -> None:
