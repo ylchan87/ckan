@@ -10,7 +10,7 @@ import sqlalchemy.orm as orm
 from sqlalchemy.orm.session import SessionExtension
 
 from ckan.model import extension
-from ckan.types import AlchemySession
+from sqlalchemy.orm import Session as TSession
 from typing import Optional
 from sqlalchemy.engine import Engine
 
@@ -73,7 +73,7 @@ class CkanSessionExtension(SessionExtension):
 # SQLAlchemy database engine. Updated by model.init_model()
 engine: Optional[Engine] = None
 
-Session: AlchemySession = orm.scoped_session(orm.sessionmaker(
+Session: TSession = orm.scoped_session(orm.sessionmaker(
     autoflush=False,
     autocommit=False,
     expire_on_commit=False,

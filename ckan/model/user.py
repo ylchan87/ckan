@@ -21,8 +21,11 @@ from ckan.model import types as _types
 from ckan.model import domain_object
 from ckan.common import config, asbool
 from sqlalchemy.orm import Query
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING
 from ckan.model import Group
+
+if TYPE_CHECKING:
+    from .api_token import ApiToken
 
 
 def set_api_key() -> Optional[str]:
@@ -53,6 +56,22 @@ user_table = Table('user', meta.metadata,
 
 class User(core.StatefulObjectMixin,
            domain_object.DomainObject):
+    id: str
+    name: str
+    # password: str
+    fullname: Optional[str]
+    email: str
+    api_key: Optional[str]
+    created: datetime.datetime
+    reset_key: str
+    about: str
+    activity_streams_email_notifications: bool
+    sysadmin: bool
+    state: str
+    image_url: str
+    plugin_extras: Dict
+
+    api_tokens: List['ApiToken']
 
     VALID_NAME = re.compile(r"^[a-zA-Z0-9_\-]{3,255}$")
     DOUBLE_SLASH = re.compile(r':\/([^/])')
@@ -104,7 +123,7 @@ class User(core.StatefulObjectMixin,
             ref = self.id
         return ref
 
-    def _set_password(self, password):
+    def _set_password(self, password: str):
         '''Hash using pbkdf2
 
         Use passlib to hash the password using pkbdf2, upgrading
@@ -119,10 +138,10 @@ class User(core.StatefulObjectMixin,
             hashed_password = six.ensure_text(hashed_password)
         self._password = hashed_password
 
-    def _get_password(self):
+    def _get_password(self) -> str:
         return self._password
 
-    def _verify_and_upgrade_from_sha1(self, password):
+    def _verify_and_upgrade_from_sha1(self, password: str) -> bool:
         # if isinstance(password, text_type):
         #     password_8bit = password.encode('ascii', 'ignore')
         # else:
@@ -139,7 +158,7 @@ class User(core.StatefulObjectMixin,
         else:
             return False
 
-    def _verify_and_upgrade_pbkdf2(self, password):
+    def _verify_and_upgrade_pbkdf2(self, password: str) -> bool:
         if pbkdf2_sha512.verify(password, self.password):
             self._set_password(password)
             self.save()
@@ -147,7 +166,7 @@ class User(core.StatefulObjectMixin,
         else:
             return False
 
-    def validate_password(self, password: str) -> None:
+    def validate_password(self, password: str) -> bool:
         '''
         Check the password against existing credentials.
 
@@ -186,7 +205,7 @@ class User(core.StatefulObjectMixin,
     def check_name_available(cls, name: str) -> bool:
         return cls.by_name(name) == None
 
-    def as_dict(self) -> Dict:
+    def as_dict(self) -> Dict[str, Any]:
         _dict = domain_object.DomainObject.as_dict(self)
         del _dict['password']
         return _dict
@@ -246,7 +265,7 @@ class User(core.StatefulObjectMixin,
         return [g.id for g in
                 self.get_groups(group_type=group_type, capacity=capacity)]
 
-    def get_groups(self, group_type: Optional[str]=None, capacity: Optional[str]=None) -> Group:
+    def get_groups(self, group_type: Optional[str]=None, capacity: Optional[str]=None) -> List[Group]:
         import ckan.model as model
 
         q = meta.Session.query(model.Group)\
@@ -276,13 +295,13 @@ class User(core.StatefulObjectMixin,
             query = sqlalchemy_query
         qstr = '%' + querystr + '%'
         filters = [
-            cls.name.ilike(qstr),
-            cls.fullname.ilike(qstr),
+            cls.name.ilike(qstr),  # type: ignore
+            cls.fullname.ilike(qstr),  # type: ignore
         ]
         # sysadmins can search on user emails
         import ckan.authz as authz
         if user_name and authz.is_sysadmin(user_name):
-            filters.append(cls.email.ilike(qstr))
+            filters.append(cls.email.ilike(qstr))  # type: ignore
 
         query = query.filter(or_(*filters))
         return query
@@ -294,11 +313,11 @@ class User(core.StatefulObjectMixin,
         names or ids
         '''
         query = meta.Session.query(cls.id)
-        query = query.filter(or_(cls.name.in_(user_list),
-                                 cls.id.in_(user_list)))
+        query = query.filter(or_(cls.name.in_(user_list),  # type: ignore
+                                 cls.id.in_(user_list)))  # type: ignore
         return [user.id for user in query.all()]
 
 
 meta.mapper(User, user_table,
     properties={'password': synonym('_password', map_column=True)},
-    order_by=user_table.c.name)
+    order_by=user_table.c.name)  # type: ignore

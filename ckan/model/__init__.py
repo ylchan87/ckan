@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from ckan.types import AlchemySession
+
 import warnings
 import logging
 import os
@@ -8,8 +8,9 @@ import re
 from time import sleep
 from os.path import splitext
 
-from sqlalchemy import MetaData, __version__ as sqav, Table
+from sqlalchemy import MetaData, Table
 from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.orm import Session as TSession
 
 from alembic.command import (
     upgrade as alembic_upgrade,
@@ -178,7 +179,7 @@ class Repository():
     #       are_tables_created().
     tables_created_and_initialised: bool = False
 
-    def __init__(self, metadata: MetaData, session: AlchemySession) -> None:
+    def __init__(self, metadata: MetaData, session: TSession) -> None:
         self.metadata = metadata
         self.session = session
         self.commit = session.commit
@@ -247,10 +248,7 @@ class Repository():
         self.session.remove()
         ## use raw connection for performance
         connection = self.session.connection()
-        if sqav.startswith("0.4"):
-            tables = self.metadata.table_iterator()
-        else:
-            tables = reversed(self.metadata.sorted_tables)
+        tables = reversed(self.metadata.sorted_tables)
         for table in tables:
             if table.name == 'alembic_version':
                 continue

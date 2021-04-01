@@ -9,24 +9,22 @@ from sqlalchemy import orm
 from six import string_types
 
 from ckan.model import meta, core
-from typing import Any, Dict, Set, Tuple, Type, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar
 
-EnumMember = TypeVar("EnumMember")
-TDomain = TypeVar("TDomain")
-
+T = TypeVar("T")
 
 __all__ = ['DomainObject', 'DomainObjectOperation']
 
 
-class Enum(set):
+class Enum(set, Generic[T]):
     '''Simple enumeration
     e.g. Animal = Enum("dog", "cat", "horse")
     joey = Animal.dog
     '''
-    def __init__(self, *names: EnumMember) -> None:
+    def __init__(self, *names: T) -> None:
         super(Enum, self).__init__(names)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: T) -> T:
         if name in self:
             return name
         raise AttributeError
@@ -34,8 +32,9 @@ class Enum(set):
 DomainObjectOperation = Enum('new', 'changed', 'deleted')
 
 class DomainObject(object):
+    name: str
 
-    text_search_fields = []
+    text_search_fields: List[str] = []
     Session = meta.Session
 
     def __init__(self, **kwargs: Any) -> None:
@@ -47,7 +46,7 @@ class DomainObject(object):
         return cls.Session.query(cls).count()
 
     @classmethod
-    def by_name(cls: Type[TDomain], name: str, autoflush: bool=True, for_update: bool=False) -> TDomain:
+    def by_name(cls: Type[T], name: str, autoflush: bool=True, for_update: bool=False) -> Optional[T]:
         q = meta.Session.query(cls).autoflush(autoflush
             ).filter_by(name=name)
         if for_update:
@@ -58,14 +57,14 @@ class DomainObject(object):
     def text_search(cls, query: Any, term: str) -> Any:
         register = cls
         make_like = lambda x,y: x.ilike('%' + y + '%')
-        q = None
+        q = sa.null()
         for field in cls.text_search_fields:
             attr = getattr(register, field)
             q = sa.or_(q, make_like(attr, term))
         return query.filter(q)
 
     @classmethod
-    def active(cls) -> Any:
+    def active(cls: Type[T]) -> orm.Query[T]:
         return meta.Session.query(cls).filter_by(state=core.State.ACTIVE)
 
     def save(self) -> None:
@@ -147,13 +146,10 @@ class DomainObject(object):
                     setattr(self, col.name, blank)
         return changed, skipped
 
-    def __lt__(self, other):
+    def __lt__(self, other: 'DomainObject') -> bool:
         return self.name < other.name
 
-    def __str__(self):
-        return repr(self)
-
-    def __unicode__(self):
+    def __repr__(self):
         repr = u'<%s' % self.__class__.__name__
         table = orm.class_mapper(self.__class__).mapped_table
         for col in table.c:
@@ -164,6 +160,3 @@ class DomainObject(object):
 
         repr += '>'
         return repr
-
-    def __repr__(self):
-        return six.ensure_str(self.__unicode__())

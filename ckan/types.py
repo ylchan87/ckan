@@ -1,17 +1,14 @@
 from functools import partial
 from typing import (
     Any, Callable, Dict, Iterable, List,
-    Mapping, Optional, Tuple, TypeVar, Union, overload, Collection,
+    Mapping, Optional, Tuple, Union,
     TYPE_CHECKING
 )
 from typing_extensions import Protocol, TypedDict
 
-from sqlalchemy.orm import Session
 
 if TYPE_CHECKING:
     from ckan.model import User
-
-AlchemySession = Session
 
 Config = Dict[str, Union[str, Mapping[str, str]]]
 

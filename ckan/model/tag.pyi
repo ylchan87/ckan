@@ -48,6 +48,7 @@ class PackageTag(core.StatefulObjectMixin, domain_object.DomainObject):
     state: str
 
     pkg: Package
+    package: Package
 
     def __init__(
         self,

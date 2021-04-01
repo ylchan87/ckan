@@ -29,8 +29,12 @@ system_info_table = Table(
 
 class SystemInfo(core.StatefulObjectMixin,
                  domain_object.DomainObject):
+    id: int
+    key: str
+    value: str
+    state: str
 
-    def __init__(self, key: str, value: str) -> None:
+    def __init__(self, key: str, value: Any) -> None:
 
         super(SystemInfo, self).__init__()
 
@@ -54,7 +58,7 @@ def get_system_info(key: str, default: Optional[str]=None) -> Optional[str]:
 
 
 
-def delete_system_info(key: str, default: Optional[Any]=None) -> None:
+def delete_system_info(key: str) -> None:
     ''' delete data from system_info table '''
     obj = meta.Session.query(SystemInfo).filter_by(key=key).first()
     if obj:
@@ -62,12 +66,12 @@ def delete_system_info(key: str, default: Optional[Any]=None) -> None:
         meta.Session.commit()
 
 
-def set_system_info(key: str, value: str) -> Optional[bool]:
+def set_system_info(key: str, value: str) -> bool:
     ''' save data in the system_info table '''
     obj = None
     obj = meta.Session.query(SystemInfo).filter_by(key=key).first()
     if obj and obj.value == text_type(value):
-        return
+        return False
     if not obj:
         obj = SystemInfo(key, value)
     else:

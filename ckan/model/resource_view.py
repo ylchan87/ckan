@@ -1,11 +1,12 @@
 # encoding: utf-8
 
 import sqlalchemy as sa
+from sqlalchemy.orm import Query
 
 from ckan.model import meta
 from ckan.model import types as _types
 from ckan.model import domain_object
-from typing import Collection, KeysView, Optional, Tuple
+from typing import Collection, Dict, KeysView, List, Optional, Tuple
 
 __all__ = ['ResourceView', 'resource_view_table']
 
@@ -24,6 +25,14 @@ resource_view_table = sa.Table(
 
 
 class ResourceView(domain_object.DomainObject):
+    id: str
+    resource_id: str
+    title: Optional[str]
+    description: Optional[str]
+    viev_type: str
+    order: int
+    config: Dict
+
     @classmethod
     def get(cls, reference: str) -> Optional["ResourceView"]:
         '''Returns a ResourceView object referenced by its id.'''
@@ -35,34 +44,35 @@ class ResourceView(domain_object.DomainObject):
         return view
 
     @classmethod
-    def get_columns(cls) -> KeysView:
+    def get_columns(cls) -> List[str]:
         return resource_view_table.columns.keys()
 
     @classmethod
-    def get_count_not_in_view_types(cls, view_types: Collection[str]) -> Collection[Tuple[str, int]]:
+    def get_count_not_in_view_types(cls, view_types: Collection[str]) -> List[Tuple[str, int]]:
         '''Returns the count of ResourceView not in the view types list'''
-        query = meta.Session.query(ResourceView.view_type,
-                                   sa.func.count(ResourceView.id)) \
-                    .group_by(ResourceView.view_type) \
-                    .filter(sa.not_(ResourceView.view_type.in_(view_types)))
+        view_type = cls.view_type  # type: ignore
+        query: Query[Tuple[str, int]] = meta.Session.query(view_type,
+                                   sa.func.count(cls.id)) \
+                    .group_by(view_type) \
+                    .filter(sa.not_(view_type.in_(view_types)))
 
         return query.all()
 
     @classmethod
-    def delete_not_in_view_types(cls, view_types: Collection[str]) -> None:
+    def delete_not_in_view_types(cls, view_types: Collection[str]) -> int:
         '''Delete the Resource Views not in the received view types list'''
-        query = meta.Session.query(ResourceView) \
-                    .filter(sa.not_(ResourceView.view_type.in_(view_types)))
+        query = meta.Session.query(cls) \
+                    .filter(sa.not_(cls.view_type.in_(view_types)))  # type: ignore
 
         return query.delete(synchronize_session='fetch')
 
     @classmethod
-    def delete_all(cls, view_types: Collection[str]=[]) -> None:
+    def delete_all(cls, view_types: Collection[str]=[]) -> int:
         '''Delete all Resource Views, or all of a particular type'''
-        query = meta.Session.query(ResourceView)
+        query = meta.Session.query(cls)
 
         if view_types:
-            query = query.filter(ResourceView.view_type.in_(view_types))
+            query = query.filter(cls.view_type.in_(view_types))  # type: ignore
 
         return query.delete(synchronize_session='fetch')
 

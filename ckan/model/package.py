@@ -117,6 +117,8 @@ class Package(core.StatefulObjectMixin,
     state: str
 
     package_tags: List["PackageTag"]
+    package_tag_all: List["PackageTag"]
+
     resources_all: List["Resource"]
     ratings: List["Rating"]
     extras: AssociationProxy

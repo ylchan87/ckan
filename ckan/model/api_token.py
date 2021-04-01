@@ -10,13 +10,13 @@ from sqlalchemy.ext.mutable import MutableDict
 
 import ckan.plugins.toolkit as tk
 from ckan.model import meta, User, DomainObject
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 
 __all__ = [u"ApiToken", u"api_token_table"]
 
 
-def _make_token():
+def _make_token() -> str:
     nbytes = tk.asint(tk.config.get(u"api_token.nbytes", 32))
     return token_urlsafe(nbytes)
 
@@ -34,6 +34,14 @@ api_token_table = Table(
 
 
 class ApiToken(DomainObject):
+    id: str
+    name: str
+    user_id: Optional[str]
+    created_at: datetime.datetime
+    last_access: Optional[datetime.datetime]
+    plugin_extras: Dict[str, Any]
+    owner: Optional[User]
+
     def __init__(self, user_id: str=None, name: str='Unnamed') -> None:
         self.id = _make_token()
         self.user_id = user_id

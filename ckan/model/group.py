@@ -72,7 +72,16 @@ class Member(core.StatefulObjectMixin,
               in a hierarchy.
                  - capacity is 'parent'
     '''
-    def __init__(self, group: Optional[str]=None, table_id: Optional[str]=None, group_id: Optional[str]=None,
+    id: str
+    table_name: Optional[str]
+    table_id: Optional[str]
+    capacity: str
+    group_id: Optional[str]
+    state: str
+
+    group: Optional['Group']
+
+    def __init__(self, group: Optional['Group']=None, table_id: Optional[str]=None, group_id: Optional[str]=None,
                  table_name: Optional[str]=None, capacity: str='public', state: str='active') -> None:
         self.group = group
         self.group_id = group_id
@@ -97,7 +106,7 @@ class Member(core.StatefulObjectMixin,
         return meta.Session.query(_package.Package).filter_by(
             id=self.table_id).all()
 
-    def __unicode__(self):
+    def __str__(self):
         # refer to objects by name, not ID, to help debugging
         if self.table_name == 'package':
             pkg = meta.Session.query(_package.Package).get(self.table_id)
@@ -115,6 +124,19 @@ class Member(core.StatefulObjectMixin,
 
 class Group(core.StatefulObjectMixin,
             domain_object.DomainObject):
+
+    id: str
+    name: str
+    title: str
+    type: str
+    description: str
+    image_url: str
+    created: datetime
+    is_organization: bool
+    approval_status: str
+    state: str
+
+    member_all: List[Member]
 
     def __init__(self, name: str=u'', title: str=u'', description: str=u'', image_url: str=u'',
                  type: str=u'group', approval_status: str=u'approved',
@@ -151,7 +173,7 @@ class Group(core.StatefulObjectMixin,
         """
         q = meta.Session.query(cls)
         if state:
-            q = q.filter(cls.state.in_(state))
+            q = q.filter(cls.state.in_(state))  # type: ignore
 
         if group_type:
             q = q.filter(cls.type == group_type)
@@ -167,8 +189,6 @@ class Group(core.StatefulObjectMixin,
         """
         assert status in ["approved", "denied"]
         self.approval_status = status
-        if status == "denied":
-            pass
 
     def get_children_groups(self, type: str='group') -> List["Group"]:
         '''Returns the groups one level underneath this group in the hierarchy.
@@ -324,8 +344,8 @@ class Group(core.StatefulObjectMixin,
                                 is_org: bool=False, limit: int=20) -> Query["Group"]:
         text_query = text_query.strip().lower()
         q = meta.Session.query(cls) \
-            .filter(or_(cls.name.contains(text_query),
-                        cls.title.ilike('%' + text_query + '%')))
+            .filter(or_(cls.name.contains(text_query),  # type: ignore
+                        cls.title.ilike('%' + text_query + '%')))  # type: ignore
         if is_org:
             q = q.filter(cls.type == 'organization')
         else:
@@ -363,9 +383,9 @@ meta.mapper(Member, member_table, properties={
 # will lead to infinite recursion, tieing up postgres processes at 100%, and
 # the server will suffer. To avoid ever failing this badly, we put in this
 # limit on recursion.
-MAX_RECURSES = 8
+MAX_RECURSES: int = 8
 
-HIERARCHY_DOWNWARDS_CTE = """WITH RECURSIVE child(depth) AS
+HIERARCHY_DOWNWARDS_CTE: str = """WITH RECURSIVE child(depth) AS
 (
     -- non-recursive term
     SELECT 0, * FROM member
@@ -381,7 +401,7 @@ SELECT G.id, G.name, G.title, child.depth, child.table_id as parent_id FROM chil
     WHERE G.type = :type AND G.state='active'
     ORDER BY child.depth ASC;""".format(max_recurses=MAX_RECURSES)
 
-HIERARCHY_UPWARDS_CTE = """WITH RECURSIVE parenttree(depth) AS (
+HIERARCHY_UPWARDS_CTE: str = """WITH RECURSIVE parenttree(depth) AS (
     -- non-recursive term
     SELECT 0, M.* FROM public.member AS M
     WHERE group_id = :id AND M.table_name = 'group' AND M.state = 'active'

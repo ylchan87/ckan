@@ -20,7 +20,6 @@ import ckan.lib.dictization
 from .package import Package
 import ckan.model
 from typing import Any, Dict, List, Optional
-from .package import Package
 
 __all__ = ['Resource', 'resource_table']
 
@@ -62,7 +61,29 @@ resource_table = Table(
 
 class Resource(core.StatefulObjectMixin,
                domain_object.DomainObject):
-    extra_columns = None
+    id: str
+    package_id: Optional[str]
+    url: str
+    format: str
+    description: str
+    hash: str
+    position: int
+    name: str
+    resource_type: str
+    mimetype: str
+    size: int
+    created: datetime.datetime
+    last_modified: datetime.datetime
+    metadata_modified: datetime.datetime
+    cache_url: str
+    cache_last_update: datetime.datetime
+    url_type: str
+    extras: Dict
+    state: str
+
+    extra_columns: Optional[List[str]] = None
+
+    package: Package
 
     def __init__(self, url: str=u'', format: str=u'', description: str=u'', hash: str=u'',
                  extras: Optional[Dict]=None, package_id: Optional[str]=None, **kwargs: Any) -> None:
@@ -102,7 +123,7 @@ class Resource(core.StatefulObjectMixin,
             _dict["package_id"] = self.package_id
         return _dict
 
-    def get_package_id(self) -> str:
+    def get_package_id(self) -> Optional[str]:
         '''Returns the package id for a resource. '''
         return self.package_id
 
@@ -128,7 +149,7 @@ class Resource(core.StatefulObjectMixin,
     @classmethod
     def get_extra_columns(cls) -> List[str]:
         if cls.extra_columns is None:
-            cls.extra_columns = config.get(
+            cls.extra_columns: List[str] = config.get(
                 'ckan.extra_resource_fields', '').split()
             for field in cls.extra_columns:
                 setattr(cls, field, DictProxy(field, 'extras'))

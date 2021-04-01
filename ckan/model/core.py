@@ -1,5 +1,8 @@
 # encoding: utf-8
 
+from typing import Optional
+
+
 log = __import__('logging').getLogger(__name__)
 
 
@@ -11,6 +14,7 @@ class State(object):
 
 class StatefulObjectMixin(object):
     __stateful__ = True
+    state: Optional[str] = None
 
     def delete(self) -> None:
         log.debug('Running delete on %s', self)
