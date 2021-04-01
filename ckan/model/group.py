@@ -12,7 +12,8 @@ from ckan.model import domain_object
 from ckan.model import user as _user
 from sqlalchemy.orm import Query
 from ckan.model import package as _package
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List,  Optional, Tuple, Union, overload
+from typing_extensions import Literal
 
 __all__ = ['group_table', 'Group',
            'Member',
@@ -131,7 +132,7 @@ class Group(core.StatefulObjectMixin,
     type: str
     description: str
     image_url: str
-    created: datetime
+    created: datetime.datetime
     is_organization: bool
     approval_status: str
     state: str
@@ -279,8 +280,23 @@ class Group(core.StatefulObjectMixin,
         return [group for group in all_groups
                 if group.name not in excluded_groups]
 
-    def packages(self, with_private: bool=False, limit: Optional[int]=None,
-            return_query: bool=False, context: Optional[Dict]=None) -> Query[_package.Package]:
+    @overload
+    def packages(self, *,
+                 return_query: Literal[True], context: Optional[Dict]=...) -> Query[_package.Package]: ...
+    @overload
+    def packages(self, with_private: bool, limit: Optional[int],
+                 return_query: Literal[True], context: Optional[Dict]=...) -> Query[_package.Package]: ...
+    @overload
+    def packages(self, with_private: bool=..., limit: Optional[int]=...,
+                 return_query: Literal[False]=..., context: Optional[Dict]=...) -> List[_package.Package]: ...
+
+    @overload
+    def packages(self, with_private: bool=..., limit: Optional[int]=...,
+                 return_query: bool=..., context: Optional[Dict]=...) -> Union[List[_package.Package], Query[_package.Package]]: ...
+
+
+    def packages(self, with_private=False, limit=None,
+            return_query=False, context=None):
         '''Return this group's active packages.
 
         Returns all packages in this group with VDM state ACTIVE
@@ -307,12 +323,12 @@ class Group(core.StatefulObjectMixin,
             user_is_org_member = True
 
         elif self.is_organization and user_id:
-            query = meta.Session.query(Member) \
+            member_query = meta.Session.query(Member) \
                     .filter(Member.state == 'active') \
                     .filter(Member.table_name == 'user') \
                     .filter(Member.group_id == self.id) \
                     .filter(Member.table_id == user_id)
-            user_is_org_member = len(query.all()) != 0
+            user_is_org_member = len(member_query.all()) != 0
 
         query = meta.Session.query(_package.Package).\
             filter(_package.Package.state == core.State.ACTIVE).\

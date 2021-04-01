@@ -15,7 +15,6 @@ T = TypeVar("T")
 
 __all__ = ['DomainObject', 'DomainObjectOperation']
 
-
 class Enum(set, Generic[T]):
     '''Simple enumeration
     e.g. Animal = Enum("dog", "cat", "horse")
@@ -24,7 +23,7 @@ class Enum(set, Generic[T]):
     def __init__(self, *names: T) -> None:
         super(Enum, self).__init__(names)
 
-    def __getattr__(self, name: T) -> T:
+    def __getattr__(self, name) -> T:
         if name in self:
             return name
         raise AttributeError
@@ -57,7 +56,7 @@ class DomainObject(object):
     def text_search(cls, query: Any, term: str) -> Any:
         register = cls
         make_like = lambda x,y: x.ilike('%' + y + '%')
-        q = sa.null()
+        q = sa.null() | sa.null()
         for field in cls.text_search_fields:
             attr = getattr(register, field)
             q = sa.or_(q, make_like(attr, term))

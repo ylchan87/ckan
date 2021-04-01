@@ -10,7 +10,6 @@ from os.path import splitext
 
 from sqlalchemy import MetaData, Table
 from sqlalchemy.exc import ProgrammingError
-from sqlalchemy.orm import Session as TSession
 
 from alembic.command import (
     upgrade as alembic_upgrade,
@@ -135,7 +134,7 @@ import ckan.migration
 from ckan.common import config
 from typing import Any, Callable, Collection, Dict, List, Optional, Tuple
 from sqlalchemy.engine import Engine
-
+from ckan.types import AlchemySession
 
 log = logging.getLogger(__name__)
 
@@ -166,20 +165,21 @@ def init_model(engine: Engine) -> None:
 
 class Repository():
     metadata: MetaData
-    session: Session
-    commit: Callable[[], None]
+    session: AlchemySession
+    commit: Any
 
     _alembic_ini: str = os.path.join(
         os.path.dirname(ckan.migration.__file__),
         u"alembic.ini"
     )
+    _alembic_output: List[Tuple[str, ...]]
 
     # note: tables_created value is not sustained between instantiations
     #       so only useful for tests. The alternative is to use
     #       are_tables_created().
     tables_created_and_initialised: bool = False
 
-    def __init__(self, metadata: MetaData, session: TSession) -> None:
+    def __init__(self, metadata: MetaData, session: AlchemySession) -> None:
         self.metadata = metadata
         self.session = session
         self.commit = session.commit
@@ -201,6 +201,7 @@ class Repository():
         # sqlite database needs to be recreated each time as the
         # memory database is lost.
 
+        assert self.metadata.bind
         if self.metadata.bind.engine.url.drivername == 'sqlite':
             # this creates the tables, which isn't required inbetween tests
             # that have simply called rebuild_db.
@@ -269,6 +270,7 @@ class Repository():
         return output
 
     def setup_migration_version_control(self) -> None:
+        assert isinstance(self.metadata.bind, Engine)
         self.reset_alembic_output()
         alembic_config = AlembicConfig(self._alembic_ini)
         alembic_config.set_main_option(
@@ -310,6 +312,7 @@ class Repository():
 
         @param version: version to upgrade to (if None upgrade to latest)
         '''
+        assert meta.engine
         _assert_engine_msg = (
             u'Database migration - only Postgresql engine supported (not %s).'
         ) % meta.engine.name
@@ -363,5 +366,5 @@ def parse_db_config(config_key: str=u'sqlalchemy.url') -> Optional[Dict[str, str
     ]
     db_details_match = re.match(u''.join(regex), url)
     if not db_details_match:
-        return
+        return None
     return db_details_match.groupdict()

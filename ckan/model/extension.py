@@ -22,7 +22,7 @@ class ObserverNotifier(object):
     MapperExtension/SessionExtension
     """
 
-    observers = None
+    observers: Any = None
 
 
 class PluginMapperExtension(MapperExtension):

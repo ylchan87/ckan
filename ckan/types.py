@@ -6,9 +6,19 @@ from typing import (
 )
 from typing_extensions import Protocol, TypedDict
 
+from sqlalchemy.orm import Session
 
 if TYPE_CHECKING:
     from ckan.model import User
+
+
+class AlchemySession(Session):
+    def __call__(self): ...
+    def remove(self) -> None: ...
+    def rollback(self) -> None: ...
+    def commit(self) -> None: ...
+    def configure(self, **kwargs: Any) -> None: ...
+
 
 Config = Dict[str, Union[str, Mapping[str, str]]]
 
