@@ -12,7 +12,7 @@ from ckan.common import config
 import ckan
 import ckan.model as model
 from ckan.logic.schema import update_configuration_schema
-from typing import Tuple
+from typing import Dict, Tuple, Union
 
 
 log = logging.getLogger(__name__)
@@ -22,14 +22,14 @@ DEFAULT_MAIN_CSS_FILE = '/base/css/main.css'
 
 # mappings translate between config settings and globals because our naming
 # conventions are not well defined and/or implemented
-mappings = {
+mappings: Dict[str, str] = {
 #   'config_key': 'globals_key',
 }
 
 
 # This mapping is only used to define the configuration options (from the
 # `config` object) that should be copied to the `app_globals` (`g`) object.
-app_globals_from_config_details = {
+app_globals_from_config_details: Dict[str, Dict[str, str]] = {
     'ckan.site_title': {},
     'ckan.site_logo': {},
     'ckan.site_url': {},
@@ -90,11 +90,11 @@ def set_app_global(key: str, value: str) -> None:
     It will process the value according to the options on
     app_globals_from_config_details (if any)
     '''
-    key, value = process_app_global(key, value)
-    setattr(app_globals, key, value)
+    key, new_value = process_app_global(key, value)
+    setattr(app_globals, key, new_value)
 
 
-def process_app_global(key: str, value: str) -> Tuple[str, str]:
+def process_app_global(key: str, value: str) -> Tuple[str, Union[bool, int, str, List[str]]]:
     '''
     Tweak a key, value pair meant to be set on the app_globals (g) object
 
@@ -102,6 +102,7 @@ def process_app_global(key: str, value: str) -> Tuple[str, str]:
     '''
     options = app_globals_from_config_details.get(key)
     key = get_globals_key(key)
+    new_value = value
     if options:
         if 'name' in options:
             key = options['name']
@@ -109,13 +110,12 @@ def process_app_global(key: str, value: str) -> Tuple[str, str]:
 
         data_type = options.get('type')
         if data_type == 'bool':
-            value = asbool(value)
+            new_value = asbool(value)
         elif data_type == 'int':
-            value = int(value)
+            new_value = int(value)
         elif data_type == 'split':
-            value = value.split()
-
-    return key, value
+            new_value = value.split()
+    return key, new_value
 
 
 def get_globals_key(key: str) -> str:
@@ -144,7 +144,7 @@ def reset() -> None:
             try:
                 config_value = six.ensure_text(config_value)
             except UnicodeDecodeError:
-                config_value = config_value.decode('latin-1')
+                config_value = config_value.decode('latin-1')  # type: ignore
         # we want to store the config the first time we get here so we can
         # reset them if needed
         if key not in _CONFIG_CACHE:
@@ -184,9 +184,13 @@ def reset() -> None:
 
 
 class _Globals(object):
-
     ''' Globals acts as a container for objects available throughout the
     life of the application. '''
+
+    main_css: str
+    site_logo: str
+    header_class: str
+    site_description: str
 
     def __init__(self):
         '''One instance of Globals is created during application

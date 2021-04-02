@@ -1741,7 +1741,7 @@ class IAuthenticator(Interface):
         for more details.
         '''
 
-    def abort(self, status_code: int, detail: str, headers: Dict, comment: str) -> Tuple[int, str, Dict, str]:
+    def abort(self, status_code: int, detail: str, headers: Optional[Dict], comment: Optional[str]) -> Tuple[int, str, Optional[Dict], Optional[str]]:
         u'''Called on abort.  This allows aborts due to authorization issues
         to be overridden'''
         return (status_code, detail, headers, comment)

@@ -47,7 +47,7 @@ APIKEY_HEADER_NAME_KEY = 'apikey_header_name'
 APIKEY_HEADER_NAME_DEFAULT = 'X-CKAN-API-Key'
 
 
-def abort(status_code: Optional[int]=None, detail: str='', headers: Optional[Dict]=None, comment: Optional[str]=None) -> NoReturn:
+def abort(status_code: int, detail: str='', headers: Optional[Dict]=None, comment: Optional[str]=None) -> NoReturn:
     '''Abort the current request immediately by returning an HTTP exception.
 
     This is a wrapper for :py:func:`pylons.controllers.util.abort` that adds
@@ -68,6 +68,8 @@ def abort(status_code: Optional[int]=None, detail: str='', headers: Optional[Dic
     if is_flask_request():
         flask_abort(status_code, detail)
 
+    # Satisfy type-checker
+    assert False, 'Drop it and rest of the function during pylons clean-up'
     # #1267 Convert detail to plain text, since WebOb 0.9.7.1 (which comes
     # with Lucid) causes an exception when unicode is received.
     detail = detail.encode('utf8')
@@ -111,7 +113,7 @@ def render_snippet(*template_names: str, **kw: Any) -> str:
             # a nested template doesn't exist - don't fallback
             raise exc
     else:
-        raise last_exc or TemplateNotFound
+        raise last_exc or TemplateNotFound(template_names)
 
 
 def render_jinja2(template_name: str, extra_vars: Dict) -> str:
@@ -120,7 +122,7 @@ def render_jinja2(template_name: str, extra_vars: Dict) -> str:
     return template.render(**extra_vars)
 
 
-def render(template_name, extra_vars=None, *pargs, **kwargs):
+def render(template_name: str, extra_vars: Optional[Dict[str, Any]]=None, *pargs, **kwargs):
     '''Render a template and return the output.
 
     This is CKAN's main template rendering function.
@@ -234,7 +236,7 @@ def _pylons_prepare_renderer(template_name, extra_vars, cache_key=None,
     return render_template
 
 
-def _allow_caching(cache_force=None):
+def _allow_caching(cache_force: Optional[bool]=None):
     # Caching Logic
 
     allow_cache = True
@@ -262,7 +264,7 @@ def _allow_caching(cache_force=None):
         request.environ['__no_cache__'] = True
 
 
-def _is_valid_session_cookie_data():
+def _is_valid_session_cookie_data() -> bool:
     is_valid_cookie_data = False
     for key, value in session.items():
         if not key.startswith(u'_') and value:
@@ -277,7 +279,7 @@ class ValidationException(Exception):
 
 
 if six.PY2:
-    class BaseController(WSGIController):
+    class BaseController(WSGIController):  # type: ignore
         '''Base class for CKAN controller classes to inherit from.
 
         '''
@@ -286,11 +288,11 @@ if six.PY2:
 
         def __before__(self, action, **params):
             c.__timer = time.time()
-            app_globals.app_globals._check_uptodate()
+            app_globals.app_globals._check_uptodate()  # type: ignore
 
             identify_user()
 
-            i18n.handle_request(request, c)
+            i18n.handle_request(request, c)  # type: ignore
 
         def __call__(self, environ, start_response):
             """Invoke the Controller"""
