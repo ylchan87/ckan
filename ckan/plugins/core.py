@@ -17,7 +17,7 @@ from six import string_types
 from ckan.plugins import interfaces
 
 from ckan.common import config
-from typing import Generator, List, Optional, Union
+from typing import Generator, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
 
 __all__ = [
@@ -27,6 +27,8 @@ __all__ = [
     'get_plugin', 'plugins_update',
     'use_plugin', 'plugin_loaded',
 ]
+
+TInterface = TypeVar('TInterface', bound=interfaces.Interface)
 
 log = logging.getLogger(__name__)
 
@@ -72,9 +74,11 @@ def use_plugin(*plugins: str) -> Generator[Union['SingletonPlugin', List['Single
         unload(*plugins)
 
 
-class PluginImplementations(ExtensionPoint):
+class PluginImplementations(ExtensionPoint, Generic[TInterface]):
+    def __init__(self, interface: Type[TInterface], *args):
+        super().__init__(interface, *args)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[TInterface]:
         '''
         When we upgraded pyutilib on CKAN 2.9 the order in which
         plugins were returned by `PluginImplementations` changed
@@ -246,7 +250,7 @@ def plugin_loaded(name) -> bool:
     return False
 
 
-def find_system_plugins() -> List[SingletonPlugin]:
+def find_system_plugins() -> List[str]:
     '''
     Return all plugins in the ckan.system_plugins entry point group.
 

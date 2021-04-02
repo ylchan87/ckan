@@ -16,7 +16,6 @@ from ckan.common import config
 from ckan.common import asbool
 import six
 from six import text_type
-from six.moves import map
 
 from .common import SearchIndexError, make_connection
 from ckan.model import PackageRelationship
@@ -26,14 +25,16 @@ from ckan.plugins import (PluginImplementations,
 import ckan.logic as logic
 import ckan.lib.plugins as lib_plugins
 import ckan.lib.navl.dictization_functions
-from typing import Dict, NoReturn
+from typing import Any, Dict, NoReturn, Optional
 
 log = logging.getLogger(__name__)
 
 TYPE_FIELD = "entity_type"
 PACKAGE_TYPE = "package"
+KEY_CHARS: str
+
 if six.PY2:
-    KEY_CHARS = string.digits + string.letters + "_-"
+    KEY_CHARS = string.digits + string.letters + "_-"  # type: ignore
 else:
     KEY_CHARS = string.digits + string.ascii_letters + "_-"
 
@@ -88,7 +89,7 @@ class SearchIndex(object):
         """ Update data from a dictionary. """
         log.debug("NOOP Index: %s" % ",".join(data.keys()))
 
-    def remove_dict(self, data: Dict) -> None:
+    def remove_dict(self, data: Dict[str, Any]) -> None:
         """ Delete an index entry uniquely identified by ``data``. """
         log.debug("NOOP Delete: %s" % ",".join(data.keys()))
 
@@ -103,13 +104,13 @@ class SearchIndex(object):
 class NoopSearchIndex(SearchIndex): pass
 
 class PackageSearchIndex(SearchIndex):
-    def remove_dict(self, pkg_dict: Dict) -> None:
+    def remove_dict(self, pkg_dict: Dict[str, Any]) -> None:
         self.delete_package(pkg_dict)
 
-    def update_dict(self, pkg_dict: Dict, defer_commit: bool=False) -> None:
+    def update_dict(self, pkg_dict: Dict[str, Any], defer_commit: bool=False) -> None:
         self.index_package(pkg_dict, defer_commit)
 
-    def index_package(self, pkg_dict: Dict, defer_commit: bool=False) -> None:
+    def index_package(self, pkg_dict: Optional[Dict[str, Any]], defer_commit: bool=False) -> None:
         if pkg_dict is None:
             return
 

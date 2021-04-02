@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+
+from ckan.types import Context
 import logging
 import os
 import sys
@@ -13,24 +15,29 @@ import ckan.authz
 import ckan.plugins.toolkit as toolkit
 from ckan.model.user import User
 from ckan.model.package import Package
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, TypeVar, Union, overload
+
+if TYPE_CHECKING:
+    from ckan.config.middleware.flask_app import CKANFlask
 
 log = logging.getLogger(__name__)
 
+PackagePlugin = TypeVar('PackagePlugin')
+GroupPlugin = TypeVar('GroupPlugin')
+OrganizationPlugin = TypeVar('OrganizationPlugin')
+
 # Mapping from package-type strings to IDatasetForm instances
-_package_plugins = {}
+_package_plugins: Dict[str, plugins.IDatasetForm] = {}
 # The fallback behaviour
-_default_package_plugin = None
+_default_package_plugin: Optional[plugins.IDatasetForm] = None
 
 # Mapping from group-type strings to IGroupForm instances
-_group_plugins = {}
+_group_plugins: Dict[str, plugins.IGroupForm] = {}
 # The fallback behaviour
-_default_group_plugin = None
-_default_organization_plugin = None
+_default_group_plugin: Optional[plugins.IGroupForm] = None
+_default_organization_plugin: Optional[plugins.IGroupForm] = None
 # Mapping from group-type strings to controllers
-_group_controllers = {}
-# Mapping from group-type strings to blueprints
-_group_blueprints = {}
+_group_controllers: Dict[str, str] = {}
 
 
 def reset_package_plugins() -> None:
@@ -51,7 +58,7 @@ def reset_group_plugins() -> None:
     _group_controllers = {}
 
 
-def lookup_package_plugin(package_type: Optional[str]=None) -> Any:
+def lookup_package_plugin(package_type: Optional[str]=None) -> Optional[plugins.IDatasetForm]:
     """
     Returns the plugin controller associoated with the given package type.
 
@@ -64,7 +71,8 @@ def lookup_package_plugin(package_type: Optional[str]=None) -> Any:
     return _package_plugins.get(package_type, _default_package_plugin)
 
 
-def lookup_group_plugin(group_type: Optional[str]=None) -> Any:
+
+def lookup_group_plugin(group_type: Optional[str]=None) -> Optional[plugins.IGroupForm]:
     """
     Returns the form plugin associated with the given group type.
 
@@ -82,14 +90,8 @@ def lookup_group_controller(group_type: Optional[str]=None) -> Optional[str]:
     Returns the group controller associated with the given group type. The
     controller is expressed as a string that you'd pass to url_to(controller=x)
     """
-    return _group_controllers.get(group_type)
-
-
-def lookup_group_blueprints(group_type: Optional[str]=None) -> Optional[str]:
-    """
-    Returns the group blueprint
-    """
-    return _group_blueprints.get(group_type)
+    if group_type:
+        return _group_controllers.get(group_type)
 
 
 def register_package_plugins() -> None:
@@ -119,7 +121,7 @@ def register_package_plugins() -> None:
     set_default_package_plugin()
 
 
-def register_package_blueprints(app: Any) -> None:
+def register_package_blueprints(app: 'CKANFlask') -> None:
     """
     Register a Flask blueprint for the various IDatasetForm instances.
 
@@ -234,7 +236,7 @@ def register_group_plugins() -> None:
     set_default_group_plugin()
 
 
-def register_group_blueprints(app: Any) -> None:
+def register_group_blueprints(app: 'CKANFlask') -> None:
     """
     Register a Flask blueprint for the various IGroupForm instances.
 
@@ -316,7 +318,7 @@ def get_permission_labels() -> Any:
     return DefaultPermissionLabels()
 
 
-class DefaultDatasetForm(object):
+class DefaultDatasetForm(plugins.IDatasetForm):
     '''The default implementation of
     :py:class:`~ckan.plugins.interfaces.IDatasetForm`.
 
@@ -384,7 +386,7 @@ class DefaultDatasetForm(object):
         return 'package/snippets/resource_form.html'
 
 
-class DefaultGroupForm(object):
+class DefaultGroupForm(plugins.IGroupForm):
     """
     Provides a default implementation of the pluggable Group controller
     behaviour.
@@ -529,7 +531,7 @@ class DefaultGroupForm(object):
         '''
         pass
 
-    def setup_template_variables(self, context: Dict, data_dict: Dict) -> None:
+    def setup_template_variables(self, context: Context, data_dict: Dict) -> None:
         c.is_sysadmin = ckan.authz.is_sysadmin(c.user)
 
         ## This is messy as auths take domain object not data_dict
@@ -586,6 +588,8 @@ class DefaultOrganizationForm(DefaultGroupForm):
 
 
 class DefaultTranslation(object):
+    name: str
+
     def i18n_directory(self) -> str:
         '''Change the directory of the *.mo translation files
 

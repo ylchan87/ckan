@@ -7,8 +7,8 @@ import pysolr
 import simplejson
 
 from six import string_types
-from six.moves.urllib.parse import quote_plus
-from typing import Dict, Optional, Tuple
+from six.moves.urllib.parse import quote_plus  # type: ignore
+from typing import Any, Dict, Optional, Tuple, Union
 from pysolr import Solr
 
 log = logging.getLogger(__name__)
@@ -30,13 +30,13 @@ DEFAULT_SOLR_URL = 'http://127.0.0.1:8983/solr'
 
 
 class SolrSettings(object):
-    _is_initialised = False
-    _url = None
-    _user = None
-    _password = None
+    _is_initialised: bool = False
+    _url: Optional[str] = None
+    _user: Optional[str] = None
+    _password: Optional[str] = None
 
     @classmethod
-    def init(cls, url: str, user: Optional[str]=None, password: Optional[str]=None) -> None:
+    def init(cls, url: Optional[str], user: Optional[str]=None, password: Optional[str]=None) -> None:
         if url is not None:
             cls._url = url
             cls._user = user
@@ -46,7 +46,7 @@ class SolrSettings(object):
         cls._is_initialised = True
 
     @classmethod
-    def get(cls) -> Tuple[str, str, str]:
+    def get(cls) -> Tuple[str, Optional[str], Optional[str]]:
         if not cls._is_initialised:
             raise SearchIndexError('SOLR URL not initialised')
         if not cls._url:
@@ -70,7 +70,7 @@ def is_available() -> bool:
 def make_connection(decode_dates: bool=True) -> Solr:
     solr_url, solr_user, solr_password = SolrSettings.get()
 
-    if solr_url and solr_user:
+    if solr_url and solr_user and solr_password:
         # Rebuild the URL with the username/password
         protocol = re.search('http(?:s)?://', solr_url).group()
         solr_url = re.sub(protocol, '', solr_url)
@@ -86,12 +86,12 @@ def make_connection(decode_dates: bool=True) -> Solr:
         return pysolr.Solr(solr_url)
 
 
-def solr_datetime_decoder(d: Dict) -> Dict:
+def solr_datetime_decoder(d: Dict[str, Any]) -> Dict[str, Any]:
     for k, v in d.items():
         if isinstance(v, string_types):
             possible_datetime = re.search(pysolr.DATETIME_REGEX, v)
             if possible_datetime:
-                date_values = possible_datetime.groupdict()
+                date_values: Dict[str, Any] = possible_datetime.groupdict()
                 for dk, dv in date_values.items():
                     date_values[dk] = int(dv)
 

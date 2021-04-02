@@ -40,7 +40,6 @@ log = logging.getLogger(__name__)
 
 lookup_group_plugin = lib_plugins.lookup_group_plugin
 lookup_group_controller = lib_plugins.lookup_group_controller
-lookup_group_blueprint = lib_plugins.lookup_group_blueprints
 
 is_org = False
 

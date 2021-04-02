@@ -11,7 +11,9 @@ from ckan.common import config
 from ckan.logic.schema import default_create_api_token_schema
 from ckan.exceptions import CkanConfigurationException
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterator, Optional, TYPE_CHECKING
+if TYPE_CHECKING:
+    from ckan.plugins.interfaces import PApiToken
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ _config_secret_fallback = u"beaker.session.secret"
 _config_algorithm = u"api_token.jwt.algorithm"
 
 
-def _get_plugins():
+def _get_plugins() -> Iterator[PApiToken]:
     return plugins.PluginImplementations(plugins.IApiToken)
 
 

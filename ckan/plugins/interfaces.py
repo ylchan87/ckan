@@ -4,20 +4,20 @@ u'''A collection of interfaces that CKAN plugins can implement to customize and
 extend CKAN.
 
 '''
+from ckan.types import Action, AuthFunction, PFeed, PUploader, PResourceUploader
 from inspect import isclass
+from typing import Any, Callable, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type, TypeVar, Union
+from typing_extensions import Protocol
+
 from pyutilib.component.core import Interface as _pca_Interface
-from typing import Any, Callable, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, TypeVar, Union
 import click
 from flask.blueprints import Blueprint
 from flask.wrappers import Response
 from ckan.common import CKANConfig
+from ckan.config.middleware.flask_app import CKANFlask
+
 if TYPE_CHECKING:
     import ckan.model as model
-
-CKANApp = TypeVar("CKANApp")
-FeedClass = TypeVar("FeedClass")
-Uploader = TypeVar("Uploader")
-ResourceUploader = TypeVar("ResourceUploader")
 
 __all__ = [
     u'Interface',
@@ -91,7 +91,7 @@ class IMiddleware(Interface):
     one for the Pylons stack and one for the Flask stack (eventually
     there will be only the Flask stack).
     '''
-    def make_middleware(self, app: CKANApp, config: CKANConfig) -> CKANApp:
+    def make_middleware(self, app: CKANFlask, config: CKANConfig) -> CKANFlask:
         u'''Return an app configured with this middleware
 
         When called on the Flask stack, this method will get the actual Flask
@@ -113,7 +113,7 @@ class IMiddleware(Interface):
         '''
         return app
 
-    def make_error_log_middleware(self, app: CKANApp, config: CKANConfig) -> CKANApp:
+    def make_error_log_middleware(self, app: CKANFlask, config: CKANConfig) -> CKANFlask:
         u'''Return an app configured with this error log middleware
 
         Note that both on the Flask and Pylons middleware stacks, this
@@ -272,7 +272,7 @@ class IFeed(Interface):
     For extending the default Atom feeds
     """
 
-    def get_feed_class(self) -> FeedClass:
+    def get_feed_class(self) -> Type[PFeed]:
         """
         Allows plugins to provide a custom class to generate feed items.
 
@@ -297,8 +297,9 @@ class IFeed(Interface):
             )
 
         """
+        from ckan.views.feed import CKANFeed
+        return CKANFeed
 
-        pass
 
     def get_item_additional_fields(self, dataset_dict: Dict) -> None:
         """
@@ -921,7 +922,7 @@ class IActions(Interface):
     u'''
     Allow adding of actions to the logic layer.
     '''
-    def get_actions(self) -> Dict[str, Callable]:
+    def get_actions(self) -> Dict[str, Action]:
         u'''
         Should return a dict, the keys being the name of the logic
         function and the values being the functions themselves.
@@ -969,7 +970,7 @@ class IValidators(Interface):
 class IAuthFunctions(Interface):
     u'''Override CKAN's authorization functions, or add new auth functions.'''
 
-    def get_auth_functions(self) -> Dict[str, Callable]:
+    def get_auth_functions(self) -> Dict[str, AuthFunction]:
         u'''Return the authorization functions provided by this plugin.
 
         Return a dictionary mapping authorization function names (strings) to
@@ -1767,7 +1768,7 @@ class IUploader(Interface):
     upload resources and group images.
     '''
 
-    def get_uploader(self, upload_to: str, old_filename: str) -> Uploader:
+    def get_uploader(self, upload_to: str, old_filename: str) -> PUploader:
         u'''Return an uploader object to upload general files that must
         implement the following methods:
 
@@ -1811,7 +1812,7 @@ class IUploader(Interface):
 
         '''
 
-    def get_resource_uploader(self) -> ResourceUploader:
+    def get_resource_uploader(self) -> PResourceUploader:
         u'''Return an uploader object used to upload resource files that must
         implement the following methods:
 

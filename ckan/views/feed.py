@@ -80,14 +80,14 @@ class CKANFeed(FeedGenerator):
         feed_title: str,
         feed_link: str,
         feed_description: str,
-        language: str,
-        author_name: str,
-        feed_guid: str,
-        feed_url: str,
-        previous_page: str,
-        next_page: str,
-        first_page: str,
-        last_page: str,
+        language: Optional[str],
+        author_name: Optional[str],
+        feed_guid: Optional[str],
+        feed_url: Optional[str],
+        previous_page: Optional[str],
+        next_page: Optional[str],
+        first_page: Optional[str],
+        last_page: Optional[str],
     ) -> None:
         super(CKANFeed, self).__init__()
 

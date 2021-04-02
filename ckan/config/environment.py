@@ -25,7 +25,7 @@ import ckan.lib.jinja_extensions as jinja_extensions
 from ckan.lib.webassets_tools import webassets_init
 from ckan.lib.i18n import build_js_translations
 
-from ckan.common import _, ungettext, config
+from ckan.common import CKANConfig, _, ungettext, config
 from ckan.exceptions import CkanConfigurationException
 from typing import Dict
 
@@ -40,7 +40,7 @@ log = logging.getLogger(__name__)
 warnings.simplefilter('ignore', UserWarning)
 
 
-def load_environment(conf: Dict):
+def load_environment(conf: CKANConfig):
     """
     Configure the Pylons environment via the ``pylons.config`` object. This
     code should only need to be run once.
