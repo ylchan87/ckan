@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from typing import List, Optional, Any, TYPE_CHECKING
+from typing import List, Optional, Any
 
 from sqlalchemy.orm import relation
 from sqlalchemy import types, Column, Table, ForeignKey, and_, UniqueConstraint
@@ -15,12 +15,10 @@ from ckan.model import (
 )
 import ckan  # this import is needed
 import ckan.model
+import ckan.logic
 import ckan.lib.dictization
 import ckan.lib.maintain as maintain
 from ckan.types import Query
-
-if TYPE_CHECKING:
-    from ckan.model import Vocabulary, Package
 
 __all__ = ['tag_table', 'package_tag_table', 'Tag', 'PackageTag',
            'MAX_TAG_LENGTH', 'MIN_TAG_LENGTH']
@@ -46,6 +44,13 @@ package_tag_table = Table('package_tag', meta.metadata,
 
 
 class Tag(domain_object.DomainObject):
+    id: str
+    name: str
+    vocabulary_id: Optional[str]
+
+    package_tags: 'List[PackageTag]'
+    vocabulary: Optional['vocabulary.Vocabulary']
+
     def __init__(self, name: str='', vocabulary_id: Optional[str]=None) -> None:
         self.name = name
         self.vocabulary_id = vocabulary_id
@@ -73,8 +78,10 @@ class Tag(domain_object.DomainObject):
 
     @classmethod
     def by_name(
-            cls, name: str, vocab: Optional['Vocabulary']=None,
-            autoflush: bool=True
+            cls, name: str,
+            autoflush: bool=True,
+            for_update: bool=False,
+            vocab: Optional['ckan.model.Vocabulary']=None,
     ) -> Optional["Tag"]:
         '''Return the tag with the given name, or None.
 
@@ -135,7 +142,7 @@ class Tag(domain_object.DomainObject):
         else:
             # If that didn't work, try to get the tag by name and vocabulary.
             if vocab_id_or_name:
-                vocab = vocabulary.Vocabulary.get(vocab_id_or_name)
+                vocab: Optional[vocabulary.Vocabulary] = vocabulary.Vocabulary.get(vocab_id_or_name)
                 if vocab is None:
                     # The user specified an invalid vocab.
                     raise ckan.logic.NotFound("could not find vocabulary '%s'"
@@ -176,7 +183,7 @@ class Tag(domain_object.DomainObject):
         else:
             query = meta.Session.query(Tag)
         search_term = search_term.strip().lower()
-        query = query.filter(Tag.name.contains(search_term))
+        query = query.filter(Tag.name.contains(search_term))  # type: ignore
         query = query.distinct().join(Tag.package_tags)
         return query
 
@@ -210,26 +217,35 @@ class Tag(domain_object.DomainObject):
         return query
 
     @property
-    def packages(self) -> List['Package']:
+    def packages(self) -> List['ckan.model.Package']:
         '''Return a list of all packages that have this tag, sorted by name.
 
         :rtype: list of ckan.model.package.Package objects
 
         '''
-        q = meta.Session.query(ckan.model.package.Package)
+        q: 'Query[ckan.model.Package]' = meta.Session.query(ckan.model.Package)
         q = q.join(PackageTag)
         q = q.filter_by(tag_id=self.id)
         q = q.filter_by(state='active')
-        q = q.order_by(ckan.model.package.Package.name)
+        q = q.order_by(ckan.model.Package.name)
         packages = q.all()
         return packages
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<Tag %s>' % self.name
 
 class PackageTag(core.StatefulObjectMixin,
                  domain_object.DomainObject):
-    def __init__(self, package: Optional['Package']=None, tag: Optional[Tag]=None, state: Optional[str]=None, **kwargs: Any) -> None:
+    id: str
+    package_id: str
+    tag_id: str
+    state: Optional[str]
+
+    pkg: Optional['ckan.model.Package']
+    package: Optional['ckan.model.Package']
+    tag: Optional[Tag]
+
+    def __init__(self, package: Optional['ckan.model.Package']=None, tag: Optional[Tag]=None, state: Optional[str]=None, **kwargs: Any) -> None:
         self.package = package
         self.tag = tag
         self.state = state
@@ -243,7 +259,7 @@ class PackageTag(core.StatefulObjectMixin,
     @classmethod
     @maintain.deprecated()
     def by_name(cls, package_name, tag_name, vocab_id_or_name=None,
-            autoflush=True):
+            autoflush=True) -> Optional['PackageTag']:
         '''DEPRECATED (and broken - missing the join to Tag)
 
         Return the PackageTag for the given package and tag names, or None.
@@ -275,15 +291,19 @@ class PackageTag(core.StatefulObjectMixin,
                     .filter(Tag.vocabulary_id == vocab.id)
                     .filter(ckan.model.Package.name==package_name)
                     .filter(Tag.name==tag_name))
+            query = query.autoflush(autoflush)
+            return query.one()[0]
         else:
             query = (meta.Session.query(PackageTag)
                     .filter(ckan.model.Package.name==package_name)
                     .filter(Tag.name==tag_name))
-        query = query.autoflush(autoflush)
-        return query.one()[0]
+            query = query.autoflush(autoflush)
+            return query.one()
 
-    def related_packages(self) -> List['Package']:
-        return [self.package]
+    def related_packages(self) -> List['ckan.model.Package']:
+        if self.package:
+            return [self.package]
+        return []
 
 meta.mapper(Tag, tag_table, properties={
     'package_tags': relation(PackageTag, backref='tag',
@@ -292,7 +312,7 @@ meta.mapper(Tag, tag_table, properties={
     'vocabulary': relation(vocabulary.Vocabulary,
         order_by=tag_table.c.name)
     },
-    order_by=tag_table.c.name,
+    order_by=tag_table.c.name,  # type: ignore
     )
 
 # NB meta.mapper(tag.PackageTag... is found in package.py, because if it was

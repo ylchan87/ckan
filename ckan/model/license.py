@@ -12,15 +12,16 @@ from six import text_type, string_types
 
 from ckan.common import _, json
 import ckan.lib.maintain as maintain
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Generic, Iterator, List, Optional, Tuple, TypeVar, Union
+
+TLicense = TypeVar('TLicense', bound='DefaultLicense')
 
 log = __import__('logging').getLogger(__name__)
 
 
-class License(object):
+class License(object, Generic[TLicense]):
     """Domain object for a license."""
-
-    def __init__(self, data: Dict) -> None:
+    def __init__(self, data: TLicense) -> None:
         # convert old keys if necessary
         if 'is_okd_compliant' in data:
             data['od_conformance'] = 'approved' \
@@ -35,8 +36,10 @@ class License(object):
         for (key, value) in self._data.items():
             if key == 'date_created':
                 # Parse ISO formatted datetime.
-                value = datetime.datetime(
-                    *list(int(item) for item in re.split(r'[^\d]', value)))
+                value = datetime.datetime(*list(
+                    int(item) for item
+                    in re.split(r'[^\d]', value)  # type: ignore
+                ))
                 self._data[key] = value
             elif isinstance(value, str):
                 if six.PY2:
@@ -45,7 +48,7 @@ class License(object):
                     value = six.ensure_text(value)
                 self._data[key] = value
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         if name == 'is_okd_compliant':
             log.warn('license.is_okd_compliant is deprecated - use '
                      'od_conformance instead.')
@@ -64,7 +67,7 @@ class License(object):
     @maintain.deprecated("License.__getitem__() is deprecated and will be "
                          "removed in a future version of CKAN. Instead, "
                          "please use attribute access.")
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         '''NB This method is deprecated and will be removed in a future version
         of CKAN. Instead, please use attribute access.
         '''
@@ -79,7 +82,7 @@ class License(object):
     @maintain.deprecated("License.as_dict() is deprecated and will be "
                          "removed in a future version of CKAN. Instead, "
                          "please use attribute access.")
-    def as_dict(self):
+    def as_dict(self) -> Dict[str, Any]:
         '''NB This method is deprecated and will be removed in a future version
         of CKAN. Instead, please use attribute access.
         '''
@@ -100,6 +103,7 @@ class License(object):
 
 class LicenseRegister(object):
     """Dictionary-like interface to a group of licenses."""
+    licenses: List[License]
 
     def __init__(self) -> None:
         group_url = config.get('licenses_group_url', None)
@@ -146,7 +150,7 @@ class LicenseRegister(object):
                 license['title'] = _(license['title'])
         self._create_license_list(license_data, license_url)
 
-    def _create_license_list(self, license_data, license_url=''):
+    def _create_license_list(self, license_data: Union[List[TLicense], Dict[str, TLicense]], license_url: str=''):
         if isinstance(license_data, dict):
             self.licenses = [License(entity) for entity in license_data.values()]
         elif isinstance(license_data, list):
@@ -155,7 +159,7 @@ class LicenseRegister(object):
             msg = "Licenses at %s must be dictionary or list" % license_url
             raise ValueError(msg)
 
-    def __getitem__(self, key, default=Exception):
+    def __getitem__(self, key: str, default: Any=Exception) -> Union[License, Any]:
         for license in self.licenses:
             if key == license.id:
                 return license
@@ -164,8 +168,8 @@ class LicenseRegister(object):
         else:
             raise KeyError("License not found: %s" % key)
 
-    def get(self, key: str, default: Optional[Any]=None):
-        return self.__getitem__(key, default=default)
+    def get(self, key: str, default: Optional[Any]=None) -> Union[License, Any]:
+        return self.__getitem__(key, default)
 
     def keys(self) -> List[str]:
         return [license.id for license in self.licenses]
@@ -176,10 +180,10 @@ class LicenseRegister(object):
     def items(self) -> List[Tuple[str, License]]:
         return [(license.id, license) for license in self.licenses]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return iter(self.keys())
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.licenses)
 
 
@@ -188,20 +192,20 @@ class DefaultLicense(dict):
     title.  This is a slightly changed dict that allows us to have the title
     as a property and so translated. '''
 
-    domain_content = False
-    domain_data = False
-    domain_software = False
-    family = ''
-    is_generic = False
-    od_conformance = 'not reviewed'
-    osd_conformance = 'not reviewed'
-    maintainer = ''
-    status = 'active'
-    url = ''
-    title = ''
-    id = ''
+    domain_content: bool = False
+    domain_data: bool = False
+    domain_software: bool = False
+    family: str = ''
+    is_generic: bool = False
+    od_conformance: str = 'not reviewed'
+    osd_conformance: str = 'not reviewed'
+    maintainer: str = ''
+    status: str = 'active'
+    url: str = ''
+    title: str = ''
+    id: str = ''
 
-    keys = ['domain_content',
+    _keys: List[str] = ['domain_content',
             'id',
             'domain_data',
             'domain_software',
@@ -214,9 +218,9 @@ class DefaultLicense(dict):
             'url',
             'title']
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         ''' behave like a dict but get from attributes '''
-        if key in self.keys:
+        if key in self._keys:
             value = getattr(self, key)
             if isinstance(value, str):
                 return text_type(value)
@@ -225,10 +229,10 @@ class DefaultLicense(dict):
         else:
             raise KeyError(key)
 
-    def copy(self) -> Dict:
+    def copy(self) -> Dict[str, Any]:
         ''' create a dict of the license used by the licenses api '''
         out = {}
-        for key in self.keys:
+        for key in self._keys:
             out[key] = text_type(getattr(self, key))
         return out
 

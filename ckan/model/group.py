@@ -3,6 +3,7 @@
 import datetime
 
 from sqlalchemy import orm, types, Column, Table, ForeignKey, or_, and_, text
+from sqlalchemy.ext.associationproxy import AssociationProxy
 
 from ckan.model import meta
 from ckan.model import core
@@ -12,8 +13,12 @@ from ckan.model import domain_object
 from ckan.model import user as _user
 from ckan.types import Query
 from ckan.model import package as _package
-from typing import Dict, List,  Optional, Tuple, Union, overload
+from typing import Dict, List,  Optional, TYPE_CHECKING, Tuple, Union, overload
 from typing_extensions import Literal
+
+if TYPE_CHECKING:
+    from .group_extra import GroupExtra
+
 
 __all__ = ['group_table', 'Group',
            'Member',
@@ -137,6 +142,8 @@ class Group(core.StatefulObjectMixin,
     approval_status: str
     state: str
 
+    _extras: List['GroupExtra']
+    extras: AssociationProxy
     member_all: List[Member]
 
     def __init__(self, name: str=u'', title: str=u'', description: str=u'', image_url: str=u'',

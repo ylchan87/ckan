@@ -13,7 +13,7 @@ from ckan.model import (
     types as _types,
 )
 from typing import List
-from ckan.model import package as _package
+
 
 __all__ = ['PackageExtra', 'package_extra_table']
 
@@ -27,9 +27,14 @@ package_extra_table = Table('package_extra', meta.metadata,
 )
 
 
-class PackageExtra(
-        core.StatefulObjectMixin,
-        domain_object.DomainObject):
+class PackageExtra(core.StatefulObjectMixin, domain_object.DomainObject):
+    id: str
+    package_id: str
+    key: str
+    value: str
+    state: str
+
+    package: _package.Package
 
     def related_packages(self) -> List[_package.Package]:
         return [self.package]
@@ -38,12 +43,12 @@ class PackageExtra(
 meta.mapper(PackageExtra, package_extra_table, properties={
     'package': orm.relation(_package.Package,
         backref=orm.backref('_extras',
-            collection_class=orm.collections.attribute_mapped_collection(u'key'),
+            collection_class=orm.collections.attribute_mapped_collection(u'key'),  # type: ignore
             cascade='all, delete, delete-orphan',
             ),
         ),
     },
-    order_by=[package_extra_table.c.package_id, package_extra_table.c.key],
+    order_by=[package_extra_table.c.package_id, package_extra_table.c.key],  # type: ignore
     extension=[extension.PluginMapperExtension()],
 )
 

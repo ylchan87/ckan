@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+import datetime
+
 from sqlalchemy import types, Column, Table, text
 
 from ckan.model import meta
@@ -27,13 +29,21 @@ tracking_summary_table = Table('tracking_summary', meta.metadata,
     )
 
 class TrackingSummary(domain_object.DomainObject):
+    url: str
+    package_id: str
+    tracking_type: str
+    # count attribute shadows DomainObject.count()
+    count: int  # type: ignore
+    running_total: int
+    recent_views: int
+    tracking_date: datetime.datetime
 
     @classmethod
     def get_for_package(cls, package_id: str) -> Dict[str, int]:
         obj = meta.Session.query(cls).autoflush(False)
         obj = obj.filter_by(package_id=package_id)
-        if meta.Session.query(obj.exists()).scalar():
-            data = obj.order_by(text('tracking_date desc')).first()
+        data = obj.order_by(text('tracking_date desc')).first()
+        if data:
             return {'total' : data.running_total,
                     'recent': data.recent_views}
 

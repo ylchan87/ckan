@@ -25,9 +25,7 @@ from ckan.common import config, asbool
 from ckan.types import Query
 
 if TYPE_CHECKING:
-    from ckan.model import Group
-    from .api_token import ApiToken
-
+    from ckan.model import Group, Rating, ApiToken
 
 def set_api_key() -> Optional[str]:
     if asbool(config.get('ckan.auth.create_default_api_keys', False)):
@@ -73,6 +71,7 @@ class User(core.StatefulObjectMixin,
     plugin_extras: Dict
 
     api_tokens: List['ApiToken']
+    ratings: List['Rating']
 
     VALID_NAME = re.compile(r"^[a-zA-Z0-9_\-]{3,255}$")
     DOUBLE_SLASH = re.compile(r':\/([^/])')
@@ -106,10 +105,10 @@ class User(core.StatefulObjectMixin,
 
     @property
     def email_hash(self) -> str:
-        e = ''
+        e = b''
         if self.email:
             e = self.email.strip().lower().encode('utf8')
-        return md5(six.ensure_binary(e)).hexdigest()
+        return md5(e).hexdigest()
 
     def get_reference_preferred_for_uri(self) -> str:
         '''Returns a reference (e.g. name, id) for this user

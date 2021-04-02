@@ -31,16 +31,14 @@ import ckan.lib.maintain as maintain
 from ckan.types import Query
 
 if TYPE_CHECKING:
-    from .activity import Activity
-    from .group import Group
+    from ckan.model import (
+     Activity, Rating,
+     PackageExtra, PackageRelationship, Resource,
+     PackageTag, Tag, Vocabulary,
+     User, Group,
+    )
     from .license import LicenseRegister, License
-    from .package_extra import PackageExtra
-    from .package_relationship import PackageRelationship
-    from .rating import Rating
-    from .resource import Resource
-    from .tag import PackageTag, Tag
-    from .user import User
-    from .vocabulary import Vocabulary
+
 
 PrintableRelationship = Tuple["Package", str, Optional[str]]
 
@@ -121,7 +119,11 @@ class Package(core.StatefulObjectMixin,
 
     resources_all: List["Resource"]
     ratings: List["Rating"]
+    _extras: List['PackageExtra']
     extras: AssociationProxy
+
+    relationships_as_subject: 'PackageRelationship'
+    relationships_as_object: 'PackageRelationship'
 
     _license_register: ClassVar['LicenseRegister']
 

@@ -3,7 +3,7 @@
 import datetime
 import six
 from collections import OrderedDict
-from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar, overload
 
 import sqlalchemy as sa
 from sqlalchemy import orm

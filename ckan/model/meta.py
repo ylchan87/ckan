@@ -7,7 +7,7 @@ from ckan.common import config
 """SQLAlchemy Metadata and Session object"""
 from sqlalchemy import MetaData, and_
 import sqlalchemy.orm as orm
-from sqlalchemy.orm.session import SessionExtension
+from sqlalchemy.orm.session import SessionExtension  # type: ignore
 
 from ckan.model import extension
 from ckan.types import AlchemySession
@@ -103,12 +103,15 @@ metadata = MetaData()
 
 def engine_is_sqlite(sa_engine: Optional[Engine]=None) -> bool:
     # Returns true iff the engine is connected to a sqlite database.
-
-    return (sa_engine or engine).engine.url.drivername == 'sqlite'
+    e = sa_engine or engine
+    assert e
+    return e.engine.url.drivername == 'sqlite'
 
 
 def engine_is_pg(sa_engine: Optional[Engine]=None) -> bool:
     # Returns true iff the engine is connected to a postgresql database.
     # According to http://docs.sqlalchemy.org/en/latest/core/engines.html#postgresql
     # all Postgres driver names start with `postgres`
-    return (sa_engine or engine).engine.url.drivername.startswith('postgres')
+    e = sa_engine or engine
+    assert e
+    return e.engine.url.drivername.startswith('postgres')

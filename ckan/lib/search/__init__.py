@@ -11,6 +11,7 @@ import requests
 
 from ckan.common import asbool, config
 import ckan.model as model
+import ckan.model.domain_object as domain_object
 import ckan.plugins as p
 import ckan.logic as logic
 
@@ -18,13 +19,16 @@ from ckan.lib.search.common import (
     SearchIndexError, SearchError, SearchQueryError,
     make_connection, is_available, SolrSettings
 )
-from ckan.lib.search.index import PackageSearchIndex, NoopSearchIndex
+from ckan.lib.search.index import (
+    SearchIndex, PackageSearchIndex, NoopSearchIndex
+)
 from ckan.lib.search.query import (
+    SearchQuery,
     TagSearchQuery, ResourceSearchQuery, PackageSearchQuery,
     QueryOptions, convert_legacy_parameters_to_solr
 )
 from ckan.lib.search.index import SearchIndex
-from typing import Dict, List, Any, Optional
+from typing import Container, Dict, List, Any, Optional, Type, TypeVar, Union
 
 
 log = logging.getLogger(__name__)
@@ -53,11 +57,11 @@ DEFAULT_OPTIONS = {
     'callback': None,  # simply passed through
 }
 
-_INDICES = {
+_INDICES: Dict[str, Type[SearchIndex]] = {
     'package': PackageSearchIndex
 }
 
-_QUERIES = {
+_QUERIES: Dict[str, Type[SearchQuery]] = {
     'tag': TagSearchQuery,
     'resource': ResourceSearchQuery,
     'package': PackageSearchQuery
@@ -67,15 +71,15 @@ SOLR_SCHEMA_FILE_OFFSET_MANAGED = '/schema?wt=schema.xml'
 SOLR_SCHEMA_FILE_OFFSET_CLASSIC = '/admin/file/?file=schema.xml'
 
 
-def _normalize_type(_type):
-    if isinstance(_type, model.domain_object.DomainObject):
+def _normalize_type(_type: Any) -> str:
+    if isinstance(_type, domain_object.DomainObject):
         _type = _type.__class__
     if isinstance(_type, type):
         _type = _type.__name__
     return _type.strip().lower()
 
 
-def index_for(_type: str) -> SearchIndex:
+def index_for(_type: Any) -> SearchIndex:
     """ Get a SearchIndex instance sub-class suitable for
         the specified type. """
     try:
@@ -86,7 +90,7 @@ def index_for(_type: str) -> SearchIndex:
         return NoopSearchIndex()
 
 
-def query_for(_type: str) -> Dict:
+def query_for(_type: Any) -> SearchQuery:
     """ Get a SearchQuery instance sub-class suitable for the specified
         type. """
     try:
@@ -100,11 +104,11 @@ def dispatch_by_operation(entity_type: str, entity: Dict, operation: str) -> Non
     """Call the appropriate index method for a given notification."""
     try:
         index = index_for(entity_type)
-        if operation == model.domain_object.DomainObjectOperation.new:
+        if operation == domain_object.DomainObjectOperation.new:
             index.insert_dict(entity)
-        elif operation == model.domain_object.DomainObjectOperation.changed:
+        elif operation == domain_object.DomainObjectOperation.changed:
             index.update_dict(entity)
-        elif operation == model.domain_object.DomainObjectOperation.deleted:
+        elif operation == domain_object.DomainObjectOperation.deleted:
             index.remove_dict(entity)
         else:
             log.warn("Unknown operation: %s" % operation)
@@ -123,7 +127,7 @@ class SynchronousSearchPlugin(p.SingletonPlugin):
         if (not isinstance(entity, model.Package) or
                 not asbool(config.get('ckan.search.automatic_indexing', True))):
             return
-        if operation != model.domain_object.DomainObjectOperation.deleted:
+        if operation != domain_object.DomainObjectOperation.deleted:
             dispatch_by_operation(
                 entity.__class__.__name__,
                 logic.get_action('package_show')(
@@ -132,7 +136,7 @@ class SynchronousSearchPlugin(p.SingletonPlugin):
                     {'id': entity.id}),
                 operation
             )
-        elif operation == model.domain_object.DomainObjectOperation.deleted:
+        elif operation == domain_object.DomainObjectOperation.deleted:
             dispatch_by_operation(entity.__class__.__name__,
                                   {'id': entity.id}, operation)
         else:
@@ -169,7 +173,7 @@ def rebuild(package_id: Optional[str]=None, only_missing: bool=False, force: boo
             log.info('Indexing just package %r...', pkg_dict['name'])
             package_index.update_dict(pkg_dict, True)
     else:
-        package_ids = [r[0] for r in model.Session.query(model.Package.id).
+        package_ids: Container = [r[0] for r in model.Session.query(model.Package.id).
                        filter(model.Package.state != 'deleted').all()]
         if only_missing:
             log.info('Indexing only missing packages...')

@@ -149,10 +149,11 @@ class Resource(core.StatefulObjectMixin,
     @classmethod
     def get_extra_columns(cls) -> List[str]:
         if cls.extra_columns is None:
-            cls.extra_columns: List[str] = config.get(
+            cls.extra_columns = config.get(
                 'ckan.extra_resource_fields', '').split()
             for field in cls.extra_columns:
                 setattr(cls, field, DictProxy(field, 'extras'))
+        assert cls.extra_columns is not None
         return cls.extra_columns
 
     @classmethod

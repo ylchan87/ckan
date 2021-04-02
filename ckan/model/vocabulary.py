@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from sqlalchemy import types, Column, Table
 
 from ckan.model import meta, types as _types, domain_object
@@ -22,13 +22,15 @@ vocabulary_table = Table(
 
 
 class Vocabulary(domain_object.DomainObject):
+    id: str
+    name: str
 
     def __init__(self, name: str) -> None:
         self.id = _types.make_uuid()
         self.name = name
 
     @classmethod
-    def get(cls, id_or_name: str) -> "Vocabulary":
+    def get(cls, id_or_name: str) -> Optional["Vocabulary"]:
         '''Return a Vocabulary object referenced by its id or name, or
         None if there is no vocabulary with the given id or name. '''
         query = meta.Session.query(Vocabulary)

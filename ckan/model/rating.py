@@ -26,7 +26,15 @@ rating_table = Table('rating', meta.metadata,
                      )
 
 class Rating(domain_object.DomainObject):
-    pass
+    id: str
+    user_id: str
+    user_ip_address: str
+    package_id: str
+    rating: float
+    created: datetime.datetime
+
+    user: user.User
+    package: _package.Package
 
 meta.mapper(Rating, rating_table,
        properties={

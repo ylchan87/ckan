@@ -84,7 +84,7 @@ class SearchIndex(object):
         """ Insert new data from a dictionary. """
         return self.update_dict(data)
 
-    def update_dict(self, data: Dict) -> None:
+    def update_dict(self, data: Dict, defer_commit: bool = False) -> None:
         """ Update data from a dictionary. """
         log.debug("NOOP Index: %s" % ",".join(data.keys()))
 

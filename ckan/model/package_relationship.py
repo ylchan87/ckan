@@ -17,7 +17,7 @@ try:
     from ckan.common import _
     _()
 except:
-    def _(txt):
+    def _(*args, **kwargs):
         return txt
 
 __all__ = ['PackageRelationship', 'package_relationship_table',
@@ -41,33 +41,44 @@ class PackageRelationship(core.StatefulObjectMixin,
     from both packages in the relationship and the type is swapped from
     forward to reverse accordingly, for meaningful display to the user.'''
 
+    id: str
+    subject_package_id: str
+    object_package_id: str
+    type: str
+    comment: str
+    state: str
+
+    object: _package.Package
+    subject: _package.Package
+
+    all_types: Optional[List[str]]
+    fwd_types: Optional[List[str]]
+    rev_types: Optional[List[str]]
+
     # List of (type, corresponding_reverse_type)
     # e.g. (A "depends_on" B, B has a "dependency_of" A)
     # don't forget to add specs to Solr's schema.xml
-    types = [(u'depends_on', u'dependency_of'),
+    types: List[Tuple[str, str]] = [(u'depends_on', u'dependency_of'),
              (u'derives_from', u'has_derivation'),
              (u'links_to', u'linked_from'),
              (u'child_of', u'parent_of'),
              ]
 
-    types_printable = \
+    types_printable: List[Tuple[str, str]] = \
             [(_(u'depends on %s'), _(u'is a dependency of %s')),
              (_(u'derives from %s'), _(u'has derivation %s')),
              (_(u'links to %s'), _(u'is linked from %s')),
              (_(u'is a child of %s'), _(u'is a parent of %s')),
              ]
 
-    inferred_types_printable = \
+    inferred_types_printable: Dict[str, str] = \
             {'sibling':_('has sibling %s')}
 
-    def __str__(self):
+    def __repr__(self):
         return '<%sPackageRelationship %s %s %s>' % ("*" if self.active != core.State.ACTIVE else "",
                                                      self.subject.name, self.type, self.object.name)
 
-    def __repr__(self):
-        return str(self)
-
-    def as_dict(self, package: _package.Package=None, ref_package_by: str='id') -> Dict[str, str]:
+    def as_dict(self, package: Optional[_package.Package]=None, ref_package_by: str='id') -> Dict[str, str]:
         """Returns full relationship info as a dict from the point of view
         of the given package if specified.
         e.g. {'subject':u'annakarenina',
@@ -81,8 +92,8 @@ class PackageRelationship(core.StatefulObjectMixin,
             subject_pkg = self.object
             object_pkg = self.subject
             relationship_type = self.forward_to_reverse_type(self.type)
-        subject_ref = getattr(subject_pkg, ref_package_by)
-        object_ref = getattr(object_pkg, ref_package_by)
+        subject_ref: str = getattr(subject_pkg, ref_package_by)
+        object_ref: str = getattr(object_pkg, ref_package_by)
         return {'subject':subject_ref,
                 'type':relationship_type,
                 'object':object_ref,
@@ -107,23 +118,25 @@ class PackageRelationship(core.StatefulObjectMixin,
         return (type_str, other_package)
 
     @classmethod
-    def by_subject(cls, package: _package.Package) -> 'Query[_package.Package]':
+    def by_subject(cls, package: _package.Package) -> 'Query[PackageRelationship]':
         return meta.Session.query(cls).filter(cls.subject_package_id==package.id)
 
     @classmethod
-    def by_object(cls, package: _package.Package) -> 'Query[_package.Package]':
+    def by_object(cls, package: _package.Package) -> 'Query[PackageRelationship]':
         return meta.Session.query(cls).filter(cls.object_package_id==package.id)
 
     @classmethod
     def get_forward_types(cls) -> List[str]:
         if not hasattr(cls, 'fwd_types'):
             cls.fwd_types = [fwd for fwd, rev in cls.types]
+        assert cls.fwd_types is not None
         return cls.fwd_types
 
     @classmethod
     def get_reverse_types(cls) -> List[str]:
         if not hasattr(cls, 'rev_types'):
             cls.rev_types = [rev for fwd, rev in cls.types]
+        assert cls.rev_types is not None
         return cls.rev_types
 
     @classmethod
@@ -133,27 +146,31 @@ class PackageRelationship(core.StatefulObjectMixin,
             for fwd, rev in cls.types:
                 cls.all_types.append(fwd)
                 cls.all_types.append(rev)
+        assert cls.all_types is not None
         return cls.all_types
 
     @classmethod
-    def reverse_to_forward_type(cls, reverse_type: str) -> Optional[str]:
+    def reverse_to_forward_type(cls, reverse_type: str) -> str:
         for fwd, rev in cls.types:
             if rev == reverse_type:
                 return fwd
+        assert False, f'Relationship {reverse_type} is not registered'
 
     @classmethod
-    def forward_to_reverse_type(cls, forward_type: str) -> Optional[str]:
+    def forward_to_reverse_type(cls, forward_type: str) -> str:
         for fwd, rev in cls.types:
             if fwd == forward_type:
                 return rev
+        assert False, f'Relationship {forward_type} is not registered'
 
     @classmethod
-    def reverse_type(cls, forward_or_reverse_type: str) -> Optional[str]:
+    def reverse_type(cls, forward_or_reverse_type: str) -> str:
         for fwd, rev in cls.types:
             if fwd == forward_or_reverse_type:
                 return rev
             if rev == forward_or_reverse_type:
                 return fwd
+        assert False, f'Relationship {forward_or_reverse_type} is not registered'
 
     @classmethod
     def make_type_printable(cls, type_: str) -> str:

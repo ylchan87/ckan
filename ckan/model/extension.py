@@ -7,7 +7,7 @@ import logging
 from operator import methodcaller
 
 from sqlalchemy.orm.interfaces import MapperExtension
-from sqlalchemy.orm.session import SessionExtension
+from sqlalchemy.orm.session import SessionExtension  # type: ignore
 
 import ckan.plugins as plugins
 from typing import Any, Callable

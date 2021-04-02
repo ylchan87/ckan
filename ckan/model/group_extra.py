@@ -26,17 +26,23 @@ group_extra_table = Table('group_extra', meta.metadata,
 
 class GroupExtra(core.StatefulObjectMixin,
                  domain_object.DomainObject):
-    pass
+    id: str
+    group_id: str
+    key: str
+    value: str
+    state: str
+
+    group: group.Group
 
 meta.mapper(GroupExtra, group_extra_table, properties={
     'group': orm.relation(group.Group,
         backref=orm.backref('_extras',
-            collection_class=orm.collections.attribute_mapped_collection(u'key'),
+            collection_class=orm.collections.attribute_mapped_collection(u'key'),  # type: ignore
             cascade='all, delete, delete-orphan',
             ),
         )
     },
-    order_by=[group_extra_table.c.group_id, group_extra_table.c.key],
+    order_by=[group_extra_table.c.group_id, group_extra_table.c.key],  # type: ignore
 )
 
 def _create_extra(key, value):

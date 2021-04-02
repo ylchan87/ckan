@@ -10,9 +10,9 @@ from ckan.common import g
 import ckan.plugins as plugins
 import ckan.model as model
 
-domain_object = model.domain_object
-_package = model.package
-resource = model.resource
+import ckan.model.domain_object as domain_object
+import ckan.model.package as _package
+import ckan.model.resource as resource
 
 log = logging.getLogger(__name__)
 
