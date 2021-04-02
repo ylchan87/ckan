@@ -4,10 +4,8 @@ u'''A collection of interfaces that CKAN plugins can implement to customize and
 extend CKAN.
 
 '''
-from ckan.types import Action, AuthFunction, PFeed, PUploader, PResourceUploader
 from inspect import isclass
-from typing import Any, Callable, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type, TypeVar, Union
-from typing_extensions import Protocol
+from typing import Any, Callable, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type, Union
 
 from pyutilib.component.core import Interface as _pca_Interface
 import click
@@ -15,6 +13,7 @@ from flask.blueprints import Blueprint
 from flask.wrappers import Response
 from ckan.common import CKANConfig
 from ckan.config.middleware.flask_app import CKANFlask
+from ckan.types import Action, AuthFunction, PFeed, PUploader, PResourceUploader, Schema
 
 if TYPE_CHECKING:
     import ckan.model as model
@@ -1925,7 +1924,7 @@ class IApiToken(Interface):
 
     """
 
-    def create_api_token_schema(self, schema: Dict) -> Dict:
+    def create_api_token_schema(self, schema: Schema) -> Schema:
         u'''Return the schema for validating new API tokens.
 
         :param schema: a dictionary mapping api_token dict keys to lists of
@@ -1941,7 +1940,7 @@ class IApiToken(Interface):
         '''
         return schema
 
-    def decode_api_token(self, encoded: str, **kwargs) -> Optional[Dict]:
+    def decode_api_token(self, encoded: str, **kwargs) -> Optional[Dict[str, Any]]:
         """Make an attempt to decode API Token provided in request.
 
         Decode token if it possible and return dictionary with
@@ -1964,7 +1963,7 @@ class IApiToken(Interface):
         """
         return None
 
-    def encode_api_token(self, data, **kwargs) -> Optional[str]:
+    def encode_api_token(self, data: Dict[str, Any], **kwargs: Any) -> Optional[bytes]:
         """Make an attempt to encode API Token.
 
         Encode token if it possible and return string, that will be
@@ -1985,7 +1984,7 @@ class IApiToken(Interface):
         """
         return None
 
-    def preprocess_api_token(self, data: Dict) -> Dict:
+    def preprocess_api_token(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Handle additional info from API Token.
 
         Allows decoding or extracting any kind of additional
@@ -2004,7 +2003,7 @@ class IApiToken(Interface):
         """
         return data
 
-    def postprocess_api_token(self, data: Dict, jti: str, data_dict: Dict) -> Dict:
+    def postprocess_api_token(self, data: Dict[str, Any], jti: str, data_dict: Dict[str, Any]) -> Dict[str, Any]:
         """Encode additional information into API Token.
 
         Allows passing any kind of additional information into API

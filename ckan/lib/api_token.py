@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from ckan.types import Schema
 import jwt
 import logging
 
@@ -11,9 +12,7 @@ from ckan.common import config
 from ckan.logic.schema import default_create_api_token_schema
 from ckan.exceptions import CkanConfigurationException
 from datetime import datetime
-from typing import Any, Dict, Iterator, Optional, TYPE_CHECKING
-if TYPE_CHECKING:
-    from ckan.plugins.interfaces import PApiToken
+from typing import Any, Dict, Iterable, Optional
 
 log = logging.getLogger(__name__)
 
@@ -24,23 +23,25 @@ _config_secret_fallback = u"beaker.session.secret"
 _config_algorithm = u"api_token.jwt.algorithm"
 
 
-def _get_plugins() -> Iterator[PApiToken]:
+def _get_plugins() -> Iterable[plugins.IApiToken]:
     return plugins.PluginImplementations(plugins.IApiToken)
 
 
-def _get_algorithm():
+def _get_algorithm() -> str:
     return config.get(_config_algorithm, u"HS256")
 
 
-def _get_secret(encode):
+def _get_secret(encode: bool) -> bytes:
     config_key = _config_encode_secret if encode else _config_decode_secret
-    secret = config.get(config_key)
+    secret: str = config.get(config_key, '')
     if not secret:
         secret = u"string:" + config.get(_config_secret_fallback, u"")
     type_, value = secret.split(u":", 1)
     if type_ == u"file":
         with open(value, u"rb") as key_file:
             value = key_file.read()
+    else:
+        value = bytes(value, u'utf8')
     if not value:
         raise CkanConfigurationException(
             (
@@ -57,20 +58,20 @@ def into_seconds(dt: datetime) -> int:
     return timegm(dt.timetuple())
 
 
-def get_schema() -> Dict:
+def get_schema() -> Schema:
     schema = default_create_api_token_schema()
     for plugin in _get_plugins():
         schema = plugin.create_api_token_schema(schema)
     return schema
 
 
-def postprocess(data: Dict, jti: str, data_dict: Dict) -> Dict:
+def postprocess(data: Dict[str, Any], jti: str, data_dict: Dict[str, Any]) -> Dict[str, Any]:
     for plugin in _get_plugins():
         data = plugin.postprocess_api_token(data, jti, data_dict)
     return data
 
 
-def decode(encoded: str, **kwargs: Any) -> Optional[Dict]:
+def decode(encoded: str, **kwargs: Any) -> Optional[Dict[str, Any]]:
     for plugin in _get_plugins():
         data = plugin.decode_api_token(encoded, **kwargs)
         if data:
@@ -91,7 +92,7 @@ def decode(encoded: str, **kwargs: Any) -> Optional[Dict]:
     return data
 
 
-def encode(data: Dict, **kwargs: Any) -> str:
+def encode(data: Dict[str, Any], **kwargs: Any) -> bytes:
     for plugin in _get_plugins():
         token = plugin.encode_api_token(data, **kwargs)
         if token:
@@ -107,7 +108,7 @@ def encode(data: Dict, **kwargs: Any) -> str:
     return token
 
 
-def add_extra(result: Dict) -> Dict:
+def add_extra(result: Dict[str, Any]) -> Dict[str, Any]:
     for plugin in _get_plugins():
         result = plugin.add_extra_fields(result)
     return result

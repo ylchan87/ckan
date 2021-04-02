@@ -1,14 +1,11 @@
 # encoding: utf-8
 
 import sys
-from typing import Dict, Optional, Tuple, Union
-import ckan.lib.helpers as _helpers
-import ckan.common as common
-
-_ = common._
+from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Tuple, Union
+from types import ModuleType
 
 
-class _Toolkit(object):
+class _Toolkit(ModuleType):
     '''This class is intended to make functions/objects consistently
     available to plugins, whilst giving core CKAN developers the ability move
     code around or change underlying frameworks etc. This object allows
@@ -22,6 +19,9 @@ class _Toolkit(object):
 
     # contents should describe the available functions/objects. We check
     # that this list matches the actual availables in the initialisation
+    ckan: Any
+    base: Any
+
     contents = [
         # Global CKAN configuration object
         'config',
@@ -132,7 +132,9 @@ class _Toolkit(object):
         'CkanVersionException',
     ]
 
-    def __init__(self):
+    def __init__(self, name):
+        super().__init__(name)
+
         self._toolkit = {}
 
         # For some members in the the toolkit (e.g. that are exported from
@@ -329,7 +331,7 @@ For example: ``bar = toolkit.aslist(config.get('ckan.foo.bar', []))``
         t['enqueue_job'] = enqueue_job
 
         if six.PY2:
-            t['response'] = pylons.response
+            t['response'] = pylons.response  # type: ignore
             self.docstring_overrides['response'] = '''
 The Pylons response object.
 
@@ -338,10 +340,10 @@ browser. It has attributes like the HTTP status code, the response headers,
 content type, cookies, etc.
 
 '''
-            t['BaseController'] = base.BaseController
+            t['BaseController'] = base.BaseController  # type: ignore
             # TODO: Sort these out
-            t['CkanCommand'] = old_cli.CkanCommand
-            t['load_config'] = old_cli.load_config
+            t['CkanCommand'] = old_cli.CkanCommand  # type: ignore
+            t['load_config'] = old_cli.load_config  # type: ignore
 
         # check contents list correct
         errors = set(t).symmetric_difference(set(self.contents))
@@ -352,7 +354,7 @@ content type, cookies, etc.
     # Wrapper for the render_snippet function as it uses keywords rather than
     # dict to pass data.
     @classmethod
-    def _render_snippet(cls, template: str, data: Optional[Dict]=None) -> _helpers.Markup:
+    def _render_snippet(cls, template: str, data: Optional[Dict]=None) -> '_helpers.Markup':
         '''Render a template snippet and return the output.
 
         See :doc:`/theming/index`.
@@ -363,7 +365,7 @@ content type, cookies, etc.
 
     # new functions
     @classmethod
-    def _add_template_directory(cls, config: common.CKANConfig, relative_path: str) -> None:
+    def _add_template_directory(cls, config: 'common.CKANConfig', relative_path: str) -> None:
         '''Add a path to the :ref:`extra_template_paths` config setting.
 
         The path is relative to the file calling this function.
@@ -373,7 +375,7 @@ content type, cookies, etc.
                                   'extra_template_paths')
 
     @classmethod
-    def _add_public_directory(cls, config: common.CKANConfig, relative_path: str) -> None:
+    def _add_public_directory(cls, config: 'common.CKANConfig', relative_path: str) -> None:
         '''Add a path to the :ref:`extra_public_paths` config setting.
 
         The path is relative to the file calling this function.
@@ -443,7 +445,7 @@ content type, cookies, etc.
         create_library(name, absolute_path)
 
     @classmethod
-    def _add_ckan_admin_tabs(cls, config: common.CKANConfig, route_name: str, tab_label: str,
+    def _add_ckan_admin_tabs(cls, config: 'common.CKANConfig', route_name: str, tab_label: str,
                              config_var: str='ckan.admin_tabs', icon: Optional[str]=None) -> None:
         '''
         Update 'ckan.admin_tabs' dict the passed config dict.
@@ -542,7 +544,7 @@ content type, cookies, etc.
         import ckan.common as common
         try:
             # CKAN >= 2.8
-            endpoint = tuple(common.request.endpoint.split('.'))
+            endpoint: Tuple[str, str] = tuple(common.request.endpoint.split('.'))
         except AttributeError:
             try:
                 return common.c.controller, common.c.action
@@ -550,7 +552,7 @@ content type, cookies, etc.
                 return (None, None)
         # service routes, like `static`
         if len(endpoint) == 1:
-            return endpoint + ('index', )
+            return (endpoint[0], 'index')
         return endpoint
 
     def __getattr__(self, name):
@@ -571,4 +573,94 @@ content type, cookies, etc.
 
 
 # https://mail.python.org/pipermail/python-ideas/2012-May/014969.html
-sys.modules[__name__] = _Toolkit()
+sys.modules[__name__] = _Toolkit('toolkit')
+
+if TYPE_CHECKING:
+    import ckan
+    import ckan.lib.base as base
+
+    import ckan.logic as logic
+    import ckan.logic.validators as logic_validators
+    import ckan.lib.navl.dictization_functions as dictization_functions
+    import ckan.lib.helpers as _helpers
+    import ckan.cli as cli
+    import ckan.lib.plugins as lib_plugins
+    import ckan.common as common
+    from ckan.exceptions import CkanVersionException, HelperError
+    from ckan.lib.jobs import enqueue as enqueue_job
+    from ckan.lib import mailer
+
+    import ckan.common as converters
+
+    config = common.config
+    _ = common._
+    ungettext = common.ungettext
+    c = common.c
+    g = common.g
+    h = _helpers.helper_functions
+    request = common.request
+    render = base.render
+    abort = base.abort
+    asbool = converters.asbool
+    asint = converters.asint
+    aslist = converters.aslist
+    literal = _helpers.literal
+    get_action = logic.get_action
+    chained_action = logic.chained_action
+    chained_helper = _helpers.chained_helper
+    get_converter = logic.get_validator
+    get_validator = logic.get_validator
+    check_access = logic.check_access
+    chained_auth_function = logic.chained_auth_function
+    navl_validate = dictization_functions.validate
+    missing = dictization_functions.missing
+    ObjectNotFound = logic.NotFound
+    NotAuthorized = logic.NotAuthorized
+    ValidationError = logic.ValidationError
+    StopOnError = dictization_functions.StopOnError
+    UnknownValidator = logic.UnknownValidator
+    Invalid = logic_validators.Invalid
+    DefaultDatasetForm = lib_plugins.DefaultDatasetForm
+    DefaultGroupForm = lib_plugins.DefaultGroupForm
+    DefaultOrganizationForm = lib_plugins.DefaultOrganizationForm
+
+    error_shout = cli.error_shout
+
+    redirect_to = _helpers.redirect_to
+    url_for = _helpers.url_for
+    get_or_bust = logic.get_or_bust
+    side_effect_free = logic.side_effect_free
+    auth_sysadmins_check = logic.auth_sysadmins_check
+    auth_allow_anonymous_access = logic.auth_allow_anonymous_access
+    auth_disallow_anonymous_access = logic.auth_disallow_anonymous_access
+
+    mail_recipient = mailer.mail_recipient
+    mail_user = mailer.mail_user
+
+    def render_snippet(template: str, data: Optional[Dict] = ...) -> _helpers.Markup: ...
+    def add_template_directory(
+        config: common.CKANConfig, relative_path: str
+    ) -> None: ...
+    def add_public_directory(
+        config: common.CKANConfig, relative_path: str
+    ) -> None: ...
+    def add_resource(path: str, name: str) -> None: ...
+    def add_ckan_admin_tabs(
+        config: common.CKANConfig,
+        route_name: str,
+        tab_label: str,
+        config_var: str = "ckan.admin_tabs",
+        icon: Optional[str] = None,
+    ) -> None: ...
+    def requires_ckan_version(
+        min_version: str, max_version: Optional[str] = ...
+    ): ...
+    def check_ckan_version(
+        min_version: Optional[str] = ...,
+        max_version: Optional[str] = ...,
+    ) -> bool: ...
+    def get_endpoint() -> Union[Tuple[str, str], Tuple[None, None]]: ...
+
+    CkanVersionException = CkanVersionException
+    HelperError = HelperError
+    enqueue_job = enqueue_job

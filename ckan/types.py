@@ -34,6 +34,8 @@ class Context(TypedDict, total=False):
     ignore_auth: Optional[bool]
     auth_user_obj: Optional['User']
 
+    group: Optional[str]
+
 class AuthResult(TypedDict, total=False):
     success: bool
     msg: Optional[str]
