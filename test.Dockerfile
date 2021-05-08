@@ -61,13 +61,12 @@ ENV PATH=${CKAN_VENV}/bin:${PATH}
 
 # Setup CKAN
 ADD . $CKAN_VENV/src/ckan/
-ADD ../ckanext-landdbcustomize $CKAN_VENV/src/ckanext-landdbcustomize/
 
 RUN ckan-pip3 install -U pip && \
     ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirement-setuptools.txt && \
     ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirements.txt && \
     ckan-pip3 install -e $CKAN_VENV/src/ckan/ && \
-    ckan-pip3 install -e $CKAN_VENV/src/ckanext-landdbcustomize/ && \
+    ckan-pip3 install -e $CKAN_VENV/src/ckan/ckanext-landdbcustomize/ && \
     ckan-pip3 install flask_debugtoolbar && \
     ln -s $CKAN_VENV/src/ckan/ckan/config/who.ini $CKAN_CONFIG/who.ini && \
     cp -v $CKAN_VENV/src/ckan/contrib/docker/ckan-entrypoint.sh /ckan-entrypoint.sh && \
