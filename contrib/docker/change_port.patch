@@ -1,0 +1,67 @@
+diff --git a/ckan/config/sitecfg_test.ini b/ckan/config/sitecfg_test.ini
+index 8d14256..9233376 100755
+--- a/ckan/config/sitecfg_test.ini
++++ b/ckan/config/sitecfg_test.ini
+@@ -96,7 +96,7 @@ ckan.site_id = default
+ ## Redis Settings
+ 
+ # URL to your Redis instance, including the database to be used.
+-#ckan.redis.url = redis://localhost:6379/0
++#ckan.redis.url = redis://localhost:6380/0
+ 
+ 
+ ## CORS Settings
+@@ -248,4 +248,4 @@ level = NOTSET
+ formatter = generic
+ 
+ [formatter_generic]
+-format = %(asctime)s %(levelname)-5.5s [%(name)s] %(message)s
+\ No newline at end of file
++format = %(asctime)s %(levelname)-5.5s [%(name)s] %(message)s
+diff --git a/contrib/docker/apache.conf b/contrib/docker/apache.conf
+index aa71a5c..a141614 100644
+--- a/contrib/docker/apache.conf
++++ b/contrib/docker/apache.conf
+@@ -1,4 +1,4 @@
+-<VirtualHost 0.0.0.0:8080>
++<VirtualHost 0.0.0.0:8081>
+     ServerName ckan
+     ServerAlias *
+ 
+diff --git a/contrib/docker/test-docker-compose.yml b/contrib/docker/test-docker-compose.yml
+index 69932b6..b75a4b8 100644
+--- a/contrib/docker/test-docker-compose.yml
++++ b/contrib/docker/test-docker-compose.yml
+@@ -32,7 +32,7 @@ services:
+       - CKAN_DATASTORE_READ_URL=postgresql://datastore_ro:${DATASTORE_READONLY_PASSWORD}@db/datastore
+       - CKAN_SOLR_URL=http://solr:8983/solr/ckan
+       - CKAN_REDIS_URL=redis://redis:6379/1
+-      - CKAN_DATAPUSHER_URL=http://datapusher:8800
++      - CKAN_DATAPUSHER_URL=http://datapusher:8801
+       - CKAN_SITE_URL=${CKAN_SITE_URL}
+       - CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
+       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+@@ -47,7 +47,7 @@ services:
+     container_name: datapusher
+     image: clementmouchet/datapusher
+     ports:
+-      - "8800:8800"
++      - "8801:8800"
+ 
+   db:
+     container_name: db
+@@ -64,6 +64,8 @@ services:
+       - pg_data:/var/lib/postgresql/data
+     healthcheck:
+       test: ["CMD", "pg_isready", "-U", "ckan"]
++    ports:
++      - "5433:5432"
+ 
+   solr:
+     container_name: solr
+@@ -77,3 +79,5 @@ services:
+   redis:
+     container_name: redis
+     image: redis:latest
++    ports:
++      - "6380:6379"
