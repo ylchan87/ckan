@@ -275,14 +275,15 @@ class MultilingualDataset(SingletonPlugin):
         # fallback to english if default locale is not supported
         if not current_lang in lang_set:
             current_lang = 'en'
+
         # treat current lang differenly so remove from set
-        lang_set.remove(current_lang)
+        #lang_set.remove(current_lang)
 
         # weight current lang more highly
-        query_fields = 'title_%s^8 text_%s^4' % (current_lang, current_lang)
-
+        #query_fields = 'title_%s^8 text_%s^4' % (current_lang, current_lang)
+        query_fields = "title^4 title_ngram^4 text"
         for lang in lang_set:
-            query_fields += ' title_%s^2 text_%s' % (lang, lang)
+            query_fields += ' title_%s^2' % (lang)
 
         search_params['qf'] = query_fields
 
