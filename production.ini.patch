@@ -1,0 +1,56 @@
+--- production.ini	2021-06-19 14:56:29.617168000 +0000
++++ production.ini	2021-06-19 14:37:28.526640000 +0000
+@@ -115,7 +115,7 @@
+ #       Add ``datapusher`` to enable DataPusher
+ #		Add ``resource_proxy`` to enable resorce proxying and get around the
+ #		same origin policy
+-ckan.plugins = stats text_view image_view recline_view
++ckan.plugins = stats text_view image_view recline_view datapusher datastore multilingual_dataset multilingual_group multilingual_tag landdbcustomize oauth2
+ 
+ # Define which views should be created by default
+ # (plugins must be loaded in ckan.plugins)
+@@ -150,9 +150,9 @@
+ 
+ 
+ ## Internationalisation Settings
+-ckan.locale_default = en
+-ckan.locale_order = en pt_BR ja it cs_CZ ca es fr el sv sr sr@latin no sk fi ru de pl nl bg ko_KR hu sa sl lv
+-ckan.locales_offered =
++ckan.locale_default = zh_Hant_TW
++ckan.locale_order = zh_Hant_TW zh_Hans_CN en
++ckan.locales_offered = zh_Hant_TW zh_Hans_CN en
+ ckan.locales_filtered_out = en_GB
+ 
+ ## Feeds Settings
+@@ -177,9 +177,9 @@
+ 
+ # Make sure you have set up the DataStore
+ 
+-#ckan.datapusher.formats = csv xls xlsx tsv application/csv application/vnd.ms-excel application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+-#ckan.datapusher.url = http://127.0.0.1:8800/
+-#ckan.datapusher.assume_task_stale_after = 3600
++ckan.datapusher.formats = csv xls xlsx tsv application/csv application/vnd.ms-excel application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
++ckan.datapusher.url = http://127.0.0.1:8800/
++ckan.datapusher.assume_task_stale_after = 3600
+ 
+ # Resource Proxy settings
+ # Preview size limit, default: 1MB
+@@ -207,6 +207,18 @@
+ #smtp.mail_from =
+ #smtp.reply_to =
+ 
++## OAuth2 configuration
++ckan.oauth2.authorization_endpoint = https://accounts.google.com/o/oauth2/auth
++ckan.oauth2.token_endpoint = https://accounts.google.com/o/oauth2/token
++ckan.oauth2.profile_api_url = https://www.googleapis.com/oauth2/v1/userinfo
++ckan.oauth2.client_id = <CLIENT_ID>
++ckan.oauth2.client_secret = <CLIENT_SECRET>
++ckan.oauth2.scope = https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile
++ckan.oauth2.profile_api_user_field = email
++ckan.oauth2.profile_api_fullname_field = name
++ckan.oauth2.profile_api_mail_field = email
++ckan.oauth2.authorization_header = Authorization
++
+ ## Background Job Settings
+ ckan.jobs.timeout = 180
+ 
