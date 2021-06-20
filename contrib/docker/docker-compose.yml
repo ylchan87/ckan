@@ -41,6 +41,7 @@ services:
       - ckan_config:/etc/ckan
       - ckan_home:/usr/lib/ckan
       - ckan_storage:/var/lib/ckan
+      - ../../production.ini.patch:/usr/production.ini.patch
 
   datapusher:
     container_name: datapusher
