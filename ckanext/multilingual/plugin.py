@@ -249,7 +249,7 @@ class MultilingualDataset(SingletonPlugin):
             text_field_items[lang_field].append(translation['term_translation'])
 
         for key, value in six.iteritems(text_field_items):
-            search_data[key] = ' '.join(value)
+            search_data[key] = ' '.join(value)[:30000] #truncate else Solr would complaint
 
         return search_data
 
