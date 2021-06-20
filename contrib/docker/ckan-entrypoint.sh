@@ -35,7 +35,7 @@ set_environment () {
   export CKAN_SMTP_MAIL_FROM=${CKAN_SMTP_MAIL_FROM}
   export CKAN_MAX_UPLOAD_SIZE_MB=${CKAN_MAX_UPLOAD_SIZE_MB}
   # uncomment below statement if no https is possible
-  # export OAUTHLIB_INSECURE_TRANSPORT=True
+  export OAUTHLIB_INSECURE_TRANSPORT=True
 }
 
 write_config () {
@@ -54,7 +54,7 @@ if [ ! -e "$CONFIG" ]; then
   cp /usr/production.ini.patch /etc/ckan
   cd /etc/ckan
   git apply /etc/ckan/production.ini.patch
-  rm /usr/production.ini.patch
+  rm /etc/ckan/production.ini.patch
   rm -f $CKAN_VENV/src/ckan/production.ini.patch
 fi
 
