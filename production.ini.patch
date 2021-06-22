@@ -5,7 +5,7 @@
  #		Add ``resource_proxy`` to enable resorce proxying and get around the
  #		same origin policy
 -ckan.plugins = stats text_view image_view recline_view
-+ckan.plugins = stats text_view image_view recline_view datapusher datastore multilingual_dataset multilingual_group multilingual_tag landdbcustomize oauth2
++ckan.plugins = stats text_view image_view recline_view datapusher datastore multilingual_dataset multilingual_group multilingual_tag landdbcustomize oauth2 recline_map_view
  
  # Define which views should be created by default
  # (plugins must be loaded in ckan.plugins)
