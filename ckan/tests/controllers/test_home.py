@@ -129,18 +129,18 @@ class TestI18nURLs(object):
             legacy_locale = locale[0]
             new_locale = locale[1]
 
-            response = app.get(f'/{legacy_locale}/', follow_redirects=False)
+            response = app.get('/{}/'.format(legacy_locale), follow_redirects=False)
 
             assert response.status_code == 308
             assert (
                 response.headers['Location'] ==
-                f'http://test.ckan.net/{new_locale}'
+                'http://test.ckan.net/{}'.format(new_locale)
             )
 
-            response = app.get(f'/{legacy_locale}/dataset', follow_redirects=False)
+            response = app.get('/{}/dataset'.format(legacy_locale), follow_redirects=False)
 
             assert response.status_code == 308
             assert (
                 response.headers['Location'] ==
-                f'http://test.ckan.net/{new_locale}/dataset'
+                'http://test.ckan.net/{}/dataset'.format(new_locale)
             )

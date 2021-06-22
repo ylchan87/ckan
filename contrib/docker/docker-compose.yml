@@ -41,6 +41,7 @@ services:
       - ckan_config:/etc/ckan
       - ckan_home:/usr/lib/ckan
       - ckan_storage:/var/lib/ckan
+      - ../../production.ini.patch:/usr/production.ini.patch
 
   datapusher:
     container_name: datapusher
@@ -59,6 +60,7 @@ services:
     environment:
       - DS_RO_PASS=${DATASTORE_READONLY_PASSWORD}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data/db
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:

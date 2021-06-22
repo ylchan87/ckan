@@ -73,7 +73,10 @@ def about():
 
 
 def redirect_locale(target_locale, path=None):
-    target = f'/{target_locale}/{path}' if path else f'/{target_locale}'
+    if path:
+        target = u'/{}/{}'.format(target_locale, path)
+    else:
+        target = u'/{}'.format(target_locale)
     return redirect(target, code=308)
 
 
@@ -85,8 +88,8 @@ for rule, view_func in util_rules:
     home.add_url_rule(rule, view_func=view_func)
 
 locales_mapping = [
-    ('zh_TW', 'zh_Hant_TW'),
-    ('zh_CN', 'zh_Hans_CN'),
+    (u'zh_TW', u'zh_Hant_TW'),
+    (u'zh_CN', u'zh_Hans_CN'),
 ]
 
 for locale in locales_mapping:
@@ -95,13 +98,13 @@ for locale in locales_mapping:
     new_locale = locale[1]
 
     home.add_url_rule(
-        f'/{legacy_locale}/',
+        u'/{}/'.format(legacy_locale),
         view_func=redirect_locale,
-        defaults={'target_locale': new_locale}
+        defaults={u'target_locale': new_locale}
     )
 
     home.add_url_rule(
-        f'/{legacy_locale}/<path:path>',
+        u'/{}/<path:path>'.format(legacy_locale),
         view_func=redirect_locale,
-        defaults={'target_locale': new_locale}
+        defaults={u'target_locale': new_locale}
     )
