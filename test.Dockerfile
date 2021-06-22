@@ -1,27 +1,18 @@
 # See CKAN docs on installation from Docker Compose on usage
-FROM ubuntu:focal-20210119
+FROM debian:stretch
 MAINTAINER Open Knowledge
-
-# Set timezone
-ENV TZ=UTC
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# Setting the locale
-ENV LC_ALL=en_US.UTF-8       
-RUN apt-get update
-RUN apt-get install --no-install-recommends -y locales
-RUN sed -i "/$LC_ALL/s/^# //g" /etc/locale.gen
-RUN dpkg-reconfigure --frontend=noninteractive locales 
-RUN update-locale LANG=${LC_ALL}
 
 # Install required system packages
 RUN apt-get -q -y update \
     && DEBIAN_FRONTEND=noninteractive apt-get -q -y upgrade \
     && apt-get -q -y install \
-        python3.6 \
+        python-dev \
+        python-pip \
+        python-virtualenv \
+        python-wheel \
         python3-dev \
         python3-pip \
-        python3-venv \
+        python3-virtualenv \
         python3-wheel \
         libpq-dev \
         libxml2-dev \
@@ -53,8 +44,9 @@ RUN useradd -r -u 900 -m -c "ckan account" -d $CKAN_HOME -s /bin/bash ckan
 
 # Setup virtual environment for CKAN
 RUN mkdir -p $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH && \
-    python3 -m venv $CKAN_VENV && \
-    ln -s $CKAN_VENV/bin/pip3 /usr/local/bin/ckan-pip3 &&\
+    virtualenv $CKAN_VENV && \
+    ln -s $CKAN_VENV/bin/pip /usr/local/bin/ckan-pip &&\
+    ln -s $CKAN_VENV/bin/paster /usr/local/bin/ckan-paster &&\
     ln -s $CKAN_VENV/bin/ckan /usr/local/bin/ckan
 
 # Virtual environment binaries/scripts to be used first
@@ -62,13 +54,13 @@ ENV PATH=${CKAN_VENV}/bin:${PATH}
 
 # Setup CKAN
 ADD . $CKAN_VENV/src/ckan/
-
-RUN ckan-pip3 install -U pip && \
-    ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirement-setuptools.txt && \
-    ckan-pip3 install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirements.txt && \
-    ckan-pip3 install -e $CKAN_VENV/src/ckan/ && \
-    ckan-pip3 install -e $CKAN_VENV/src/ckan/ckanext-landdbcustomize/ && \
-    ckan-pip3 install flask_debugtoolbar && \
+RUN ckan-pip install -U pip && \
+    ckan-pip install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirement-setuptools.txt && \
+    ckan-pip install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirements-py2.txt && \
+    ckan-pip install -e $CKAN_VENV/src/ckan/ && \
+    ckan-pip install git+https://github.com/chunlaw/ckanext-oauth2 && \
+    ckan-pip install -e $CKAN_VENV/src/ckan/ckanext-landdbcustomize/ && \
+    ckan-pip install flask_debugtoolbar && \
     ln -s $CKAN_VENV/src/ckan/ckan/config/who.ini $CKAN_CONFIG/who.ini && \
     cp -v $CKAN_VENV/src/ckan/contrib/docker/ckan-entrypoint.sh /ckan-entrypoint.sh && \
     chmod +x /ckan-entrypoint.sh && \
