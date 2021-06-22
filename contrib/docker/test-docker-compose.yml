@@ -65,6 +65,8 @@ services:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "ckan"]
+    ports:
+      - "5432:5432"
 
   solr:
     container_name: solr
