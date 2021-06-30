@@ -68,18 +68,18 @@ RUN ckan-pip install -U pip && \
 
 #ENTRYPOINT ["/ckan-entrypoint.sh"]
 
-# Setup SSH (for dev purpose, not to be in production env)
-RUN apt-get update && \
-    apt-get install sudo -y && \
-    apt-get install openssh-server -y && \
-    echo 'ckan:ckan' | chpasswd && \
-    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+## Setup SSH (for dev purpose, not to be in production env)
+#RUN apt-get update && \
+#    apt-get install sudo -y && \
+#    apt-get install openssh-server -y && \
+#    echo 'ckan:ckan' | chpasswd && \
+#    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 
 RUN adduser ckan sudo
 
 USER ckan
 EXPOSE 5000
-EXPOSE 22
+#EXPOSE 22
 
 #CMD ["ckan","-c","/etc/ckan/production.ini", "run", "--host", "0.0.0.0"]
 CMD ["sleep","infinity"]

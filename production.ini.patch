@@ -1,15 +1,17 @@
---- production.ini	2021-06-19 14:56:29.617168000 +0000
-+++ production.ini	2021-06-19 14:37:28.526640000 +0000
-@@ -115,7 +115,7 @@
+diff --git a/production.ini b/production.ini
+index ea077c1da..041a960b4 100644
+--- a/production.ini
++++ b/production.ini
+@@ -115,7 +115,7 @@ ckan.site_id = default
  #       Add ``datapusher`` to enable DataPusher
  #		Add ``resource_proxy`` to enable resorce proxying and get around the
  #		same origin policy
 -ckan.plugins = stats text_view image_view recline_view
-+ckan.plugins = stats text_view image_view recline_view datapusher datastore multilingual_dataset multilingual_group multilingual_tag landdbcustomize oauth2
++ckan.plugins = stats text_view image_view recline_view datapusher datastore multilingual_dataset multilingual_group multilingual_tag landdbcustomize oauth2 recline_map_view
  
  # Define which views should be created by default
  # (plugins must be loaded in ckan.plugins)
-@@ -150,9 +150,9 @@
+@@ -150,9 +150,9 @@ ckan.display_timezone = server
  
  
  ## Internationalisation Settings
@@ -22,7 +24,20 @@
  ckan.locales_filtered_out = en_GB
  
  ## Feeds Settings
-@@ -177,9 +177,9 @@
+@@ -164,9 +164,9 @@ ckan.feeds.author_link =
+ 
+ ## Storage Settings
+ 
+-#ckan.storage_path = /var/lib/ckan
+-#ckan.max_resource_size = 10
+-#ckan.max_image_size = 2
++ckan.storage_path = /var/lib/ckan
++ckan.max_resource_size = 100
++ckan.max_image_size = 20
+ 
+ ## Webassets Settings
+ #ckan.webassets.use_x_sendfile = false
+@@ -177,9 +177,9 @@ ckan.feeds.author_link =
  
  # Make sure you have set up the DataStore
  
@@ -35,7 +50,7 @@
  
  # Resource Proxy settings
  # Preview size limit, default: 1MB
-@@ -207,6 +207,18 @@
+@@ -207,6 +207,20 @@ ckan.hide_activity_from_users = %(ckan.site_id)s
  #smtp.mail_from =
  #smtp.reply_to =
  
@@ -50,6 +65,8 @@
 +ckan.oauth2.profile_api_fullname_field = name
 +ckan.oauth2.profile_api_mail_field = email
 +ckan.oauth2.authorization_header = Authorization
++
++extra_public_paths = /var/lib/ckan/public
 +
  ## Background Job Settings
  ckan.jobs.timeout = 180
