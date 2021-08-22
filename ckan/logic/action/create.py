@@ -1328,7 +1328,7 @@ def tag_create(context, data_dict):
     if not context.get('defer_commit'):
         model.repo.commit()
 
-    log.debug("Created tag '%s' " % tag)
+    #log.debug("Created tag '%s' " % tag) #crash with unicode
     return model_dictize.tag_dictize(tag, context)
 
 

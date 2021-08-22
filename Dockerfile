@@ -53,12 +53,13 @@ RUN ckan-pip install -U pip && \
     ckan-pip install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirement-setuptools.txt && \
     ckan-pip install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirements-py2.txt && \
     ckan-pip install -e $CKAN_VENV/src/ckan/ && \
-    ckan-pip install git+https://github.com/chunlaw/ckanext-oauth2 && \
-    ckan-pip install git+https://github.com/ylchan87/ckanext-landdbcustomize && \
     ln -s $CKAN_VENV/src/ckan/ckan/config/who.ini $CKAN_CONFIG/who.ini && \
     cp -v $CKAN_VENV/src/ckan/contrib/docker/ckan-entrypoint.sh /ckan-entrypoint.sh && \
     chmod +x /ckan-entrypoint.sh && \
     chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
+
+RUN ckan-pip install git+https://github.com/chunlaw/ckanext-oauth2
+RUN ckan-pip install git+https://github.com/ylchan87/ckanext-landdbcustomize
 
 ENTRYPOINT ["/ckan-entrypoint.sh"]
 

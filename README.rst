@@ -17,6 +17,8 @@ docker volume rm docker_ckan_home docker_ckan_config
 ```
 cd contril/docker
 docker-compose up -d --build
+# or for dev
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 ```
 
 Test your CKAN instance in localhost:5000

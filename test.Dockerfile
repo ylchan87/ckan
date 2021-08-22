@@ -39,7 +39,6 @@ ENV CKAN_STORAGE_PATH=/var/lib/ckan
 ARG CKAN_SITE_URL
 
 # Create ckan user
-# RUN useradd -r -u 900 -m -c "ckan account" -d $CKAN_HOME -s /bin/false ckan
 RUN useradd -r -u 900 -m -c "ckan account" -d $CKAN_HOME -s /bin/bash ckan 
 
 # Setup virtual environment for CKAN
@@ -58,15 +57,18 @@ RUN ckan-pip install -U pip && \
     ckan-pip install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirement-setuptools.txt && \
     ckan-pip install --upgrade --no-cache-dir -r $CKAN_VENV/src/ckan/requirements-py2.txt && \
     ckan-pip install -e $CKAN_VENV/src/ckan/ && \
-    ckan-pip install git+https://github.com/chunlaw/ckanext-oauth2 && \
-    ckan-pip install -e $CKAN_VENV/src/ckan/ckanext-landdbcustomize/ && \
-    ckan-pip install flask_debugtoolbar && \
     ln -s $CKAN_VENV/src/ckan/ckan/config/who.ini $CKAN_CONFIG/who.ini && \
     cp -v $CKAN_VENV/src/ckan/contrib/docker/ckan-entrypoint.sh /ckan-entrypoint.sh && \
     chmod +x /ckan-entrypoint.sh && \
     chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
 
-#ENTRYPOINT ["/ckan-entrypoint.sh"]
+RUN ckan-pip install flask_debugtoolbar
+RUN ckan-pip install git+https://github.com/chunlaw/ckanext-oauth2
+
+ADD ./ckanext-landdbcustomize/ /usr/lib/ckanext-landdbcustomize
+RUN ckan-pip install -e /usr/lib/ckanext-landdbcustomize
+
+ENTRYPOINT ["/ckan-entrypoint.sh"]
 
 ## Setup SSH (for dev purpose, not to be in production env)
 #RUN apt-get update && \
@@ -74,12 +76,9 @@ RUN ckan-pip install -U pip && \
 #    apt-get install openssh-server -y && \
 #    echo 'ckan:ckan' | chpasswd && \
 #    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-
-RUN adduser ckan sudo
+RUN apt-get update && apt-get install sudo -y && echo 'ckan:ckan' | chpasswd && adduser ckan sudo
 
 USER ckan
 EXPOSE 5000
-#EXPOSE 22
 
-#CMD ["ckan","-c","/etc/ckan/production.ini", "run", "--host", "0.0.0.0"]
-CMD ["sleep","infinity"]
+CMD ["ckan","-c","/etc/ckan/production.ini", "run", "--host", "0.0.0.0"]
