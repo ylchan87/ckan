@@ -1,7 +1,17 @@
-{% set groups = h.get_featured_groups() %}
+{% set groups = h.get_featured_groups(20) %}
 
 {% for group in groups %}
-  <div class="box">
+{% if group.name == "highlights" %}
+  <div class="box featcards">
     {% snippet 'snippets/group_item.html', group=group, truncate=50, truncate_title=35 %}
   </div>
+{% endif %}  
+{% endfor %}
+
+{% for group in groups %}
+{% if group.name != "highlights" %}
+  <div class="box featcards">
+    {% snippet 'snippets/group_item.html', group=group, truncate=50, truncate_title=35 %}
+  </div>
+{% endif %}  
 {% endfor %}

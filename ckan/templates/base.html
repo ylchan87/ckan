@@ -22,6 +22,17 @@
     {% endblock %}
 
     #}
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FLTZXC3TST"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-FLTZXC3TST');
+    </script>
+
     {%- block meta -%}
       <meta charset="utf-8" />
       {% block meta_generator %}<meta name="generator" content="ckan {{ h.ckan_version() }}" />{% endblock %}

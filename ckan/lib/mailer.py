@@ -2,6 +2,7 @@
 
 import codecs
 import os
+import re
 import smtplib
 import socket
 import logging
@@ -119,6 +120,7 @@ def mail_recipient(recipient_name, recipient_email, subject,
                    body, body_html=None, headers={}):
     '''Sends an email'''
     site_title = config.get('ckan.site_title')
+    site_title = re.sub(r'[^\x00-\x7f]|[^\S]',r'', site_title) # remove non-ascii (i.e. Chi chars)  and space
     site_url = config.get('ckan.site_url')
     return _mail_recipient(recipient_name, recipient_email,
                            site_title, site_url, subject, body,
